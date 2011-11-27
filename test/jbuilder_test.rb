@@ -3,7 +3,6 @@ require 'active_support/test_case'
 
 require 'jbuilder'
 
-
 class JbuilderTest < ActiveSupport::TestCase
   test "single key" do
     json = Jbuilder.encode do |json|
@@ -79,7 +78,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
   
-  test "double nesting" do
+  test "array nested inside nested hash" do
     json = Jbuilder.encode do |json|
       json.author do |json|
         json.name "David"
@@ -96,5 +95,21 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal "hello", parsed["author"]["comments"].first["content"]
       assert_equal "world", parsed["author"]["comments"].second["content"]
     end
+  end
+  
+  test "array nested inside array" do
+    json = Jbuilder.encode do |json|
+      json.comments do |json|
+        json.child! do |json| 
+          json.authors do |json|
+            json.child! do |json|
+              json.name "david"
+            end
+          end
+        end
+      end
+    end
+    
+    assert_equal "david", JSON.parse(json)["comments"].first["authors"].first["name"]
   end
 end
