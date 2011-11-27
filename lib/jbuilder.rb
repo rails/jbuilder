@@ -63,6 +63,8 @@ class Jbuilder < BlankSlate
       case
       when args.one?
         _assign method, args.first
+      when args.one? && block_given?
+        _assign method, args.first
       when args.empty? && block_given?
         _yield_nesting method, block
       when args.many? && args.first.is_a?(Enumerable)
