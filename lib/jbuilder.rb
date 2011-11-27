@@ -65,8 +65,10 @@ class Jbuilder < BlankSlate
         _assign method, args.first
       when args.empty? && block_given?
         _yield_nesting method, block
-      when args.many?
+      when args.many? && args.first.is_a?(Enumerable)
         _inline_nesting method, args.first, args.from(1)
+      when args.many?
+        _inline_extract method, args.first, args.from(1)
       end
     end
 
@@ -90,5 +92,9 @@ class Jbuilder < BlankSlate
           end
         end
       end
+    end
+    
+    def _inline_extract(container, record, attributes)
+      __send__(container) { |parent| parent.extract! record, *attributes }
     end
 end

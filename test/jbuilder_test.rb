@@ -65,6 +65,25 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
   
+  test "extract from non-enumerable" do
+    person = Class.new do
+      attr_reader :name, :age
+      
+      def initialize(name, age)
+        @name, @age = name, age
+      end
+    end.new("David", 32)
+    
+    json = Jbuilder.encode do |json|
+      json.author person, :name, :age
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "David", parsed["author"]["name"]
+      assert_equal 32,      parsed["author"]["age"]
+    end
+  end
+  
   test "nesting multiple children from array" do
     comments = [ Struct.new(:content).new("hello"), Struct.new(:content).new("world") ]
     
