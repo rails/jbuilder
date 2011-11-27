@@ -47,8 +47,6 @@ class Jbuilder < BlankSlate
     end
   end
 
-  alias :[] :extract!
-  
   def []=(*attributes, object)
     extract!(object, *attributes)
   end
