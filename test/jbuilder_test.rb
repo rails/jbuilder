@@ -126,6 +126,21 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal "world", parsed["comments"].second["content"]
     end
   end
+
+  test "nesting multiple children from array with inline loop on root" do
+    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+    
+    json = Jbuilder.encode do |json|
+      json.(comments) do |json, comment|
+        json.content comment.content
+      end
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "hello", parsed.first["content"]
+      assert_equal "world", parsed.second["content"]
+    end
+  end
   
   test "array nested inside nested hash" do
     json = Jbuilder.encode do |json|

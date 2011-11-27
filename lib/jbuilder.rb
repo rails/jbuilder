@@ -34,6 +34,28 @@ class Jbuilder < BlankSlate
     @attributes << jbuilder.attributes!
   end
 
+  # Iterates over the passed collection and adds each iteration as an element of the resulting array.
+  #
+  # Example:
+  #
+  #   json.array!(@people) do |json, person|
+  #     json.name person.name
+  #     json.age calculate_age(person.birthday)
+  #   end
+  #
+  #   [ { "David", 32 }, { "Jamie", 31 } ]
+  #
+  # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
+  #
+  #   json.(@people) { |json, person| ... }
+  def array!(collection)
+    collection.each do |element|
+      child! do |child|
+        yield child, element
+      end
+    end
+  end
+
   # Extracts the mentioned attributes from the passed object and turns them into attributes of the JSON.
   #
   # Example:
@@ -51,7 +73,16 @@ class Jbuilder < BlankSlate
     end
   end
 
-  alias :call :extract! if RUBY_VERSION > '1.9'
+  if RUBY_VERSION > '1.9'
+    def call(*args)
+      case
+      when args.one?
+        array!(args.first) { |json, element| yield json, element }
+      when args.many?
+        extract!(*args)
+      end
+    end
+  end
 
   # Returns the attributes of the current builder.
   def attributes!
@@ -65,14 +96,14 @@ class Jbuilder < BlankSlate
 
 
   private
-    def method_missing(method, *args, &block)
+    def method_missing(method, *args)
       case
       when args.one? && block_given?
-        _yield_iteration method, args.first, block
+        _yield_iteration(method, args.first) { |child, element| yield child, element }
       when args.one?
         _assign method, args.first
       when args.empty? && block_given?
-        _yield_nesting method, block
+        _yield_nesting(method) { |jbuilder| yield jbuilder }
       when args.many? && args.first.is_a?(Enumerable)
         _inline_nesting method, args.first, args.from(1)
       when args.many?
@@ -84,9 +115,9 @@ class Jbuilder < BlankSlate
       @attributes[key] = value
     end
 
-    def _yield_nesting(container, block)
+    def _yield_nesting(container)
       jbuilder = Jbuilder.new
-      block.call jbuilder
+      yield jbuilder
       @attributes[container] = jbuilder.attributes!
     end
 
@@ -102,12 +133,10 @@ class Jbuilder < BlankSlate
       end
     end
     
-    def _yield_iteration(container, collection, block)
+    def _yield_iteration(container, collection)
       __send__(container) do |parent|
-        collection.each do |element|
-          parent.child! do |child|
-            block.call child, element
-          end
+        parent.array!(collection) do |child, element|
+          yield child, element
         end
       end
     end
