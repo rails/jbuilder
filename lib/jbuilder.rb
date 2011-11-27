@@ -67,6 +67,8 @@ class Jbuilder < BlankSlate
   private
     def method_missing(method, *args, &block)
       case
+      when args.one? && block_given?
+        _yield_iteration method, args.first, block
       when args.one?
         _assign method, args.first
       when args.empty? && block_given?
@@ -95,6 +97,16 @@ class Jbuilder < BlankSlate
             attributes.each do |attribute|
               child.__send__ attribute, element.send(attribute)
             end
+          end
+        end
+      end
+    end
+    
+    def _yield_iteration(container, collection, block)
+      __send__(container) do |parent|
+        collection.each do |element|
+          parent.child! do |child|
+            block.call child, element
           end
         end
       end

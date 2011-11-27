@@ -112,7 +112,7 @@ class JbuilderTest < ActiveSupport::TestCase
   
   
   test "nesting multiple children from array with inline loop" do
-    comments = [ Struct.new(:content).new("hello"), Struct.new(:content).new("world") ]
+    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
     
     json = Jbuilder.encode do |json|
       json.comments comments do |json, comment|
@@ -121,6 +121,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
     
     JSON.parse(json).tap do |parsed|
+      assert_equal ["content"], parsed["comments"].first.keys
       assert_equal "hello", parsed["comments"].first["content"]
       assert_equal "world", parsed["comments"].second["content"]
     end
