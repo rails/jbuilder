@@ -37,11 +37,11 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
   
-  test "extracting from object using bracket style" do
+  test "extracting from object using call style for 1.9" do
     person = Struct.new(:name, :age).new("David", 32)
     
     json = Jbuilder.encode do |json|
-      json[:name, :age] = person
+      json.(person, :name, :age)
     end
     
     JSON.parse(json).tap do |parsed|

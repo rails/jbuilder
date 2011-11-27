@@ -38,18 +38,20 @@ class Jbuilder < BlankSlate
   #
   # Example:
   #
-  #   json.people @people, :name, :age
+  #   json.extract! @person, :name, :age
   #
-  #   { "people": [ { "David", 32 }, { "Jamie", 31 } ] }
+  #   { "David", 32 }, { "Jamie", 31 }
+  #
+  # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
+  #
+  #   json.(@person, :name, :age)
   def extract!(object, *attributes)
     attributes.each do |attribute|
       __send__ attribute, object.send(attribute)
     end
   end
 
-  def []=(*attributes, object)
-    extract!(object, *attributes)
-  end
+  alias :call :extract! if RUBY_VERSION > '1.9'
 
   # Returns the attributes of the current builder.
   def attributes!
