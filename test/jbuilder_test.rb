@@ -37,6 +37,19 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
   
+  test "extracting from object using bracket style" do
+    person = Struct.new(:name, :age).new("David", 32)
+    
+    json = Jbuilder.encode do |json|
+      json[:name, :age] = person
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "David", parsed["name"]
+      assert_equal 32, parsed["age"]
+    end
+  end
+  
   test "nesting single child with block" do
     json = Jbuilder.encode do |json|
       json.author do |json|
