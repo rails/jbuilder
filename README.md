@@ -1,9 +1,9 @@
-Json Builder
+Jbuilder
 ============
 
-Json builder gives you a simple DSL for declaring JSON structures that beats massaging giant hash structures. This is particularly helpful when the generation process is fraught with conditionals and loops. Here's a simple example:
+Jbuilder gives you a simple DSL for declaring JSON structures that beats massaging giant hash structures. This is particularly helpful when the generation process is fraught with conditionals and loops. Here's a simple example:
 
-    JsonBuilder.encode do |json|
+    Jbuilder.encode do |json|
       json.content format_content(@message.content)
       json.extract! @message, :created_at, :updated_at
   
@@ -39,7 +39,7 @@ This will build the following structure:
       ]
     }
 
-You can either use JsonBuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
+You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
 
     # Any helpers available to views are available to the builder
     json.content format_content(@message.content)
@@ -56,3 +56,5 @@ You can either use JsonBuilder stand-alone or directly as an ActionView template
 
     # You can use partials as well, just remember to pass in the json instance
     render @message.comments, json: json
+
+Note: This is very similar to Garrett Bjerkhoel's json_builder, which I discovered after making this, bar some helpers like extract! and an intent to stay with the explicit yields over json_builder's 3.0's move to instance_eval.

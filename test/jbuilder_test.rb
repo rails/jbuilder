@@ -1,12 +1,12 @@
 require 'test/unit'
 require 'active_support/test_case'
 
-require 'json_builder'
+require 'jbuilder'
 
 
-class JsonBuilderTest < ActiveSupport::TestCase
+class JbuilderTest < ActiveSupport::TestCase
   test "single key" do
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.content "hello"
     end
     
@@ -14,7 +14,7 @@ class JsonBuilderTest < ActiveSupport::TestCase
   end
 
   test "multiple keys" do
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.title "hello"
       json.content "world"
     end
@@ -28,7 +28,7 @@ class JsonBuilderTest < ActiveSupport::TestCase
   test "extracting from object" do
     person = Struct.new(:name, :age).new("David", 32)
     
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.extract! person, :name, :age
     end
     
@@ -39,7 +39,7 @@ class JsonBuilderTest < ActiveSupport::TestCase
   end
   
   test "nesting single child with block" do
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.author do |json|
         json.name "David"
         json.age  32
@@ -53,7 +53,7 @@ class JsonBuilderTest < ActiveSupport::TestCase
   end
   
   test "nesting multiple children with block" do
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.comments do |json|
         json.child! { |json| json.content "hello" }
         json.child! { |json| json.content "world" }
@@ -69,7 +69,7 @@ class JsonBuilderTest < ActiveSupport::TestCase
   test "nesting multiple children from array" do
     comments = [ Struct.new(:content).new("hello"), Struct.new(:content).new("world") ]
     
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.comments comments, :content
     end
     
@@ -80,7 +80,7 @@ class JsonBuilderTest < ActiveSupport::TestCase
   end
   
   test "double nesting" do
-    json = JsonBuilder.encode do |json|
+    json = Jbuilder.encode do |json|
       json.author do |json|
         json.name "David"
         json.age  32
