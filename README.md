@@ -5,11 +5,12 @@ Jbuilder gives you a simple DSL for declaring JSON structures that beats massagi
 
     Jbuilder.encode do |json|
       json.content format_content(@message.content)
-      json.extract! @message, :created_at, :updated_at
+      json.(@message, :created_at, :updated_at)
   
       json.author do |json|
         json.name @message.creator.name.familiar
         json.email_address @message.creator.email_address_with_name
+        json.url url_for(@message.creator, format: :json)
       end
   
       if current_user.admin?
@@ -28,7 +29,8 @@ This will build the following structure:
     
       "author": {
         "name": "David H.",
-        "email_address": "'David Heinemeier Hansson' <david@heinemeierhansson.com>"
+        "email_address": "'David Heinemeier Hansson' <david@heinemeierhansson.com>",
+        "url": "http://example.com/users/1-david.json"
       },
     
       "visitors": 15,
@@ -43,11 +45,12 @@ You can either use Jbuilder stand-alone or directly as an ActionView template la
 
     # Any helpers available to views are available to the builder
     json.content format_content(@message.content)
-    json.extract! @message, :created_at, :updated_at
+    json.(@message, :created_at, :updated_at)
 
     json.author do |json|
       json.name @message.creator.name.familiar
       json.email_address @message.creator.email_address_with_name
+      json.url url_for(@message.creator, format: :json)
     end
 
     if current_user.admin?
@@ -57,4 +60,4 @@ You can either use Jbuilder stand-alone or directly as an ActionView template la
     # You can use partials as well, just remember to pass in the json instance
     render @message.comments, json: json
 
-Note: This is very similar to Garrett Bjerkhoel's json_builder, which I discovered after making this, bar some helpers like extract! and an intent to stay with the explicit yields over json_builder's 3.0's move to instance_eval.
+Note: This is similar to Garrett Bjerkhoel's json_builder, which I discovered after making this, but the DSL has taken a different turn and will retain the explicit yield style (vs json_builder's 3.0's move to instance_eval).
