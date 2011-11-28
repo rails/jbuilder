@@ -78,7 +78,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
   
-  test "extract from non-enumerable" do
+  test "nesting single child with inline extract" do
     person = Class.new do
       attr_reader :name, :age
       
@@ -98,13 +98,14 @@ class JbuilderTest < ActiveSupport::TestCase
   end
   
   test "nesting multiple children from array" do
-    comments = [ Struct.new(:content).new("hello"), Struct.new(:content).new("world") ]
+    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
     
     json = Jbuilder.encode do |json|
       json.comments comments, :content
     end
     
     JSON.parse(json).tap do |parsed|
+      assert_equal ["content"], parsed["comments"].first.keys
       assert_equal "hello", parsed["comments"].first["content"]
       assert_equal "world", parsed["comments"].second["content"]
     end
@@ -176,4 +177,19 @@ class JbuilderTest < ActiveSupport::TestCase
     
     assert_equal "david", JSON.parse(json)["comments"].first["authors"].first["name"]
   end
+  
+  test "top-level array" do
+    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+
+    json = Jbuilder.encode do |json|
+      json.array!(comments) do |json, comment|
+        json.content comment.content
+      end
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "hello", parsed.first["content"]
+      assert_equal "world", parsed.second["content"]
+    end
+  end 
 end
