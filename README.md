@@ -1,5 +1,5 @@
 Jbuilder
-============
+========
 
 Jbuilder gives you a simple DSL for declaring JSON structures that beats massaging giant hash structures. This is particularly helpful when the generation process is fraught with conditionals and loops. Here's a simple example:
 

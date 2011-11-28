@@ -27,6 +27,12 @@ class Jbuilder < BlankSlate
   #   end
   #
   #   { "comments": [ { "content": "hello" }, { "content": "world" } ]}
+  #
+  # More commonly, you'd use the combined iterator, though:
+  #
+  #   json.comments(@post.comments) do |json, comment|
+  #     json.content comment.formatted_content
+  #   end  
   def child!
     @attributes = [] unless @attributes.is_a? Array
     jbuilder = Jbuilder.new
@@ -48,6 +54,15 @@ class Jbuilder < BlankSlate
   # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
   #
   #   json.(@people) { |json, person| ... }
+  #
+  # It's generally only needed to use this method for top-level arrays. If you have named arrays, you can do:
+  #
+  #   json.people(@people) do |json, person|
+  #     json.name person.name
+  #     json.age calculate_age(person.birthday)
+  #   end  
+  #
+  #   { "people": [ { "David", 32 }, { "Jamie", 31 } ] }
   def array!(collection)
     collection.each do |element|
       child! do |child|
