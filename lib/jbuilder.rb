@@ -12,6 +12,9 @@ class Jbuilder < BlankSlate
     jbuilder.target!
   end
 
+  define_method(:__class__, find_hidden_method(:class))
+  define_method(:_tap, find_hidden_method(:tap))
+
   def initialize
     @attributes = ActiveSupport::OrderedHash.new
   end
@@ -34,9 +37,7 @@ class Jbuilder < BlankSlate
   #   end  
   def child!
     @attributes = [] unless @attributes.is_a? Array
-    jbuilder = Jbuilder.new
-    yield jbuilder
-    @attributes << jbuilder.attributes!
+    @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
   end
 
   # Iterates over the passed collection and adds each iteration as an element of the resulting array.
@@ -129,10 +130,13 @@ class Jbuilder < BlankSlate
       @attributes[key] = value
     end
 
+    # Overwrite in subclasses if you need to add initialization values
+    def _new_instance
+      __class__.new
+    end
+
     def _yield_nesting(container)
-      jbuilder = Jbuilder.new
-      yield jbuilder
-      @attributes[container] = jbuilder.attributes!
+      @attributes[container] = _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
     end
 
     def _inline_nesting(container, collection, attributes)
