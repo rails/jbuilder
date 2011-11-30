@@ -17,6 +17,11 @@ class Jbuilder < BlankSlate
     @attributes = ActiveSupport::OrderedHash.new
   end
 
+  # Dynamically set a key value pair.
+  def set!(key, value)
+    @attributes[key] = value
+  end
+
   # Turns the current element into an array and yields a builder to add a hash.
   #
   # Example:

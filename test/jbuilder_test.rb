@@ -192,4 +192,12 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal "world", parsed.second["content"]
     end
   end 
+  
+  test "dynamically set a key/value" do
+    json = Jbuilder.encode do |json|
+      json.set!(:each, "stuff")
+    end
+    
+    assert_equal "stuff", JSON.parse(json)["each"]
+  end
 end
