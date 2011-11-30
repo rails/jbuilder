@@ -116,14 +116,28 @@ class Jbuilder < BlankSlate
   private
     def method_missing(method, *args)
       case
+      # json.comments @post.comments { |json, comment| ... }
+      # { "comments": [ { ...}, { ... } ] }
       when args.one? && block_given?
         _yield_iteration(method, args.first) { |child, element| yield child, element }
+
+      # json.age 32
+      # { "age": 32 }
       when args.one?
         _assign method, args.first
+
+      # json.comments { |json| ... }
+      # { "comments": ... }
       when args.empty? && block_given?
         _yield_nesting(method) { |jbuilder| yield jbuilder }
+      
+      # json.comments(@post.comments, :content, :created_at)
+      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       when args.many? && args.first.is_a?(Enumerable)
         _inline_nesting method, args.first, args.from(1)
+
+      # json.author @post.creator, :name, :email_address
+      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
       when args.many?
         _inline_extract method, args.first, args.from(1)
       end
