@@ -76,4 +76,10 @@ end
 json.partial! "api/comments/comments" @message.comments
 ```
 
-Note: Jbuilder is similar to Garrett Bjerkhoel's json_builder, which I discovered after making this, but the DSL has taken a different turn and will retain the explicit yield style (vs json_builder's 3.0's move to instance_eval).
+Libraries similar to this in some form or another includes:
+
+* RABL: https://github.com/nesquena/rabl
+* JsonBuilder: https://github.com/nov/jsonbuilder
+* JSON Builder: https://github.com/dewski/json_builder
+* Jsonify: https://github.com/bsiggelkow/jsonify
+* RepresentationView: https://github.com/mdub/representative_view
