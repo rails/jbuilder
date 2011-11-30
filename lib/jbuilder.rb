@@ -7,9 +7,7 @@ require 'active_support/json'
 class Jbuilder < BlankSlate
   # Yields a builder and automatically turns the result into a JSON string
   def self.encode
-    jbuilder = new
-    yield jbuilder
-    jbuilder.target!
+    new._tap { |jbuilder| yield jbuilder }.target!
   end
 
   define_method(:__class__, find_hidden_method(:class))
@@ -163,3 +161,5 @@ class Jbuilder < BlankSlate
       __send__(container) { |parent| parent.extract! record, *attributes }
     end
 end
+
+require "jbuilder_template" if defined?(ActionView::Template)

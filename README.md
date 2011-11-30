@@ -68,10 +68,6 @@ You can either use Jbuilder stand-alone or directly as an ActionView template la
     end
 
     # You can use partials as well, just remember to pass in the json instance
-    render @message.comments, json: json
-
-Jbuilder is included with Rails 3.2 and automatically configured. If you want to use Jbuilder templates with an earlier version of Rails 3, you can add the following code in something like config/initializer/jbuilder_templates.rb:
-
-    ActionView::Template.register_template_handler :jbuilder, -> template { "Jbuilder.encode do |json|;#{template.source};end;" }
+    json.partial! "api/comments/comments" @message.comments
 
 Note: Jbuilder is similar to Garrett Bjerkhoel's json_builder, which I discovered after making this, but the DSL has taken a different turn and will retain the explicit yield style (vs json_builder's 3.0's move to instance_eval).
