@@ -124,7 +124,7 @@ class Jbuilder < BlankSlate
       # json.age 32
       # { "age": 32 }
       when args.one?
-        _assign method, args.first
+        set! method, args.first
 
       # json.comments { |json| ... }
       # { "comments": ... }
@@ -143,17 +143,13 @@ class Jbuilder < BlankSlate
       end
     end
 
-    def _assign(key, value)
-      @attributes[key] = value
-    end
-
     # Overwrite in subclasses if you need to add initialization values
     def _new_instance
       __class__.new
     end
 
     def _yield_nesting(container)
-      @attributes[container] = _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+      set! container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
     end
 
     def _inline_nesting(container, collection, attributes)
