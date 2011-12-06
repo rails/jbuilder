@@ -193,6 +193,18 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end 
   
+  test "empty top-level array" do
+    comments = []
+    
+    json = Jbuilder.encode do |json|
+      json.array!(comments) do |json, comment|
+        json.content comment.content
+      end
+    end
+    
+    assert_equal [], JSON.parse(json)
+  end
+  
   test "dynamically set a key/value" do
     json = Jbuilder.encode do |json|
       json.set!(:each, "stuff")
