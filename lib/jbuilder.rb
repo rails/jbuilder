@@ -52,7 +52,7 @@ class Jbuilder < BlankSlate
   #     json.age calculate_age(person.birthday)
   #   end
   #
-  #   [ { "David", 32 }, { "Jamie", 31 } ]
+  #   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
   #
   # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
   #
@@ -65,7 +65,7 @@ class Jbuilder < BlankSlate
   #     json.age calculate_age(person.birthday)
   #   end  
   #
-  #   { "people": [ { "David", 32 }, { "Jamie", 31 } ] }
+  #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
   def array!(collection)
     collection.each do |element|
       child! do |child|
@@ -80,7 +80,7 @@ class Jbuilder < BlankSlate
   #
   #   json.extract! @person, :name, :age
   #
-  #   { "David", 32 }, { "Jamie", 31 }
+  #   { "name": David", "age": 32 }, { "name": Jamie", "age": 31 }
   #
   # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
   #
@@ -117,7 +117,7 @@ class Jbuilder < BlankSlate
     def method_missing(method, *args)
       case
       # json.comments @post.comments { |json, comment| ... }
-      # { "comments": [ { ...}, { ... } ] }
+      # { "comments": [ { ... }, { ... } ] }
       when args.one? && block_given?
         _yield_iteration(method, args.first) { |child, element| yield child, element }
 
