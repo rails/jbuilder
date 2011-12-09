@@ -215,4 +215,18 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal nil, parsed["nil_value"]
     end
   end
+
+  test "empty arrays are not encoded as objects" do
+    json = Jbuilder.encode do |json|
+      json.comments([]) do |json, comment|
+        json.author = comment.author
+      end
+    end
+
+    JSON.parse(json).tap do |parsed|
+      assert parsed.key?("comments"), "The comments key is not present"
+      assert parsed["comments"].is_a?(Array), "The comments key is not an array"
+      assert parsed["comments"].empty?, "The comments array is not empty"
+    end
+  end
 end

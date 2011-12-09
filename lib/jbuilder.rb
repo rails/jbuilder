@@ -165,9 +165,13 @@ class Jbuilder < BlankSlate
     end
 
     def _yield_iteration(container, collection)
-      __send__(container) do |parent|
-        parent.array!(collection) do |child, element|
-          yield child, element
+      if collection.empty?
+        __send__(container, collection)
+      else
+        __send__(container) do |parent|
+          parent.array!(collection) do |child, element|
+            yield child, element
+          end
         end
       end
     end
