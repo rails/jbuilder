@@ -37,17 +37,21 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
-  test "extracting from object using call style for 1.9" do
-    person = Struct.new(:name, :age).new("David", 32)
+  if RUBY_VERSION > '1.9'
+  eval <<-EOF
+    test "extracting from object using call style for 1.9" do
+      person = Struct.new(:name, :age).new("David", 32)
 
-    json = Jbuilder.encode do |json|
-      json.(person, :name, :age)
-    end
+      json = Jbuilder.encode do |json|
+        json.(person, :name, :age)
+      end
 
-    JSON.parse(json).tap do |parsed|
-      assert_equal "David", parsed["name"]
-      assert_equal 32, parsed["age"]
+      JSON.parse(json).tap do |parsed|
+        assert_equal "David", parsed["name"]
+        assert_equal 32, parsed["age"]
+      end
     end
+  EOF
   end
 
   test "nesting single child with block" do
@@ -66,9 +70,9 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "nesting multiple children with block" do
     json = Jbuilder.encode do |json|
-      json.comments do |json|
-        json.child! { |json| json.content "hello" }
-        json.child! { |json| json.content "world" }
+      json.comments do |comments|
+        comments.child! { |child| child.content "hello" }
+        comments.child! { |child| child.content "world" }
       end
     end
 
@@ -128,30 +132,34 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
-  test "nesting multiple children from array with inline loop on root" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  if RUBY_VERSION > '1.9'
+  eval <<-EOT
+    test "nesting multiple children from array with inline loop on root" do
+      comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
-    json = Jbuilder.encode do |json|
-      json.(comments) do |json, comment|
-        json.content comment.content
+      json = Jbuilder.encode do |json|
+        json.(comments) do |json, comment|
+          json.content comment.content
+        end
+      end
+
+      JSON.parse(json).tap do |parsed|
+        assert_equal "hello", parsed.first["content"]
+        assert_equal "world", parsed.second["content"]
       end
     end
-
-    JSON.parse(json).tap do |parsed|
-      assert_equal "hello", parsed.first["content"]
-      assert_equal "world", parsed.second["content"]
-    end
+  EOT
   end
 
   test "array nested inside nested hash" do
     json = Jbuilder.encode do |json|
-      json.author do |json|
-        json.name "David"
-        json.age  32
+      json.author do |author|
+        author.name "David"
+        author.age  32
 
-        json.comments do |json|
-          json.child! { |json| json.content "hello" }
-          json.child! { |json| json.content "world" }
+        author.comments do |comments|
+          comments.child! { |child| child.content "hello" }
+          comments.child! { |child| child.content "world" }
         end
       end
     end
