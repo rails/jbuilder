@@ -157,6 +157,8 @@ class Jbuilder < BlankSlate
 
     def _inline_nesting(container, collection, attributes)
       __send__(container) do |parent|
+        puts "Calling inline nesting"
+        
         collection.each do |element|
           parent.child! do |child|
             attributes.each do |attribute|
