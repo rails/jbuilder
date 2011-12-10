@@ -43,7 +43,8 @@ class Jbuilder < BlankSlate
     @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
   end
 
-  # Iterates over the passed collection and adds each iteration as an element of the resulting array.
+  # Turns the current element into an array and iterates over the passed collection, adding each iteration as 
+  # an element of the resulting array.
   #
   # Example:
   #
@@ -67,6 +68,8 @@ class Jbuilder < BlankSlate
   #
   #   { "people": [ { "David", 32 }, { "Jamie", 31 } ] }
   def array!(collection)
+    @attributes = [] and return if collection.empty?
+    
     collection.each do |element|
       child! do |child|
         yield child, element
@@ -154,6 +157,8 @@ class Jbuilder < BlankSlate
 
     def _inline_nesting(container, collection, attributes)
       __send__(container) do |parent|
+        parent.array!(collection) and return if collection.empty?
+        
         collection.each do |element|
           parent.child! do |child|
             attributes.each do |attribute|
