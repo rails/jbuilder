@@ -9,7 +9,7 @@ class JbuilderTemplate < Jbuilder
   end
   
   def partial!(partial_name, options = {})
-    @context.render(partial_name, options.merge(json: self))
+    @context.render(partial_name, options.merge(:json => self))
   end
   
   private
