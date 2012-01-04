@@ -4,6 +4,7 @@ require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/json'
 
+
 class Jbuilder < BlankSlate
   # Yields a builder and automatically turns the result into a JSON string
   def self.encode
