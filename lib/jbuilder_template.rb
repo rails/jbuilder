@@ -18,8 +18,9 @@ class JbuilderTemplate < Jbuilder
     end
 end
 
-class JbuilderHandler < ActionView::Template::Handler
-  self.default_format = Mime::JSON
+class JbuilderHandler
+  cattr_accessor :default_format
+  @@default_format = Mime::JSON
 
   def self.call(template)
     %{
