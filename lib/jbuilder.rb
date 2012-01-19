@@ -19,8 +19,8 @@ class Jbuilder < BlankSlate
 
   # Dynamically set a key value pair.
   def set!(key, value)
-    @attributes[key] = value
-  end
+    @attributes[key] = value if value.present?
+  end  
 
   # Turns the current element into an array and yields a builder to add a hash.
   #
@@ -111,7 +111,19 @@ class Jbuilder < BlankSlate
   def target!
     ActiveSupport::JSON.encode @attributes
   end
-
+  
+  #json.fetch(method) do {}
+  def fetch(method, *args)
+    _yield_nesting(method) { |jbuilder| yield jbuilder }
+  end
+  
+  # add normal json, like json.add(:a => 'b')
+  def add(options = {})
+    return if options.nil?
+    options.each do |key, value|
+      set! key, value
+    end  
+  end
 
   private
     def method_missing(method, *args)
@@ -133,13 +145,13 @@ class Jbuilder < BlankSlate
       
       # json.comments(@post.comments, :content, :created_at)
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      when args.many? && args.first.is_a?(Enumerable)
-        _inline_nesting method, args.first, args.from(1)
+     when args.many? && args.first.is_a?(Enumerable)
+       _inline_nesting method, args.first, args.from(1)
 
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      when args.many?
-        _inline_extract method, args.first, args.from(1)
+     when args.many?
+       _inline_extract method, args.first, args.from(1)         
       end
     end
 
