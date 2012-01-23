@@ -100,4 +100,4 @@ end
 ```
 
 The issue is that the "inner" json in the block overwrites the parent and 
-causes issues to appear quite strange.
+causes strange looking issues to appear.
