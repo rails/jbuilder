@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'active_support/test_case'
 
-require 'jbuilder'
+require File.expand_path("../lib/jbuilder.rb", File.dirname(__FILE__))
 
 class JbuilderTest < ActiveSupport::TestCase
   test "single key" do
@@ -224,5 +224,41 @@ class JbuilderTest < ActiveSupport::TestCase
     end
     
     assert_equal "stuff", JSON.parse(json)["each"]
+  end
+
+  test "camelize keys" do
+    json = Jbuilder.encode do |json|
+      json.camelize = true
+      json.camel_style "for JS"
+    end
+
+    assert_equal ['camelStyle'], JSON.parse(json).keys
+  end
+
+  test "camelize flag is incapsulated per object" do
+    json = Jbuilder.encode do |json|
+      json.camelize = true
+      json.js_style "to win"
+    end
+
+    assert_equal ['jsStyle'], JSON.parse(json).keys
+
+    json = Jbuilder.encode do |json|
+      json.ruby_style "to win twice"
+    end
+
+    assert_equal ['ruby_style'], JSON.parse(json).keys
+  end
+
+  test "camelize nested keys" do
+    json = Jbuilder.encode do |json|
+      json.camelize = true
+      json.camel_style do |json|
+        json.inner_peace "helps you win"
+      end
+    end
+
+    assert_equal ['camelStyle'], JSON.parse(json).keys
+    assert_equal ['innerPeace'], JSON.parse(json).values[0].keys
   end
 end
