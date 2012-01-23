@@ -84,7 +84,7 @@ Libraries similar to this in some form or another includes:
 * Jsonify: https://github.com/bsiggelkow/jsonify
 * RepresentationView: https://github.com/mdub/representative_view
 
-Compatability Notes
+Compatibility Notes
 ===================
 
 Jbuilder works best with Ruby 1.9.
