@@ -83,3 +83,21 @@ Libraries similar to this in some form or another includes:
 * JSON Builder: https://github.com/dewski/json_builder
 * Jsonify: https://github.com/bsiggelkow/jsonify
 * RepresentationView: https://github.com/mdub/representative_view
+
+Compatability Notes
+===================
+
+Jbuilder works best with Ruby 1.9.
+
+Jbuilder leverages "block local variables" found in Ruby 1.9.  So when you 
+write code like:
+
+``` ruby
+json.author do |json|
+  # notice json variable in here
+  json.name @message.creator.name.familiar
+end
+```
+
+The issue is that the "inner" json in the block overwrites the parent and 
+causes issues to appear quite strange.
