@@ -87,7 +87,7 @@ Libraries similar to this in some form or another includes:
 Compatibility Notes
 ===================
 
-Jbuilder works best with Ruby 1.9.
+Jbuilder works best with Ruby 1.9.  It does not work so well with Ruby 1.8.
 
 Jbuilder leverages "block local variables" found in Ruby 1.9.  So when you 
 write code like:
