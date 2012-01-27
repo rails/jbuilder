@@ -12,6 +12,13 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal "hello", JSON.parse(json)["content"]
   end
 
+  test "nil key" do
+    json = Jbuilder.encode do |json|
+      json.content nil
+    end
+    assert_equal 1, JSON.parse(json).length
+  end
+
   test "multiple keys" do
     json = Jbuilder.encode do |json|
       json.title "hello"
@@ -49,7 +56,7 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal 32, parsed["age"]
     end
   end
-  
+
   test "nesting single child with block" do
     json = Jbuilder.encode do |json|
       json.author do |json|
