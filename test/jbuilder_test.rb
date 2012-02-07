@@ -11,7 +11,17 @@ class JbuilderTest < ActiveSupport::TestCase
     
     assert_equal "hello", JSON.parse(json)["content"]
   end
-
+  
+  [true, false, nil].each do |value|
+    test "single key: #{value}" do
+      json = Jbuilder.encode do |json|
+        json.content value
+      end
+      
+      assert_equal value, JSON.parse(json)["content"]
+    end
+  end
+  
   test "multiple keys" do
     json = Jbuilder.encode do |json|
       json.title "hello"
@@ -224,5 +234,15 @@ class JbuilderTest < ActiveSupport::TestCase
     end
     
     assert_equal "stuff", JSON.parse(json)["each"]
+  end
+  
+  [true, false, nil].each do |value|
+    test "dynamically set a key/value: #{value}" do
+      json = Jbuilder.encode do |json|
+        json.set!(:each, value)
+      end
+      
+      assert_equal value, JSON.parse(json)["each"]
+    end
   end
 end
