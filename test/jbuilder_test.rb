@@ -12,11 +12,23 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal "hello", JSON.parse(json)["content"]
   end
 
-  test "nil key" do
+  test "nil value" do
     json = Jbuilder.encode do |json|
       json.content nil
     end
-    assert_equal 1, JSON.parse(json).length
+    
+    JSON.parse(json).tap do |json|
+      assert parsed.has_key?("content")
+      assert_equal nil, parsed["content"]
+    end
+  end
+  
+  test "false value" do
+    json = Jbuilder.encode do |json|
+      json.published false
+    end
+    
+    assert_equal false, JSON.parse(json)["published"]
   end
 
   test "multiple keys" do
