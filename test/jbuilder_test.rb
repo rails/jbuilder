@@ -12,6 +12,14 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal "hello", JSON.parse(json)["content"]
   end
 
+  test "single key with false value" do
+    json = Jbuilder.encode do |json|
+      json.content false
+    end
+
+    assert_equal false, JSON.parse(json)["content"]
+  end
+
   test "multiple keys" do
     json = Jbuilder.encode do |json|
       json.title "hello"
