@@ -190,7 +190,19 @@ class JbuilderTest < ActiveSupport::TestCase
     
     assert_equal "david", JSON.parse(json)["comments"].first["authors"].first["name"]
   end
-  
+
+  test "nested jbuilder objects" do
+    to_nest = Jbuilder.new
+    to_nest.nested_value "Nested Test"
+    json = Jbuilder.encode do |json|
+      json.value "Test"
+      json.nested to_nest
+    end
+    parsed = JSON.parse(json)
+    assert_equal "Test", parsed['value']
+    assert_equal "Nested Test", parsed["nested"]["nested_value"]
+  end
+
   test "top-level array" do
     comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
