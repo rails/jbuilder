@@ -73,7 +73,7 @@ if current_user.admin?
 end
 
 # You can use partials as well, just remember to pass in the json instance
-json.partial! "api/comments/comments", @message.comments
+json.partial! "api/comments/comments", comments: @message.comments
 ```
 
 Libraries similar to this in some form or another includes:
