@@ -48,7 +48,7 @@ This will build the following structure:
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
   ],
   
-  "attachment": [
+  "attachments": [
     { "filename": "forecast.xls", "url": "http://example.com/downloads/forecast.xls" },
     { "filename": "presentation.pdf", "url": "http://example.com/downloads/presentation.pdf" }
   ]
