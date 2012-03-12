@@ -18,8 +18,28 @@ class Jbuilder < BlankSlate
   end
 
   # Dynamically set a key value pair.
-  def set!(key, value)
-    @attributes[key] = value
+  #
+  # Example:
+  #
+  #   json.set!(:each, "stuff")
+  #
+  #   { "each": "stuff" }
+  #
+  # You can also pass a block for nested attributes
+  #
+  #   json.set!(:author) do |json|
+  #     json.name "David"
+  #     json.age 32
+  #   end
+  #
+  #   { "author": { "name": "David", "age": 32 } }
+  def set!(*args)
+    case
+    when args.one? && block_given?
+      _yield_nesting(args.first) { |jbuilder| yield jbuilder }
+    when args.many?
+      @attributes[args.first] = args.second
+    end
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
