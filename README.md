@@ -72,8 +72,11 @@ if current_user.admin?
   json.visitors calculate_visitors(@message)
 end
 
-# You can use partials as well, just remember to pass in the json instance
-json.partial! "api/comments/comments", @message.comments
+# You can use partials as well. The following line will render the file
+# RAILS_ROOT/app/views/api/comments/_comments, and set a local variable
+# 'comments' with all this message's comments, which you can use inside
+# the partial.
+json.partial! "api/comments/comments", comments: @message.comments
 ```
 
 Libraries similar to this in some form or another include:
