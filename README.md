@@ -55,6 +55,17 @@ This will build the following structure:
 }
 ```
 
+Top level arrays can be handled directly.  Useful for index and other collection actions.
+
+``` ruby
+#@people = People.all
+json.array!(@people) do |json, person|
+  json.name person.name
+  json.age calculate_age(person.birthday)
+end
+#   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
+```
+
 You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
 
 ``` ruby
