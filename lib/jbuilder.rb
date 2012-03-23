@@ -3,8 +3,11 @@ require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/json'
+require 'active_support/inflector'
 
 class Jbuilder < BlankSlate
+  attr_accessor :camelize
+
   # Yields a builder and automatically turns the result into a JSON string
   def self.encode
     new._tap { |jbuilder| yield jbuilder }.target!
@@ -15,11 +18,16 @@ class Jbuilder < BlankSlate
 
   def initialize
     @attributes = ActiveSupport::OrderedHash.new
+    @camelize   = false
   end
 
   # Dynamically set a key value pair.
   def set!(key, value)
-    @attributes[key] = value
+    if @camelize
+      @attributes[key.to_s.camelize(:lower)] = value
+    else
+      @attributes[key] = value
+    end
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -40,7 +48,7 @@ class Jbuilder < BlankSlate
   #   end  
   def child!
     @attributes = [] unless @attributes.is_a? Array
-    @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+    @attributes << _setup_instance._tap { |jbuilder| yield jbuilder }.attributes!
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as 
@@ -146,13 +154,20 @@ class Jbuilder < BlankSlate
       end
     end
 
-    # Overwrite in subclasses if you need to add initialization values
+    # Override in subclasses if you need to add initialization values
+    def _setup_instance
+      instance = _new_instance
+      instance.camelize = @camelize
+
+      instance
+    end
+
     def _new_instance
       __class__.new
     end
 
     def _yield_nesting(container)
-      set! container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+      set! container, _setup_instance._tap { |jbuilder| yield jbuilder }.attributes!
     end
 
     def _inline_nesting(container, collection, attributes)

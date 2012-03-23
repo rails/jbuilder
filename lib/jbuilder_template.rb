@@ -1,3 +1,10 @@
+module ActionView
+  class Base
+    cattr_accessor :camelize_jbuilder
+    @@camelize_jbuilder = false
+  end
+end
+
 class JbuilderTemplate < Jbuilder
   def self.encode(context)
     new(context)._tap { |jbuilder| yield jbuilder }.target!
