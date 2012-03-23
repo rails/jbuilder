@@ -66,6 +66,34 @@ end
 # => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
 ```
 
+Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
+
+``` ruby
+class Person
+  # ... Class Definition ... #
+  def to_builder
+    person = Jbuilder.new
+    person.(self, :name, :age)
+    person
+  end
+end
+
+class Company
+  # ... Class Definition ... #
+  def to_builder
+    company = Jbuilder.new
+    company.name name
+    company.president president.to_builder
+    company
+  end
+end
+
+company = Company.new("Doodle Corp", Person.new("John Stobs", 58))
+company.to_builder.target!
+
+# => {"name":"Doodle Corp","president":{"name":"John Stobs","age":58}}
+```
+
 You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
 
 ``` ruby
