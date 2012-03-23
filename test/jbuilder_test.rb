@@ -242,4 +242,18 @@ class JbuilderTest < ActiveSupport::TestCase
     
     assert_equal "stuff", JSON.parse(json)["each"]
   end
+
+  test "dynamically set a key/nested child with block" do
+    json = Jbuilder.encode do |json|
+      json.set!(:author) do |json|
+        json.name "David"
+        json.age 32
+      end
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "David", parsed["author"]["name"]
+      assert_equal 32, parsed["author"]["age"]
+    end
+  end
 end
