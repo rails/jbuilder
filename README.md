@@ -76,7 +76,7 @@ end
 json.partial! "api/comments/comments", @message.comments
 ```
 
-Libraries similar to this in some form or another includes:
+Libraries similar to this in some form or another include:
 
 * RABL: https://github.com/nesquena/rabl
 * JsonBuilder: https://github.com/nov/jsonbuilder
