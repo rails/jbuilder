@@ -58,12 +58,12 @@ This will build the following structure:
 Top level arrays can be handled directly.  Useful for index and other collection actions.
 
 ``` ruby
-#@people = People.all
+# @people = People.all
 json.array!(@people) do |json, person|
   json.name person.name
   json.age calculate_age(person.birthday)
 end
-#   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
+# => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
 ```
 
 You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
@@ -97,21 +97,3 @@ Libraries similar to this in some form or another include:
 * JSON Builder: https://github.com/dewski/json_builder
 * Jsonify: https://github.com/bsiggelkow/jsonify
 * RepresentationView: https://github.com/mdub/representative_view
-
-Compatibility Notes
-===================
-
-Jbuilder works best with Ruby 1.9.  It does not work so well with Ruby 1.8.
-
-Jbuilder leverages "block local variables" found in Ruby 1.9.  So when you 
-write code like:
-
-``` ruby
-json.author do |json|
-  # notice json variable in here
-  json.name @message.creator.name.familiar
-end
-```
-
-The issue is that the "inner" json in the block overwrites the parent and 
-causes strange looking issues to appear.
