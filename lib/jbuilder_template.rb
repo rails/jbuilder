@@ -18,6 +18,21 @@ class JbuilderTemplate < Jbuilder
     end
 end
 
-ActionView::Template.register_template_handler :jbuilder, Proc.new { |template|
-  "if defined?(json); #{template.source}; else; JbuilderTemplate.encode(self) do |json|;#{template.source};end; end;"
-}
+class JbuilderHandler
+  cattr_accessor :default_format
+  self.default_format = Mime::JSON
+
+  def self.call(template)
+    %{
+      if defined?(json)
+        #{template.source}
+      else
+        JbuilderTemplate.encode(self) do |json|
+          #{template.source}
+        end
+      end
+    }
+  end
+end
+
+ActionView::Template.register_template_handler :jbuilder, JbuilderHandler

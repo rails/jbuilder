@@ -48,11 +48,22 @@ This will build the following structure:
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
   ],
   
-  "attachment": [
+  "attachments": [
     { "filename": "forecast.xls", "url": "http://example.com/downloads/forecast.xls" },
     { "filename": "presentation.pdf", "url": "http://example.com/downloads/presentation.pdf" }
   ]
 }
+```
+
+Top level arrays can be handled directly.  Useful for index and other collection actions.
+
+``` ruby
+# @people = People.all
+json.array!(@people) do |json, person|
+  json.name person.name
+  json.age calculate_age(person.birthday)
+end
+# => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
 ```
 
 You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
@@ -72,11 +83,14 @@ if current_user.admin?
   json.visitors calculate_visitors(@message)
 end
 
-# You can use partials as well, just remember to pass in the json instance
-json.partial! "api/comments/comments" @message.comments
+# You can use partials as well. The following line will render the file
+# RAILS_ROOT/app/views/api/comments/_comments, and set a local variable
+# 'comments' with all this message's comments, which you can use inside
+# the partial.
+json.partial! "api/comments/comments", comments: @message.comments
 ```
 
-Libraries similar to this in some form or another includes:
+Libraries similar to this in some form or another include:
 
 * RABL: https://github.com/nesquena/rabl
 * JsonBuilder: https://github.com/nov/jsonbuilder

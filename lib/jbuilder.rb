@@ -134,7 +134,7 @@ class Jbuilder < BlankSlate
 
       # json.age 32
       # { "age": 32 }
-      when args.one?
+      when args.length == 1
         set! method, args.first
 
       # json.comments { |json| ... }
