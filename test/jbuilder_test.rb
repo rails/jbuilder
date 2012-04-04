@@ -256,4 +256,31 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal 32, parsed["author"]["age"]
     end
   end
+
+  test "query like object" do
+    class Person
+      attr_reader :name, :age
+
+      def initialize(name, age)
+        @name, @age = name, age
+      end
+    end
+    class RelationMock
+      def each(&block)
+        [Person.new("Bob", 30), Person.new("Frank", 50)].each(&block)
+      end
+      def empty?
+        false
+      end
+    end
+
+    result = Jbuilder.encode do |json|
+      json.relations RelationMock.new, :name, :age
+    end
+
+    parsed = JSON.parse(result)
+    assert_equal 2, parsed["relations"].length
+    assert_equal "Bob", parsed["relations"][0]["name"]
+    assert_equal 50, parsed["relations"][1]["age"]
+  end
 end
