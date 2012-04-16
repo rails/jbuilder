@@ -86,13 +86,23 @@ class Jbuilder < BlankSlate
   #   end  
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
+  #
+  # If you omit the block then you can set the top level array directly:
+  #
+  #   json.array! [1, 2, 3]
+  #
+  #   [1,2,3]
   def array!(collection)
-    @attributes = [] and return if collection.empty?
-    
-    collection.each do |element|
-      child! do |child|
-        yield child, element
+    if block_given?
+      @attributes = [] and return if collection.empty?
+      
+      collection.each do |element|
+        child! do |child|
+          yield child, element
+        end
       end
+    else
+      @attributes = collection || []
     end
   end
 
