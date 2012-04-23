@@ -297,4 +297,13 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal ["oats and friends"], json.attributes!.keys
   end
+
+  test "default key_format!" do
+    Jbuilder.key_format :camelize => :lower
+    json = Jbuilder.new
+    json.camel_style "for JS"
+
+    assert_equal ['camelStyle'], json.attributes!.keys
+    Jbuilder.class_variable_set("@@key_format", {})
+  end
 end

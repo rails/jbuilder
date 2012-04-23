@@ -10,12 +10,14 @@ class Jbuilder < BlankSlate
     new._tap { |jbuilder| yield jbuilder }.target!
   end
 
+  @@key_format = {}
+
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
 
   def initialize
     @attributes = ActiveSupport::OrderedHash.new
-    @key_format = {}
+    @key_format = @@key_format.clone
   end
 
   # Dynamically set a key value pair.
@@ -71,13 +73,12 @@ class Jbuilder < BlankSlate
   #   { "_first_name": "David" }
   #
   def key_format!(*args)
-    options = args.extract_options!
-    args.each do |name|
-      @key_format[name] = []
-    end
-    options.each do |name, paramaters|
-      @key_format[name] = paramaters
-    end
+    __class__.extract_key_format(args, @key_format)
+  end
+  
+  # Same as the instance method key_format! except sets the default.
+  def self.key_format(*args)
+    extract_key_format(args, @@key_format)
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -248,6 +249,16 @@ class Jbuilder < BlankSlate
         else
           result.send(func, *args)
         end
+      end
+    end
+
+    def self.extract_key_format(args, target)
+      options = args.extract_options!
+      args.each do |name|
+        target[name] = []
+      end
+      options.each do |name, paramaters|
+        target[name] = paramaters
       end
     end
 end
