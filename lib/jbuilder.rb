@@ -15,6 +15,7 @@ class Jbuilder < BlankSlate
 
   def initialize
     @attributes = ActiveSupport::OrderedHash.new
+    @key_format = {}
   end
 
   # Dynamically set a key value pair.
@@ -37,7 +38,6 @@ class Jbuilder < BlankSlate
     if block_given?
       _yield_nesting(key) { |jbuilder| yield jbuilder }
     else
-      @attributes[key] = value
       @attributes[_format_key(key)] = value
     end
   end
@@ -73,10 +73,10 @@ class Jbuilder < BlankSlate
   def key_format!(*args)
     options = args.extract_options!
     args.each do |name|
-      @key_options[name] = []
+      @key_format[name] = []
     end
     options.each do |name, paramaters|
-      @key_options[name] = paramaters
+      @key_format[name] = paramaters
     end
   end
 
@@ -239,9 +239,9 @@ class Jbuilder < BlankSlate
       __send__(container) { |parent| parent.extract! record, *attributes }
     end
 
-    # Format the key using the methods described in key_options
+    # Format the key using the methods described in @key_format
     def _format_key(key)
-      @key_options.inject(key.to_s) do |result, args|
+      @key_format.inject(key.to_s) do |result, args|
         func, args = args
         if func.is_a? Proc
           func.call(result, *args)
