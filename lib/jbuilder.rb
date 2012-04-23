@@ -38,6 +38,45 @@ class Jbuilder < BlankSlate
       _yield_nesting(key) { |jbuilder| yield jbuilder }
     else
       @attributes[key] = value
+      @attributes[_format_key(key)] = value
+    end
+  end
+
+  # Specifies formatting to be applied to the key. Passing in a name of a function
+  # will cause that function to be called on the key.  So :upcase will upper case
+  # the key.  You can also pass in lambdas for more complex transformations.
+  #
+  # Example:
+  #
+  #   json.key_format! :upcase
+  #   json.author do |json|
+  #     json.name "David"
+  #     json.age 32
+  #   end
+  #
+  #   { "AUTHOR": { "NAME": "David", "AGE": 32 } }
+  #
+  # You can pass parameters to the method using a hash pair.
+  #
+  #   json.set_format! :camelize => :lower
+  #   json.first_name "David"
+  #
+  #   { "firstName": "David" }
+  #
+  # Lambdas can also be used.
+  #
+  #   json.set_format! ->(key){ "_" + key }
+  #   json.first_name "David"
+  #
+  #   { "_first_name": "David" }
+  #
+  def key_format!(*args)
+    options = args.extract_options!
+    args.each do |name|
+      @key_options[name] = []
+    end
+    options.each do |name, paramaters|
+      @key_options[name] = paramaters
     end
   end
 
@@ -198,6 +237,18 @@ class Jbuilder < BlankSlate
     
     def _inline_extract(container, record, attributes)
       __send__(container) { |parent| parent.extract! record, *attributes }
+    end
+
+    # Format the key using the methods described in key_options
+    def _format_key(key)
+      @key_options.inject(key.to_s) do |result, args|
+        func, args = args
+        if func.is_a? Proc
+          func.call(result, *args)
+        else
+          result.send(func, *args)
+        end
+      end
     end
 end
 

@@ -1,5 +1,6 @@
 require 'test/unit'
 require 'active_support/test_case'
+require 'active_support/inflector'
 
 require 'jbuilder'
 
@@ -255,5 +256,45 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal "David", parsed["author"]["name"]
       assert_equal 32, parsed["author"]["age"]
     end
+  end
+
+  test "key_format! with parameter" do
+    json = Jbuilder.new
+    json.key_format! :camelize => [:lower]
+    json.camel_style "for JS"
+
+    assert_equal ['camelStyle'], json.attributes!.keys
+  end
+
+  test "key_format! with parameter not as an array" do
+    json = Jbuilder.new
+    json.key_format! :camelize => :lower
+    json.camel_style "for JS"
+
+    assert_equal ['camelStyle'], json.attributes!.keys
+  end
+
+  test "key_format! with no parameter" do
+    json = Jbuilder.new
+    json.key_format! :upcase
+    json.lower "Value"
+
+    assert_equal ['LOWER'], json.attributes!.keys
+  end
+
+  test "key_format! with multiple steps" do
+    json = Jbuilder.new
+    json.key_format! :upcase, :pluralize
+    json.pill ""
+
+    assert_equal ["PILLs"], json.attributes!.keys
+  end
+
+  test "key_format! with lambda/proc" do
+    json = Jbuilder.new
+    json.key_format! ->(key){ key + " and friends" }
+    json.oats ""
+
+    assert_equal ["oats and friends"], json.attributes!.keys
   end
 end
