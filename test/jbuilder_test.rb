@@ -256,4 +256,41 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal 32, parsed["author"]["age"]
     end
   end
+
+  test "single key with nil value and serializes_nil disabled" do
+    json = Jbuilder.encode do |json|
+      json.serializes_nil! false
+      json.content nil
+    end
+
+    assert JSON.parse(json).empty?
+    assert !JSON.parse(json).has_key?("content")
+  end
+
+  test "single key with nil value and default serializes_nil disabled" do
+    Jbuilder.serializes_nil false
+    json = Jbuilder.encode do |json|
+      json.content nil
+    end
+
+    assert JSON.parse(json).empty?
+    assert !JSON.parse(json).has_key?("content")
+
+    # reset default value
+    Jbuilder.serializes_nil true
+  end
+
+  test "single key with nil value and default serializes_nil disabled and instance serializes_nil enabled" do
+    Jbuilder.serializes_nil false
+    json = Jbuilder.encode do |json|
+      json.serializes_nil! true
+      json.content nil
+    end
+
+    assert JSON.parse(json).has_key?("content")
+    assert_equal nil, JSON.parse(json)["content"]
+
+    # reset default value
+    Jbuilder.serializes_nil true
+  end
 end

@@ -90,6 +90,27 @@ end
 json.partial! "api/comments/comments", comments: @message.comments
 ```
 
+You can configure Jbuilder to not serialize nil values.  By default nil values will be serialized to javascript null.
+
+``` ruby
+# You can set the default behavior of all Jbuilder instances to not serialize nil
+Jbuilder.serialize_nil false
+
+json.author do |json|
+  json.name nil
+  json.age 32
+end
+# => { author: {"age": 32 } }
+
+# Or you can set the behavior per instance
+json.author do |json|
+  json.serialize_nil! false
+  json.name nil
+  json.age 32
+end
+# => { author: {"age": 32 } }
+```
+
 Libraries similar to this in some form or another include:
 
 * RABL: https://github.com/nesquena/rabl
