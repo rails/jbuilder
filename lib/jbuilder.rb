@@ -2,6 +2,7 @@ require 'blankslate'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
+require 'active_support/core_ext/hash'
 require 'active_support/json'
 
 class Jbuilder < BlankSlate
@@ -86,13 +87,23 @@ class Jbuilder < BlankSlate
   #   end  
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
+  #
+  # If you omit the block then you can set the top level array directly:
+  #
+  #   json.array! [1, 2, 3]
+  #
+  #   [1,2,3]
   def array!(collection)
     @attributes = [] and return if collection.empty?
-    
-    collection.each do |element|
-      child! do |child|
-        yield child, element
+
+    if block_given?
+      collection.each do |element|
+        child! do |child|
+          yield child, element
+        end
       end
+    else
+      @attributes = collection
     end
   end
 
@@ -143,15 +154,35 @@ class Jbuilder < BlankSlate
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
-    value =  ActiveSupport::JSON.decode(Rails.cache.fetch(key, options) do
-      _new_instance._tap { |jbuilder| yield jbuilder }.target!
-    end)
+    cache_key = ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(key).split("://").last : key, :jbuilder)
+    value = Rails.cache.read(cache_key, options)
 
-    if value.is_a? Hash
-      @attributes.merge! value
+    if ! value
+      attributes = self.attributes!.clone
+      yield self
+      new_value = self.attributes!.is_a?(Hash) ? self.attributes!.diff(attributes) : self.attributes!
+      Rails.cache.write(cache_key, new_value, options)
     else
-      @attributes = value
+      if value.is_a?(Array)
+        self.array! value
+      else
+        value.each do |k, v|
+          self.set! k, v
+        end
+      end
     end
+
+
+    # cache_key = ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(key).split("://").last : key, :jbuilder)
+    # value =  ActiveSupport::JSON.decode(Rails.cache.fetch(cache_key, options) do
+    #   _new_instance._tap { |jbuilder| yield jbuilder }.target!
+    # end)
+
+    # if value.is_a? Hash
+    #   @attributes.merge! value
+    # else
+    #   @attributes = value
+    # end
   end
 
   private

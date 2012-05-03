@@ -158,7 +158,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.name "Parent"
       json.comments comments, :content
     end
-    
+
     JSON.parse(json).tap do |parsed|
       assert_equal "Parent", parsed["name"]
       assert_equal [], parsed["comments"]
@@ -281,7 +281,19 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test "fragment caching a JSON object" do
-    Rails.cache.write("cachekey", '{"name": "Something"}')
+    json = Jbuilder.encode do |json|
+      json.cache!("cachekey") do |json|
+        json.name "Cache"
+      end
+    end
+
+    Rails.cache.read("jbuilder/cachekey").tap do |parsed|
+      assert_equal "Cache", parsed[:name]
+    end
+  end
+
+  test "fragment caching deserializes a JSON object" do
+    Rails.cache.write("jbuilder/cachekey", {:name => "Something"})
     json = Jbuilder.encode do |json|
       json.cache!("cachekey") do |json|
         json.name "Cache"
@@ -289,12 +301,12 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     JSON.parse(json).tap do |parsed|
-      assert_equal "Something", parsed["name"]
+      assert_equal "Something", parsed['name']
     end
   end
 
-  test "fragment caching an array" do
-    Rails.cache.write("cachekey", '["a", "b", "c"]')
+  test "fragment caching deserializes an array" do
+    Rails.cache.write("jbuilder/cachekey", ["a", "b", "c"])
     json = Jbuilder.encode do |json|
       json.cache!("cachekey") do |json|
         json.array! ['1', '2', '3']
