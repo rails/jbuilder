@@ -134,6 +134,25 @@ class Jbuilder < BlankSlate
     ActiveSupport::JSON.encode @attributes
   end
 
+  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper 
+  # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
+  #
+  # Example:
+  #
+  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  #     json.extract! @person, :name, :age
+  #   end
+  def cache!(key=nil, options={}, &block)
+    value =  ActiveSupport::JSON.decode(Rails.cache.fetch(key, options) do
+      _new_instance._tap { |jbuilder| yield jbuilder }.target!
+    end)
+
+    if value.is_a? Hash
+      @attributes.merge! value
+    else
+      @attributes = value
+    end
+  end
 
   private
     def method_missing(method, *args)
