@@ -293,4 +293,32 @@ class JbuilderTest < ActiveSupport::TestCase
     # reset default value
     Jbuilder.serializes_nil true
   end
+
+  test "child key with nil value and serializes_nil disabled" do
+    json = Jbuilder.encode do |json|
+      json.serializes_nil! false
+      json.author do |json|
+        json.name nil
+        json.age  32
+      end
+    end
+
+    assert !JSON.parse(json).has_key?("name")
+  end
+
+  test "child key with nil value and default serializes_nil disabled" do
+    Jbuilder.serializes_nil false
+    json = Jbuilder.encode do |json|
+      json.author do |json|
+        json.name nil
+        json.age  32
+      end
+    end
+
+    assert !JSON.parse(json).has_key?("name")
+
+    # reset default value
+    Jbuilder.serializes_nil true
+  end
+
 end

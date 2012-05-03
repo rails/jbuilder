@@ -62,7 +62,10 @@ class Jbuilder < BlankSlate
   #   end  
   def child!
     @attributes = [] unless @attributes.is_a? Array
-    @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+    @attributes << (_new_instance._tap do |jbuilder| 
+      jbuilder.serializes_nil! @serializes_nil
+      yield jbuilder 
+    end.attributes!)
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as 
@@ -213,7 +216,10 @@ class Jbuilder < BlankSlate
     end
 
     def _yield_nesting(container)
-      set! container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+      set! container, (_new_instance._tap do |jbuilder| 
+        jbuilder.serializes_nil! @serializes_nil
+        yield jbuilder 
+      end.attributes!)
     end
 
     def _inline_nesting(container, collection, attributes)

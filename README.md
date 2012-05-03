@@ -94,7 +94,7 @@ You can configure Jbuilder to not serialize nil values.  By default nil values w
 
 ``` ruby
 # You can set the default behavior of all Jbuilder instances to not serialize nil
-Jbuilder.serialize_nil false
+Jbuilder.serializes_nil false
 
 json.author do |json|
   json.name nil
@@ -104,7 +104,7 @@ end
 
 # Or you can set the behavior per instance
 json.author do |json|
-  json.serialize_nil! false
+  json.serializes_nil! false
   json.name nil
   json.age 32
 end
