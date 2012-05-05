@@ -256,4 +256,54 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal 32, parsed["author"]["age"]
     end
   end
+  
+  test "array of Strings with nil value" do
+    json = Jbuilder.encode do |json|
+      json.data(["hello", nil, "world"])
+    end
+
+    JSON.parse(json).tap do |parsed|
+      assert_equal "hello", parsed['data'].first
+      assert_nil parsed['data'].second
+      assert_equal "world", parsed['data'].third
+    end
+  end
+
+  test "array of Structs with nil value" do
+    comments = [ Struct.new(:content).new("hello"), nil ]
+
+    json = Jbuilder.encode do |json|
+      json.data(comments) do |json, comment|
+        if comment
+          json.content comment.content
+        else
+          json.null!
+        end
+      end
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "hello", parsed['data'].first["content"]
+      assert_nil parsed['data'].second
+    end
+  end
+  
+  test "array of top-level Structs with nil value" do
+    comments = [ Struct.new(:content).new("hello"), nil ]
+
+    json = Jbuilder.encode do |json|
+      json.array!(comments) do |json, comment|
+        if comment
+          json.content comment.content
+        else
+          json.null!
+        end
+      end
+    end
+    
+    JSON.parse(json).tap do |parsed|
+      assert_equal "hello", parsed.first["content"]
+      assert_nil parsed.second
+    end
+  end
 end

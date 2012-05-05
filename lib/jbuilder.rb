@@ -95,6 +95,25 @@ class Jbuilder < BlankSlate
       end
     end
   end
+  
+  # Sets the current attributes to nil, such that the resulting JSON will be 'null'. This is useful for
+  # encoding a complex array elements as 'null' instead of '{}'.
+  #
+  # Example:
+  #
+  #  json.people @people do |json, person|
+  #    if person
+  #      json.name person.name
+  #      json.age person.age
+  #    else
+  #      json.null!
+  #    end
+  #  end
+  #
+  #  {"people": [{"name":"David", "age":32}, nil]}
+  def null!
+    @attributes = nil
+  end
 
   # Extracts the mentioned attributes from the passed object and turns them into attributes of the JSON.
   #
