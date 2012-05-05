@@ -155,20 +155,17 @@ class Jbuilder < BlankSlate
   #   end
   def cache!(key=nil, options={}, &block)
     cache_key = ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(key).split("://").last : key, :jbuilder)
-    value = Rails.cache.read(cache_key, options)
-
-    if ! value
+    value = Rails.cache.fetch(cache_key, options) do
       attributes = self.attributes!.clone
       yield self
-      new_value = self.attributes!.is_a?(Hash) ? self.attributes!.diff(attributes) : self.attributes!
-      Rails.cache.write(cache_key, new_value, options)
+      self.attributes!.is_a?(Hash) ? self.attributes!.diff(attributes) : self.attributes!
+    end
+
+    if value.is_a?(Array)
+      self.array! value
     else
-      if value.is_a?(Array)
-        self.array! value
-      else
-        value.each do |k, v|
-          self.set! k, v
-        end
+      value.each do |k, v|
+        self.set! k, v
       end
     end
 
