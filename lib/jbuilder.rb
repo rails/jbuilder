@@ -15,9 +15,9 @@ class Jbuilder < BlankSlate
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
 
-  def initialize
+  def initialize(key_format = @@key_format.clone)
     @attributes = ActiveSupport::OrderedHash.new
-    @key_format = @@key_format.clone
+    @key_format = key_format
   end
 
   # Dynamically set a key value pair.
@@ -207,7 +207,7 @@ class Jbuilder < BlankSlate
 
     # Overwrite in subclasses if you need to add initialization values
     def _new_instance
-      __class__.new
+      __class__.new(@key_format)
     end
 
     def _yield_nesting(container)
