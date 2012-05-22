@@ -60,14 +60,14 @@ class Jbuilder < BlankSlate
   #
   # You can pass parameters to the method using a hash pair.
   #
-  #   json.set_format! :camelize => :lower
+  #   json.key_format! :camelize => :lower
   #   json.first_name "David"
   #
   #   { "firstName": "David" }
   #
   # Lambdas can also be used.
   #
-  #   json.set_format! ->(key){ "_" + key }
+  #   json.key_format! ->(key){ "_" + key }
   #   json.first_name "David"
   #
   #   { "_first_name": "David" }

@@ -93,7 +93,7 @@ json.partial! "api/comments/comments", comments: @message.comments
 Keys can be auto formatted using `key_format!`, this can be used to convert keynames from the standard ruby_format to CamelCase:
 
 ``` ruby
-json.set_format! :camelize => :lower
+json.key_format! :camelize => :lower
 json.first_name "David"
 
 # { "firstName": "David" }
@@ -102,7 +102,7 @@ json.first_name "David"
 You can set this globaly with the class method `key_format` (from inside your enviorment.rb for example):
 
 ``` ruby
-Jbuilder.set_format :camelize => :lower
+Jbuilder.key_format :camelize => :lower
 ```
 
 Libraries similar to this in some form or another include:
