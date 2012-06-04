@@ -90,6 +90,18 @@ end
 json.partial! "api/comments/comments", comments: @message.comments
 ```
 
+Jbuilder supports fragment caching similar to the `cache` helper in `ActionView`:
+
+``` ruby
+json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  json.extract! @person, :name, :age
+  
+  json.friends(@person.friends) do |json, friend|
+    json.extract! friend, :name, :age
+  end
+end
+```
+
 Libraries similar to this in some form or another include:
 
 * RABL: https://github.com/nesquena/rabl

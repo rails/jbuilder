@@ -86,13 +86,23 @@ class Jbuilder < BlankSlate
   #   end  
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
+  #
+  # If you omit the block then you can set the top level array directly:
+  #
+  #   json.array! [1, 2, 3]
+  #
+  #   [1,2,3]
   def array!(collection)
-    @attributes = [] and return if collection.empty?
-    
-    collection.each do |element|
-      child! do |child|
-        yield child, element
+    if block_given?
+      @attributes = [] and return if collection.empty?
+      
+      collection.each do |element|
+        child! do |child|
+          yield child, element
+        end
       end
+    else
+      @attributes = collection || []
     end
   end
 
@@ -134,6 +144,33 @@ class Jbuilder < BlankSlate
     ActiveSupport::JSON.encode @attributes
   end
 
+  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper 
+  # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
+  #
+  # Example:
+  #
+  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  #     json.extract! @person, :name, :age
+  #   end
+  def cache!(key = nil, options = {}, &block)
+    cache_key = ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(key).split("://").last : key, :jbuilder)
+    value = Rails.cache.read(cache_key, options)
+
+    if ! value
+      attributes = self.attributes!.clone
+      yield self
+      new_value = self.attributes!.is_a?(Hash) ? self.attributes!.diff(attributes) : self.attributes!
+      Rails.cache.write(cache_key, new_value, options)
+    else
+      if value.is_a?(Array)
+        self.array! value
+      else
+        value.each do |k, v|
+          self.set! k, v
+        end
+      end
+    end
+  end
 
   private
     def method_missing(method, *args)
