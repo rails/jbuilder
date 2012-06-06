@@ -156,30 +156,16 @@ class Jbuilder < BlankSlate
   def cache!(key=nil, options={}, &block)
     cache_key = ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(key).split("://").last : key, :jbuilder)
     value = Rails.cache.fetch(cache_key, options) do
-      attributes = self.attributes!.clone
-      yield self
-      self.attributes!.is_a?(Hash) ? self.attributes!.diff(attributes) : self.attributes!
+      _new_instance._tap {|jbuilder| yield jbuilder}.attributes!
     end
 
     if value.is_a?(Array)
-      self.array! value
+      array! value
     else
       value.each do |k, v|
-        self.set! k, v
+        set! k, v
       end
     end
-
-
-    # cache_key = ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(key).split("://").last : key, :jbuilder)
-    # value =  ActiveSupport::JSON.decode(Rails.cache.fetch(cache_key, options) do
-    #   _new_instance._tap { |jbuilder| yield jbuilder }.target!
-    # end)
-
-    # if value.is_a? Hash
-    #   @attributes.merge! value
-    # else
-    #   @attributes = value
-    # end
   end
 
   private
