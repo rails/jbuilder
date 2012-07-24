@@ -30,15 +30,10 @@ class JbuilderHandler
   self.default_format = Mime::JSON
 
   def self.call(template)
-    %{
-      if defined?(json)
-        #{template.source}
-      else
-        JbuilderTemplate.encode(self) do |json|
-          #{template.source}
-        end
-      end
-    }
+    
+    # this juggling is required to keep line numbers right in the error
+    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{template.source}
+      json.target! unless __already_defined}
   end
 end
 
