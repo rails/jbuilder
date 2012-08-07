@@ -66,7 +66,7 @@ end
 # => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
 ```
 
-You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
+You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views a la show.json.jbuilder. Be sure not to include `Jbuilder.encode` in your view, **the content in the view is already yielded**:
 
 ``` ruby
 # Any helpers available to views are available to the builder
