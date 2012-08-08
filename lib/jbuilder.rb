@@ -3,7 +3,7 @@ require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/json'
-
+require 'multi_json'
 class Jbuilder < BlankSlate
   # Yields a builder and automatically turns the result into a JSON string
   def self.encode
@@ -131,7 +131,7 @@ class Jbuilder < BlankSlate
   
   # Encodes the current builder as JSON.
   def target!
-    ActiveSupport::JSON.encode @attributes
+    MultiJson.encode @attributes
   end
 
 
