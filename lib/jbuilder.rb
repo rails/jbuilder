@@ -10,11 +10,14 @@ class Jbuilder < BlankSlate
     new._tap { |jbuilder| yield jbuilder }.target!
   end
 
+  @@key_format = {}
+
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
 
-  def initialize
+  def initialize(key_format = @@key_format.clone)
     @attributes = ActiveSupport::OrderedHash.new
+    @key_format = key_format
   end
 
   # Dynamically set a key value pair.
@@ -37,8 +40,45 @@ class Jbuilder < BlankSlate
     if block_given?
       _yield_nesting(key) { |jbuilder| yield jbuilder }
     else
-      @attributes[key] = value
+      @attributes[_format_key(key)] = value
     end
+  end
+
+  # Specifies formatting to be applied to the key. Passing in a name of a function
+  # will cause that function to be called on the key.  So :upcase will upper case
+  # the key.  You can also pass in lambdas for more complex transformations.
+  #
+  # Example:
+  #
+  #   json.key_format! :upcase
+  #   json.author do |json|
+  #     json.name "David"
+  #     json.age 32
+  #   end
+  #
+  #   { "AUTHOR": { "NAME": "David", "AGE": 32 } }
+  #
+  # You can pass parameters to the method using a hash pair.
+  #
+  #   json.key_format! :camelize => :lower
+  #   json.first_name "David"
+  #
+  #   { "firstName": "David" }
+  #
+  # Lambdas can also be used.
+  #
+  #   json.key_format! ->(key){ "_" + key }
+  #   json.first_name "David"
+  #
+  #   { "_first_name": "David" }
+  #
+  def key_format!(*args)
+    __class__.extract_key_format(args, @key_format)
+  end
+  
+  # Same as the instance method key_format! except sets the default.
+  def self.key_format(*args)
+    extract_key_format(args, @@key_format)
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -167,7 +207,7 @@ class Jbuilder < BlankSlate
 
     # Overwrite in subclasses if you need to add initialization values
     def _new_instance
-      __class__.new
+      __class__.new(@key_format)
     end
 
     def _yield_nesting(container)
@@ -198,6 +238,28 @@ class Jbuilder < BlankSlate
     
     def _inline_extract(container, record, attributes)
       __send__(container) { |parent| parent.extract! record, *attributes }
+    end
+
+    # Format the key using the methods described in @key_format
+    def _format_key(key)
+      @key_format.inject(key.to_s) do |result, args|
+        func, args = args
+        if func.is_a? Proc
+          func.call(result, *args)
+        else
+          result.send(func, *args)
+        end
+      end
+    end
+
+    def self.extract_key_format(args, target)
+      options = args.extract_options!
+      args.each do |name|
+        target[name] = []
+      end
+      options.each do |name, paramaters|
+        target[name] = paramaters
+      end
     end
 end
 
