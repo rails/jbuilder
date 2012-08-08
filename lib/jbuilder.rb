@@ -203,7 +203,7 @@ class Jbuilder < BlankSlate
 
       # json.comments(@post.comments, :content, :created_at)
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      when args.many? && args.first.is_a?(Enumerable)
+      when args.many? && args.first.respond_to?(:each)
         _inline_nesting method, args.first, args.from(1)
 
       # json.author @post.creator, :name, :email_address
