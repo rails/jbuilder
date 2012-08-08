@@ -13,8 +13,11 @@ class Jbuilder < BlankSlate
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
 
+  @@serializes_nil = true
+
   def initialize
     @attributes = ActiveSupport::OrderedHash.new
+    @serializes_nil = @@serializes_nil
   end
 
   # Dynamically set a key value pair.
@@ -36,7 +39,7 @@ class Jbuilder < BlankSlate
   def set!(key, value = nil)
     if block_given?
       _yield_nesting(key) { |jbuilder| yield jbuilder }
-    else
+    elsif !value.nil? || @serializes_nil
       @attributes[key] = value
     end
   end
@@ -59,7 +62,10 @@ class Jbuilder < BlankSlate
   #   end  
   def child!
     @attributes = [] unless @attributes.is_a? Array
-    @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+    @attributes << (_new_instance._tap do |jbuilder| 
+      jbuilder.serializes_nil! @serializes_nil
+      yield jbuilder 
+    end.attributes!)
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as 
@@ -124,6 +130,45 @@ class Jbuilder < BlankSlate
     end
   end
 
+  # Indicates whether nil values will be serialized or not.  By default nil values will be serialized.
+  # This can be configured at both the class level and the instance level.  The instance level will
+  # always override the class level setting for the scope of the instance.
+  #
+  # Example:
+  #
+  #   json.author do |json|
+  #     json.serializes_nil! false
+  #     json.name nil
+  #     json.age 32
+  #   end
+  #
+  #   { author: { "age": 32 } }
+  #
+  # You can also change the default behavior for all json serialization.
+  #
+  #   Jbuilder.serializes_nil false
+  #
+  #   json.author do |json|
+  #     json.name nil
+  #     json.age 32
+  #   end
+  #
+  #   { author: {"age": 32 } }
+  #
+  def serializes_nil!
+    @serializes_nil
+  end
+
+  # Sets whether or not nil values will be serialized.
+  def serializes_nil!(value)
+    @serializes_nil = value
+  end
+
+  # Sets whether or not nil values will be serialized by default.
+  def self.serializes_nil(value)
+    @@serializes_nil = value
+  end
+
   # Returns the attributes of the current builder.
   def attributes!
     @attributes
@@ -171,7 +216,10 @@ class Jbuilder < BlankSlate
     end
 
     def _yield_nesting(container)
-      set! container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+      set! container, (_new_instance._tap do |jbuilder| 
+        jbuilder.serializes_nil! @serializes_nil
+        yield jbuilder 
+      end.attributes!)
     end
 
     def _inline_nesting(container, collection, attributes)
