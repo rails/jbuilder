@@ -14,6 +14,8 @@ class Jbuilder < BlankSlate
 
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
+  define_method(:_is_a?, find_hidden_method(:is_a?))
+  reveal(:respond_to?)
 
   def initialize(key_format = @@key_format.clone)
     @attributes = ActiveSupport::OrderedHash.new
@@ -178,6 +180,12 @@ class Jbuilder < BlankSlate
   private
     def method_missing(method, *args)
       case
+      # json.age 32
+      # json.person another_jbuilder
+      # { "age": 32, "person": { ...  }
+      when args.one? && args.first.respond_to?(:_is_a?) && args.first._is_a?(Jbuilder)
+        set! method, args.first.attributes!
+
       # json.comments @post.comments { |json, comment| ... }
       # { "comments": [ { ... }, { ... } ] }
       when args.one? && block_given?
@@ -192,7 +200,7 @@ class Jbuilder < BlankSlate
       # { "comments": ... }
       when args.empty? && block_given?
         _yield_nesting(method) { |jbuilder| yield jbuilder }
-      
+
       # json.comments(@post.comments, :content, :created_at)
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       when args.many? && args.first.is_a?(Enumerable)
