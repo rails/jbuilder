@@ -66,6 +66,34 @@ end
 # => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
 ```
 
+Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
+
+``` ruby
+class Person
+  # ... Class Definition ... #
+  def to_builder
+    person = Jbuilder.new
+    person.(self, :name, :age)
+    person
+  end
+end
+
+class Company
+  # ... Class Definition ... #
+  def to_builder
+    company = Jbuilder.new
+    company.name name
+    company.president president.to_builder
+    company
+  end
+end
+
+company = Company.new("Doodle Corp", Person.new("John Stobs", 58))
+company.to_builder.target!
+
+# => {"name":"Doodle Corp","president":{"name":"John Stobs","age":58}}
+```
+
 You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
 
 ``` ruby
@@ -88,6 +116,21 @@ end
 # 'comments' with all this message's comments, which you can use inside
 # the partial.
 json.partial! "api/comments/comments", comments: @message.comments
+```
+
+Keys can be auto formatted using `key_format!`, this can be used to convert keynames from the standard ruby_format to CamelCase:
+
+``` ruby
+json.key_format! :camelize => :lower
+json.first_name "David"
+
+# { "firstName": "David" }
+```
+
+You can set this globaly with the class method `key_format` (from inside your enviorment.rb for example):
+
+``` ruby
+Jbuilder.key_format :camelize => :lower
 ```
 
 Libraries similar to this in some form or another include:

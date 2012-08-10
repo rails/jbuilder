@@ -1,6 +1,7 @@
 require 'test/unit'
 require 'active_support/test_case'
 require 'active_support/cache'
+require 'active_support/inflector'
 
 require 'jbuilder'
 
@@ -230,7 +231,19 @@ class JbuilderTest < ActiveSupport::TestCase
     
     assert_equal "david", JSON.parse(json)["comments"].first["authors"].first["name"]
   end
-  
+
+  test "nested jbuilder objects" do
+    to_nest = Jbuilder.new
+    to_nest.nested_value "Nested Test"
+    json = Jbuilder.encode do |json|
+      json.value "Test"
+      json.nested to_nest
+    end
+    parsed = JSON.parse(json)
+    assert_equal "Test", parsed['value']
+    assert_equal "Nested Test", parsed["nested"]["nested_value"]
+  end
+
   test "top-level array" do
     comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
@@ -280,6 +293,95 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
+  test "query like object" do
+    class Person
+      attr_reader :name, :age
+
+      def initialize(name, age)
+        @name, @age = name, age
+      end
+    end
+    class RelationMock
+      def each(&block)
+        [Person.new("Bob", 30), Person.new("Frank", 50)].each(&block)
+      end
+      def empty?
+        false
+      end
+    end
+
+    result = Jbuilder.encode do |json|
+      json.relations RelationMock.new, :name, :age
+    end
+
+    parsed = JSON.parse(result)
+    assert_equal 2, parsed["relations"].length
+    assert_equal "Bob", parsed["relations"][0]["name"]
+    assert_equal 50, parsed["relations"][1]["age"]
+  end
+
+  test "key_format! with parameter" do
+    json = Jbuilder.new
+    json.key_format! :camelize => [:lower]
+    json.camel_style "for JS"
+
+    assert_equal ['camelStyle'], json.attributes!.keys
+  end
+
+  test "key_format! with parameter not as an array" do
+    json = Jbuilder.new
+    json.key_format! :camelize => :lower
+    json.camel_style "for JS"
+
+    assert_equal ['camelStyle'], json.attributes!.keys
+  end
+
+  test "key_format! propagates to child elements" do
+    json = Jbuilder.new
+    json.key_format! :upcase
+    json.level1 "one"
+    json.level2 do |json|
+      json.value "two"
+    end
+
+    result = json.attributes!
+    assert_equal "one", result["LEVEL1"]
+    assert_equal "two", result["LEVEL2"]["VALUE"]
+  end
+
+  test "key_format! with no parameter" do
+    json = Jbuilder.new
+    json.key_format! :upcase
+    json.lower "Value"
+
+    assert_equal ['LOWER'], json.attributes!.keys
+  end
+
+  test "key_format! with multiple steps" do
+    json = Jbuilder.new
+    json.key_format! :upcase, :pluralize
+    json.pill ""
+
+    assert_equal ["PILLs"], json.attributes!.keys
+  end
+
+  test "key_format! with lambda/proc" do
+    json = Jbuilder.new
+    json.key_format! ->(key){ key + " and friends" }
+    json.oats ""
+
+    assert_equal ["oats and friends"], json.attributes!.keys
+  end
+
+  test "default key_format!" do
+    Jbuilder.key_format :camelize => :lower
+    json = Jbuilder.new
+    json.camel_style "for JS"
+
+    assert_equal ['camelStyle'], json.attributes!.keys
+    Jbuilder.class_variable_set("@@key_format", {})
+  end
+
   test "fragment caching a JSON object" do
     json = Jbuilder.encode do |json|
       json.cache!("cachekey") do |json|
@@ -288,12 +390,12 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     Rails.cache.read("jbuilder/cachekey").tap do |parsed|
-      assert_equal "Cache", parsed[:name]
+      assert_equal "Cache", parsed['name']
     end
   end
 
   test "fragment caching deserializes a JSON object" do
-    Rails.cache.write("jbuilder/cachekey", {:name => "Something"})
+    Rails.cache.write("jbuilder/cachekey", {'name' => "Something"})
     json = Jbuilder.encode do |json|
       json.cache!("cachekey") do |json|
         json.name "Cache"
