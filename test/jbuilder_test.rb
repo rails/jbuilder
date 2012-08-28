@@ -67,7 +67,20 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal 32, parsed["age"]
     end
   end
-  
+
+  test "extracting from hash" do
+    person = {:name => "Jim", :age => 34}
+
+    json = Jbuilder.encode do |json|
+      json.extract! person, :name, :age
+    end
+
+    JSON.parse(json).tap do |parsed|
+      assert_equal "Jim", parsed["name"]
+      assert_equal 34, parsed["age"]
+    end
+  end
+
   test "nesting single child with block" do
     json = Jbuilder.encode do |json|
       json.author do |json|

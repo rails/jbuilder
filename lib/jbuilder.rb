@@ -138,9 +138,15 @@ class Jbuilder < BlankSlate
     end
   end
 
-  # Extracts the mentioned attributes from the passed object and turns them into attributes of the JSON.
+  # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
   #
   # Example:
+  #
+  #   @person = Struct.new(:name, :age).new("David", 32)
+  #
+  #   or you can utilize a Hash
+  #
+  #   @person = {:name => "David", :age => 32}
   #
   #   json.extract! @person, :name, :age
   #
@@ -150,9 +156,13 @@ class Jbuilder < BlankSlate
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    attributes.each do |attribute|
-      __send__ attribute, object.send(attribute)
+    p = if object.is_a?(Hash)
+      lambda{|attribute| __send__ attribute, object.send(:fetch, attribute)}
+    else
+      lambda{|attribute| __send__ attribute, object.send(attribute)}
     end
+
+    attributes.each{|attribute| p.call(attribute)}
   end
 
   if RUBY_VERSION > '1.9'
