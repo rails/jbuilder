@@ -5,21 +5,47 @@ require 'active_support/core_ext/enumerable'
 require 'active_support/json'
 require 'multi_json'
 class Jbuilder < BlankSlate
+  class KeyFormatter
+    def initialize(*args)
+      @format = {}
+      @cache = {}
+
+      options = args.extract_options!
+      args.each do |name|
+        @format[name] = []
+      end
+      options.each do |name, paramaters|
+        @format[name] = paramaters
+      end
+    end
+
+    def format(key)
+      @cache[key] ||= @format.inject(key.to_s) do |result, args|
+        func, args = args
+        if func.is_a? Proc
+          func.call(result, *args)
+        else
+          result.send(func, *args)
+        end
+      end
+    end
+  end
+  
   # Yields a builder and automatically turns the result into a JSON string
   def self.encode
     new._tap { |jbuilder| yield jbuilder }.target!
   end
 
-  @@key_format = {}
+  @@key_formatter = KeyFormatter.new
 
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
   define_method(:_is_a?, find_hidden_method(:is_a?))
   reveal(:respond_to?)
 
-  def initialize(key_format = @@key_format.clone)
+  def initialize(key_formatter = @@key_formatter)
     @attributes = ActiveSupport::OrderedHash.new
-    @key_format = key_format
+    @key_formatter = key_formatter
   end
 
   # Dynamically set a key value pair.
@@ -75,12 +101,12 @@ class Jbuilder < BlankSlate
   #   { "_first_name": "David" }
   #
   def key_format!(*args)
-    __class__.extract_key_format(args, @key_format)
+    @key_formatter = KeyFormatter.new(*args)
   end
   
   # Same as the instance method key_format! except sets the default.
   def self.key_format(*args)
-    extract_key_format(args, @@key_format)
+    @@key_formatter = KeyFormatter.new(*args)
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -186,7 +212,7 @@ class Jbuilder < BlankSlate
 
   protected
     def _set_value(key, value)
-      @attributes[_format_key(key)] = value
+      @attributes[@key_formatter.format(key)] = value
     end
 
 
@@ -230,7 +256,7 @@ class Jbuilder < BlankSlate
 
     # Overwrite in subclasses if you need to add initialization values
     def _new_instance
-      __class__.new(@key_format)
+      __class__.new(@key_formatter)
     end
 
     def _yield_nesting(container)
@@ -261,28 +287,6 @@ class Jbuilder < BlankSlate
     
     def _inline_extract(container, record, attributes)
       _yield_nesting(container) { |parent| parent.extract! record, *attributes }
-    end
-
-    # Format the key using the methods described in @key_format
-    def _format_key(key)
-      @key_format.inject(key.to_s) do |result, args|
-        func, args = args
-        if func.is_a? Proc
-          func.call(result, *args)
-        else
-          result.send(func, *args)
-        end
-      end
-    end
-
-    def self.extract_key_format(args, target)
-      options = args.extract_options!
-      args.each do |name|
-        target[name] = []
-      end
-      options.each do |name, paramaters|
-        target[name] = paramaters
-      end
     end
 end
 

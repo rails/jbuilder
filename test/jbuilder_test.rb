@@ -369,6 +369,6 @@ class JbuilderTest < ActiveSupport::TestCase
     json.camel_style "for JS"
 
     assert_equal ['camelStyle'], json.attributes!.keys
-    Jbuilder.class_variable_set("@@key_format", {})
+    Jbuilder.class_variable_set("@@key_formatter", Jbuilder::KeyFormatter.new)
   end
 end
