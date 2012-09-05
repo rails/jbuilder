@@ -19,6 +19,10 @@ class Jbuilder < BlankSlate
       end
     end
 
+    def initialize_copy(original)
+      @cache = {}
+    end
+
     def format(key)
       @cache[key] ||= @format.inject(key.to_s) do |result, args|
         func, args = args
@@ -42,7 +46,7 @@ class Jbuilder < BlankSlate
   define_method(:_tap, find_hidden_method(:tap))
   reveal(:respond_to?)
 
-  def initialize(key_formatter = @@key_formatter)
+  def initialize(key_formatter = @@key_formatter.clone)
     @attributes = ActiveSupport::OrderedHash.new
     @key_formatter = key_formatter
   end
