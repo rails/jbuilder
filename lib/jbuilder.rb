@@ -188,38 +188,38 @@ class Jbuilder < BlankSlate
 
 
   private
-    def method_missing(method, *args)
+    def method_missing(method, value = nil, *args)
       if block_given?
-        if args.empty?
+        if value
+          # json.comments @post.comments { |json, comment| ... }
+          # { "comments": [ { ... }, { ... } ] }
+          _yield_iteration(method, value) { |child, element| yield child, element }
+        else
           # json.comments { |json| ... }
           # { "comments": ... }
           _yield_nesting(method) { |jbuilder| yield jbuilder }
-        elsif args.one?
-          # json.comments @post.comments { |json, comment| ... }
-          # { "comments": [ { ... }, { ... } ] }
-          _yield_iteration(method, args.first) { |child, element| yield child, element }
         end
       else
-        if args.length == 1
-          if args.first.respond_to?(:_is_a?) && args.first._is_a?(Jbuilder)
+        if args.empty?
+          if value.respond_to?(:_is_a?) && value._is_a?(Jbuilder)
             # json.age 32
             # json.person another_jbuilder
             # { "age": 32, "person": { ...  }
-            set! method, args.first.attributes!
+            set! method, value.attributes!
           else
             # json.age 32
             # { "age": 32 }
-            set! method, args.first
+            set! method, value
           end
-        elsif args.many?
-          if args.first.respond_to?(:each)
+        else
+          if value.respond_to?(:each)
             # json.comments(@post.comments, :content, :created_at)
             # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-            _inline_nesting method, args.first, args.from(1)
+            _inline_nesting method, value, args
           else
             # json.author @post.creator, :name, :email_address
             # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-            _inline_extract method, args.first, args.from(1)
+            _inline_extract method, value, args
           end
         end
       end
