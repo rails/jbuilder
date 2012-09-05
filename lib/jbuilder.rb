@@ -156,13 +156,11 @@ class Jbuilder < BlankSlate
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    p = if object.is_a?(Hash)
-      lambda{|attribute| _set_value attribute, object.send(:fetch, attribute)}
+    if object.is_a?(Hash)
+      attributes.each {|attribute| _set_value attribute, object.send(:fetch, attribute)}
     else
-      lambda{|attribute| _set_value attribute, object.send(attribute)}
+      attributes.each {|attribute| _set_value attribute, object.send(attribute)}
     end
-
-    attributes.each{|attribute| p.call(attribute)}
   end
 
   if RUBY_VERSION > '1.9'
