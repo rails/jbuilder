@@ -157,9 +157,9 @@ class Jbuilder < BlankSlate
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
     p = if object.is_a?(Hash)
-      lambda{|attribute| __send__ attribute, object.send(:fetch, attribute)}
+      lambda{|attribute| set! attribute, object.send(:fetch, attribute)}
     else
-      lambda{|attribute| __send__ attribute, object.send(attribute)}
+      lambda{|attribute| set! attribute, object.send(attribute)}
     end
 
     attributes.each{|attribute| p.call(attribute)}
@@ -233,13 +233,13 @@ class Jbuilder < BlankSlate
     end
 
     def _inline_nesting(container, collection, attributes)
-      __send__(container) do |parent|
+      set!(container) do |parent|
         parent.array!(collection) and return if collection.empty?
         
         collection.each do |element|
           parent.child! do |child|
             attributes.each do |attribute|
-              child.__send__ attribute, element.send(attribute)
+              child.set! attribute, element.send(attribute)
             end
           end
         end
@@ -247,7 +247,7 @@ class Jbuilder < BlankSlate
     end
     
     def _yield_iteration(container, collection)
-      __send__(container) do |parent|
+      set!(container) do |parent|
         parent.array!(collection) do |child, element|
           yield child, element
         end
@@ -255,7 +255,7 @@ class Jbuilder < BlankSlate
     end
     
     def _inline_extract(container, record, attributes)
-      __send__(container) { |parent| parent.extract! record, *attributes }
+      set!(container) { |parent| parent.extract! record, *attributes }
     end
 
     # Format the key using the methods described in @key_format
