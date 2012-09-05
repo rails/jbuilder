@@ -3,9 +3,9 @@ class JbuilderTemplate < Jbuilder
     new(context)._tap { |jbuilder| yield jbuilder }.target!
   end
 
-  def initialize(context)
+  def initialize(context, *args)
     @context = context
-    super()
+    super(*args)
   end
 
   def partial!(options, locals = {})
@@ -21,7 +21,7 @@ class JbuilderTemplate < Jbuilder
 
   private
     def _new_instance
-      __class__.new(@context)
+      __class__.new(@context, @key_formatter)
     end
 end
 
