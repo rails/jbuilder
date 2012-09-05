@@ -40,7 +40,6 @@ class Jbuilder < BlankSlate
 
   define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
-  define_method(:_is_a?, find_hidden_method(:is_a?))
   reveal(:respond_to?)
 
   def initialize(key_formatter = @@key_formatter)
@@ -230,7 +229,7 @@ class Jbuilder < BlankSlate
         end
       else
         if args.empty?
-          if value.respond_to?(:_is_a?) && value._is_a?(Jbuilder)
+          if Jbuilder === value
             # json.age 32
             # json.person another_jbuilder
             # { "age": 32, "person": { ...  }
