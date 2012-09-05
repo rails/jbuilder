@@ -164,12 +164,11 @@ class Jbuilder < BlankSlate
   end
 
   if RUBY_VERSION > '1.9'
-    def call(*args)
-      case
-      when args.one?
-        array!(args.first) { |json, element| yield json, element }
-      when args.many?
-        extract!(*args)
+    def call(object = nil, *attributes)
+      if attributes.empty?
+        array!(object) { |json, element| yield json, element }
+      else
+        extract!(object, *attributes)
       end
     end
   end
