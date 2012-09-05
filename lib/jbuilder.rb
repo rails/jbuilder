@@ -154,12 +154,9 @@ class Jbuilder < BlankSlate
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
   def array!(collection)
-    @attributes = [] and return if collection.empty?
-    
-    collection.each do |element|
-      child! do |child|
-        yield child, element
-      end
+    @attributes = []
+    collection.each do |element| #[] and return if collection.empty?
+      @attributes << _new_instance._tap { |jbuilder| yield jbuilder, element }.attributes!
     end
   end
 
