@@ -264,13 +264,9 @@ class Jbuilder < BlankSlate
 
     def _inline_nesting(container, collection, attributes)
       _yield_nesting(container) do |parent|
-        parent.array!(collection) and return if collection.empty?
-        
-        collection.each do |element|
-          parent.child! do |child|
-            attributes.each do |attribute|
-              child._set_value attribute, element.send(attribute)
-            end
+        parent.array!(collection) do |child, element|
+          attributes.each do |attribute|
+            child._set_value attribute, element.send(attribute)
           end
         end
       end
