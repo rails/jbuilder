@@ -42,7 +42,7 @@ class Jbuilder < BlankSlate
     if block_given?
       _yield_nesting(key) { |jbuilder| yield jbuilder }
     else
-      @attributes[_format_key(key)] = value
+      _set_value(key, value)
     end
   end
 
@@ -157,9 +157,9 @@ class Jbuilder < BlankSlate
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
     p = if object.is_a?(Hash)
-      lambda{|attribute| set! attribute, object.send(:fetch, attribute)}
+      lambda{|attribute| _set_value attribute, object.send(:fetch, attribute)}
     else
-      lambda{|attribute| set! attribute, object.send(attribute)}
+      lambda{|attribute| _set_value attribute, object.send(attribute)}
     end
 
     attributes.each{|attribute| p.call(attribute)}
@@ -187,6 +187,12 @@ class Jbuilder < BlankSlate
   end
 
 
+  protected
+    def _set_value(key, value)
+      @attributes[_format_key(key)] = value
+    end
+
+
   private
     def method_missing(method, value = nil, *args)
       if block_given?
@@ -205,11 +211,11 @@ class Jbuilder < BlankSlate
             # json.age 32
             # json.person another_jbuilder
             # { "age": 32, "person": { ...  }
-            set! method, value.attributes!
+            _set_value method, value.attributes!
           else
             # json.age 32
             # { "age": 32 }
-            set! method, value
+            _set_value method, value
           end
         else
           if value.respond_to?(:each)
@@ -231,17 +237,17 @@ class Jbuilder < BlankSlate
     end
 
     def _yield_nesting(container)
-      set! container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+      _set_value container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
     end
 
     def _inline_nesting(container, collection, attributes)
-      set!(container) do |parent|
+      _yield_nesting(container) do |parent|
         parent.array!(collection) and return if collection.empty?
         
         collection.each do |element|
           parent.child! do |child|
             attributes.each do |attribute|
-              child.set! attribute, element.send(attribute)
+              child._set_value attribute, element.send(attribute)
             end
           end
         end
@@ -249,7 +255,7 @@ class Jbuilder < BlankSlate
     end
     
     def _yield_iteration(container, collection)
-      set!(container) do |parent|
+      _yield_nesting(container) do |parent|
         parent.array!(collection) do |child, element|
           yield child, element
         end
@@ -257,7 +263,7 @@ class Jbuilder < BlankSlate
     end
     
     def _inline_extract(container, record, attributes)
-      set!(container) { |parent| parent.extract! record, *attributes }
+      _yield_nesting(container) { |parent| parent.extract! record, *attributes }
     end
 
     # Format the key using the methods described in @key_format
