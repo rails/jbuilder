@@ -1,10 +1,10 @@
-require 'blankslate'
+require 'blankslate' unless defined? BasicObject
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/json'
 require 'multi_json'
-class Jbuilder < BlankSlate
+class Jbuilder < (defined? BasicObject ? BasicObject : BlankSlate)
   class KeyFormatter
     def initialize(*args)
       @format = {}
