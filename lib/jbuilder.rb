@@ -37,15 +37,13 @@ class Jbuilder < BlankSlate
   end
 
   # Yields a builder and automatically turns the result into a JSON string
-  def self.encode
-    jbuilder = new
+  def self.encode(*args)
+    jbuilder = new(*args)
     yield jbuilder
     jbuilder.target!
   end
 
   @@key_formatter = KeyFormatter.new
-
-  reveal(:respond_to?)
 
   def initialize(key_formatter = @@key_formatter.clone)
     @attributes = ActiveSupport::OrderedHash.new

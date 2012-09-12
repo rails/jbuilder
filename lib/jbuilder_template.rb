@@ -1,8 +1,4 @@
 class JbuilderTemplate < Jbuilder
-  def self.encode(context)
-    new(context)._tap { |jbuilder| yield jbuilder }.target!
-  end
-
   def initialize(context, *args)
     @context = context
     super(*args)
