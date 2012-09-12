@@ -68,7 +68,7 @@ class Jbuilder < BasicObject
   #   { "author": { "name": "David", "age": 32 } }
   def set!(key, value = nil)
     if ::Kernel::block_given?
-      _yield_nesting(key) { yield self }
+      _set_value(key, _with_attributes { yield self })
     else
       _set_value(key, value)
     end
@@ -157,10 +157,7 @@ class Jbuilder < BasicObject
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
   def array!(collection)
-    @attributes = []
-    collection.each do |element|
-      @attributes << _with_attributes { yield self, element }
-    end
+    @attributes = _map_collection(collection) { |element| yield self, element }
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -217,15 +214,15 @@ class Jbuilder < BasicObject
 
   private
     def method_missing(method, value = nil, *args)
-      if ::Kernel.block_given?
+      result = if ::Kernel.block_given?
         if value
           # json.comments @post.comments { |json, comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _yield_iteration(method, value) { |element| yield self, element }
+          _map_collection(value) { |element| yield self, element }
         else
           # json.comments { |json| ... }
           # { "comments": ... }
-          _yield_nesting(method) { yield self }
+          _with_attributes { yield self }
         end
       else
         if args.empty?
@@ -233,57 +230,42 @@ class Jbuilder < BasicObject
             # json.age 32
             # json.person another_jbuilder
             # { "age": 32, "person": { ...  }
-            _set_value method, value.attributes!
+            value.attributes!
           else
             # json.age 32
             # { "age": 32 }
-            _set_value method, value
+            value
           end
         else
           if value.respond_to?(:each)
             # json.comments(@post.comments, :content, :created_at)
             # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-            _inline_nesting method, value, args
+            _map_collection(value) do |element|
+              args.each do |attribute|
+                _set_value attribute, element.send(attribute)
+              end
+            end
           else
             # json.author @post.creator, :name, :email_address
             # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-            _inline_extract method, value, args
+            _with_attributes { extract! value, *args }
           end
         end
+      end
+      _set_value method, result
+    end
+
+    def _map_collection(collection)
+      collection.each.map do |element|
+        _with_attributes { yield element }
       end
     end
 
     def _with_attributes
-      @attributes, parent_attributes = ::ActiveSupport::OrderedHash.new, @attributes
+      @attributes, parent = ::ActiveSupport::OrderedHash.new, @attributes
       yield
-      @attributes, child_attributes = parent_attributes, @attributes
-      child_attributes
-    end
-
-    def _yield_nesting(container)
-      _set_value container, _with_attributes { yield }
-    end
-
-    def _inline_nesting(container, collection, attributes)
-      _yield_nesting(container) do
-        array!(collection) do |_, element|
-          attributes.each do |attribute|
-            _set_value attribute, element.send(attribute)
-          end
-        end
-      end
-    end
-
-    def _yield_iteration(container, collection)
-      _yield_nesting(container) do
-        array!(collection) do |_, element|
-          yield element
-        end
-      end
-    end
-
-    def _inline_extract(container, record, attributes)
-      _yield_nesting(container) { extract! record, *attributes }
+      @attributes, child = parent, @attributes
+      child
     end
 end
 
