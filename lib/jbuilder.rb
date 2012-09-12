@@ -38,12 +38,13 @@ class Jbuilder < BlankSlate
 
   # Yields a builder and automatically turns the result into a JSON string
   def self.encode
-    new._tap { |jbuilder| yield jbuilder }.target!
+    jbuilder = new
+    yield jbuilder
+    jbuilder.target!
   end
 
   @@key_formatter = KeyFormatter.new
 
-  define_method(:_tap, find_hidden_method(:tap))
   reveal(:respond_to?)
 
   def initialize(key_formatter = @@key_formatter.clone)
