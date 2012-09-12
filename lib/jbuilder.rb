@@ -191,7 +191,7 @@ class Jbuilder < BasicObject
   if ::RUBY_VERSION > '1.9'
     def call(object = nil, *attributes)
       if attributes.empty?
-        array!(object) { |json, element| yield json, element }
+        array!(object) { |_, element| yield self, element }
       else
         extract!(object, *attributes)
       end
@@ -221,7 +221,7 @@ class Jbuilder < BasicObject
         if value
           # json.comments @post.comments { |json, comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _yield_iteration(method, value) { |child, element| yield child, element }
+          _yield_iteration(method, value) { |element| yield self, element }
         else
           # json.comments { |json| ... }
           # { "comments": ... }
@@ -266,9 +266,9 @@ class Jbuilder < BasicObject
 
     def _inline_nesting(container, collection, attributes)
       _yield_nesting(container) do
-        array!(collection) do |child, element|
+        array!(collection) do |_, element|
           attributes.each do |attribute|
-            child._set_value attribute, element.send(attribute)
+            _set_value attribute, element.send(attribute)
           end
         end
       end
@@ -276,8 +276,8 @@ class Jbuilder < BasicObject
 
     def _yield_iteration(container, collection)
       _yield_nesting(container) do
-        array!(collection) do |child, element|
-          yield child, element
+        array!(collection) do |_, element|
+          yield element
         end
       end
     end
