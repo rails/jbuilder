@@ -5,7 +5,7 @@ require 'active_support/core_ext/enumerable'
 require 'active_support/json'
 require 'multi_json'
 
-class Jbuilder < BlankSlate
+class Jbuilder < BasicObject
   class KeyFormatter
     def initialize(*args)
       @format = {}
@@ -46,7 +46,7 @@ class Jbuilder < BlankSlate
   @@key_formatter = KeyFormatter.new
 
   def initialize(key_formatter = @@key_formatter.clone)
-    @attributes = ActiveSupport::OrderedHash.new
+    @attributes = ::ActiveSupport::OrderedHash.new
     @key_formatter = key_formatter
   end
 
@@ -67,7 +67,7 @@ class Jbuilder < BlankSlate
   #
   #   { "author": { "name": "David", "age": 32 } }
   def set!(key, value = nil)
-    if block_given?
+    if ::Kernel::block_given?
       _yield_nesting(key) { |jbuilder| yield jbuilder }
     else
       _set_value(key, value)
@@ -128,7 +128,7 @@ class Jbuilder < BlankSlate
   #     json.content comment.formatted_content
   #   end
   def child!
-    @attributes = [] unless @attributes.is_a? Array
+    @attributes = [] unless @attributes.is_a? ::Array
     @attributes << _with_attributes { yield self }
   end
 
@@ -158,7 +158,7 @@ class Jbuilder < BlankSlate
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
   def array!(collection)
     @attributes = []
-    collection.each do |element| #[] and return if collection.empty?
+    collection.each do |element|
       @attributes << _with_attributes { yield self, element }
     end
   end
@@ -181,14 +181,14 @@ class Jbuilder < BlankSlate
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    if object.is_a?(Hash)
+    if object.is_a?(::Hash)
       attributes.each {|attribute| _set_value attribute, object.send(:fetch, attribute)}
     else
       attributes.each {|attribute| _set_value attribute, object.send(attribute)}
     end
   end
 
-  if RUBY_VERSION > '1.9'
+  if ::RUBY_VERSION > '1.9'
     def call(object = nil, *attributes)
       if attributes.empty?
         array!(object) { |json, element| yield json, element }
@@ -205,7 +205,7 @@ class Jbuilder < BlankSlate
 
   # Encodes the current builder as JSON.
   def target!
-    MultiJson.encode @attributes
+    ::MultiJson.encode @attributes
   end
 
 
@@ -217,7 +217,7 @@ class Jbuilder < BlankSlate
 
   private
     def method_missing(method, value = nil, *args)
-      if block_given?
+      if ::Kernel.block_given?
         if value
           # json.comments @post.comments { |json, comment| ... }
           # { "comments": [ { ... }, { ... } ] }
@@ -229,7 +229,7 @@ class Jbuilder < BlankSlate
         end
       else
         if args.empty?
-          if Jbuilder === value
+          if ::Jbuilder === value
             # json.age 32
             # json.person another_jbuilder
             # { "age": 32, "person": { ...  }
@@ -254,7 +254,7 @@ class Jbuilder < BlankSlate
     end
 
     def _with_attributes
-      @attributes, parent_attributes = ActiveSupport::OrderedHash.new, @attributes
+      @attributes, parent_attributes = ::ActiveSupport::OrderedHash.new, @attributes
       yield
       @attributes, child_attributes = parent_attributes, @attributes
       child_attributes
