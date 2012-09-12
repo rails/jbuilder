@@ -68,7 +68,7 @@ class Jbuilder < BasicObject
   #   { "author": { "name": "David", "age": 32 } }
   def set!(key, value = nil)
     if ::Kernel::block_given?
-      _yield_nesting(key) { |jbuilder| yield jbuilder }
+      _yield_nesting(key) { yield self }
     else
       _set_value(key, value)
     end
@@ -225,7 +225,7 @@ class Jbuilder < BasicObject
         else
           # json.comments { |json| ... }
           # { "comments": ... }
-          _yield_nesting(method) { |jbuilder| yield jbuilder }
+          _yield_nesting(method) { yield self }
         end
       else
         if args.empty?
@@ -261,12 +261,12 @@ class Jbuilder < BasicObject
     end
 
     def _yield_nesting(container)
-      _set_value container, _with_attributes { yield self }
+      _set_value container, _with_attributes { yield }
     end
 
     def _inline_nesting(container, collection, attributes)
-      _yield_nesting(container) do |parent|
-        parent.array!(collection) do |child, element|
+      _yield_nesting(container) do
+        array!(collection) do |child, element|
           attributes.each do |attribute|
             child._set_value attribute, element.send(attribute)
           end
@@ -275,15 +275,15 @@ class Jbuilder < BasicObject
     end
 
     def _yield_iteration(container, collection)
-      _yield_nesting(container) do |parent|
-        parent.array!(collection) do |child, element|
+      _yield_nesting(container) do
+        array!(collection) do |child, element|
           yield child, element
         end
       end
     end
 
     def _inline_extract(container, record, attributes)
-      _yield_nesting(container) { |parent| parent.extract! record, *attributes }
+      _yield_nesting(container) { extract! record, *attributes }
     end
 end
 
