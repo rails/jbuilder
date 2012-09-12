@@ -18,11 +18,6 @@ class JbuilderTemplate < Jbuilder
       @context.render(options, locals.merge(:json => self))
     end
   end
-
-  private
-    def _new_instance
-      __class__.new(@context, @key_formatter)
-    end
 end
 
 class JbuilderHandler
@@ -30,7 +25,6 @@ class JbuilderHandler
   self.default_format = Mime::JSON
 
   def self.call(template)
-    
     # this juggling is required to keep line numbers right in the error
     %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{template.source}
       json.target! unless __already_defined}

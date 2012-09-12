@@ -43,7 +43,6 @@ class Jbuilder < BlankSlate
 
   @@key_formatter = KeyFormatter.new
 
-  define_method(:__class__, find_hidden_method(:class))
   define_method(:_tap, find_hidden_method(:tap))
   reveal(:respond_to?)
 
@@ -131,7 +130,7 @@ class Jbuilder < BlankSlate
   #   end
   def child!
     @attributes = [] unless @attributes.is_a? Array
-    @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+    @attributes << _with_attributes { yield self }
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as
@@ -161,7 +160,7 @@ class Jbuilder < BlankSlate
   def array!(collection)
     @attributes = []
     collection.each do |element| #[] and return if collection.empty?
-      @attributes << _new_instance._tap { |jbuilder| yield jbuilder, element }.attributes!
+      @attributes << _with_attributes { yield self, element }
     end
   end
 
@@ -255,13 +254,15 @@ class Jbuilder < BlankSlate
       end
     end
 
-    # Overwrite in subclasses if you need to add initialization values
-    def _new_instance
-      __class__.new(@key_formatter)
+    def _with_attributes
+      @attributes, parent_attributes = ActiveSupport::OrderedHash.new, @attributes
+      yield
+      @attributes, child_attributes = parent_attributes, @attributes
+      child_attributes
     end
 
     def _yield_nesting(container)
-      _set_value container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+      _set_value container, _with_attributes { yield self }
     end
 
     def _inline_nesting(container, collection, attributes)
