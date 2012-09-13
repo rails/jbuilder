@@ -12,8 +12,8 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     json = JbuilderTemplate.encode(binding) do |json|
       json.content "hello"
     end
-    
-    assert_equal "hello", JSON.parse(json)["content"]
+
+    assert_equal "hello", MultiJson.load(json)["content"]
   end
 
   test "key_format! with parameter" do
