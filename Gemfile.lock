@@ -1,9 +1,8 @@
 PATH
   remote: .
   specs:
-    jbuilder (0.4.1)
+    jbuilder (0.5.0)
       activesupport (>= 3.0.0)
-      blankslate (>= 2.1.2.4)
 
 GEM
   remote: http://rubygems.org/
@@ -24,7 +23,6 @@ GEM
     activesupport (3.2.8)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    blankslate (2.1.2.4)
     builder (3.0.0)
     erubis (2.7.0)
     hike (1.2.1)

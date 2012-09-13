@@ -1,10 +1,11 @@
+require 'active_support/basic_object'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/json'
 require 'multi_json'
 
-class Jbuilder < BasicObject
+class Jbuilder < ActiveSupport::BasicObject
   class KeyFormatter
     def initialize(*args)
       @format = {}
@@ -184,13 +185,11 @@ class Jbuilder < BasicObject
     end
   end
 
-  if ::RUBY_VERSION > '1.9'
-    def call(object = nil, *attributes)
-      if attributes.empty?
-        array!(object) { |_, element| yield self, element }
-      else
-        extract!(object, *attributes)
-      end
+  def call(object = nil, *attributes)
+    if attributes.empty?
+      array!(object) { |_, element| yield self, element }
+    else
+      extract!(object, *attributes)
     end
   end
 
@@ -263,8 +262,9 @@ class Jbuilder < BasicObject
     def _with_attributes
       @attributes, parent = ::ActiveSupport::OrderedHash.new, @attributes
       yield
-      @attributes, child = parent, @attributes
-      child
+      @attributes
+    ensure
+      @attributes = parent
     end
 end
 
