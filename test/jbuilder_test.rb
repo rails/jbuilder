@@ -343,6 +343,19 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal "two", result["LEVEL2"]["VALUE"]
   end
 
+  test "key_format! resets after child element" do
+    json = Jbuilder.new
+    json.level2 do |json|
+      json.key_format! :upcase
+      json.value "two"
+    end
+    json.level1 "one"
+
+    result = json.attributes!
+    assert_equal "two", result["level2"]["VALUE"]
+    assert_equal "one", result["level1"]
+  end
+
   test "key_format! with no parameter" do
     json = Jbuilder.new
     json.key_format! :upcase

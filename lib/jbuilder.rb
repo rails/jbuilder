@@ -260,11 +260,12 @@ class Jbuilder < ActiveSupport::BasicObject
     end
 
     def _with_attributes
-      @attributes, parent = ::ActiveSupport::OrderedHash.new, @attributes
+      parent_attributes, parent_formatter = @attributes, @key_formatter
+      @attributes = ::ActiveSupport::OrderedHash.new
       yield
       @attributes
     ensure
-      @attributes = parent
+      @attributes, @key_formatter = parent_attributes, parent_formatter
     end
 end
 
