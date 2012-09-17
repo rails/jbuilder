@@ -1,10 +1,11 @@
-require 'blankslate'
+require 'active_support/basic_object'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/json'
 require 'multi_json'
-class Jbuilder < BlankSlate
+
+class Jbuilder < ActiveSupport::BasicObject
   class KeyFormatter
     def initialize(*args)
       @format = {}
@@ -34,20 +35,18 @@ class Jbuilder < BlankSlate
       end
     end
   end
-  
+
   # Yields a builder and automatically turns the result into a JSON string
-  def self.encode
-    new._tap { |jbuilder| yield jbuilder }.target!
+  def self.encode(*args)
+    jbuilder = new(*args)
+    yield jbuilder
+    jbuilder.target!
   end
 
   @@key_formatter = KeyFormatter.new
 
-  define_method(:__class__, find_hidden_method(:class))
-  define_method(:_tap, find_hidden_method(:tap))
-  reveal(:respond_to?)
-
   def initialize(key_formatter = @@key_formatter.clone)
-    @attributes = ActiveSupport::OrderedHash.new
+    @attributes = ::ActiveSupport::OrderedHash.new
     @key_formatter = key_formatter
   end
 
@@ -68,8 +67,8 @@ class Jbuilder < BlankSlate
   #
   #   { "author": { "name": "David", "age": 32 } }
   def set!(key, value = nil)
-    if block_given?
-      _yield_nesting(key) { |jbuilder| yield jbuilder }
+    if ::Kernel::block_given?
+      _set_value(key, _with_attributes { yield self })
     else
       _set_value(key, value)
     end
@@ -106,7 +105,7 @@ class Jbuilder < BlankSlate
   def key_format!(*args)
     @key_formatter = KeyFormatter.new(*args)
   end
-  
+
   # Same as the instance method key_format! except sets the default.
   def self.key_format(*args)
     @@key_formatter = KeyFormatter.new(*args)
@@ -127,13 +126,13 @@ class Jbuilder < BlankSlate
   #
   #   json.comments(@post.comments) do |json, comment|
   #     json.content comment.formatted_content
-  #   end  
+  #   end
   def child!
-    @attributes = [] unless @attributes.is_a? Array
-    @attributes << _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
+    @attributes = [] unless @attributes.is_a? ::Array
+    @attributes << _with_attributes { yield self }
   end
 
-  # Turns the current element into an array and iterates over the passed collection, adding each iteration as 
+  # Turns the current element into an array and iterates over the passed collection, adding each iteration as
   # an element of the resulting array.
   #
   # Example:
@@ -154,14 +153,11 @@ class Jbuilder < BlankSlate
   #   json.people(@people) do |json, person|
   #     json.name person.name
   #     json.age calculate_age(person.birthday)
-  #   end  
+  #   end
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
   def array!(collection)
-    @attributes = []
-    collection.each do |element| #[] and return if collection.empty?
-      @attributes << _new_instance._tap { |jbuilder| yield jbuilder, element }.attributes!
-    end
+    @attributes = _map_collection(collection) { |element| yield self, element }
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -182,20 +178,18 @@ class Jbuilder < BlankSlate
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    if object.is_a?(Hash)
+    if object.is_a?(::Hash)
       attributes.each {|attribute| _set_value attribute, object.send(:fetch, attribute)}
     else
       attributes.each {|attribute| _set_value attribute, object.send(attribute)}
     end
   end
 
-  if RUBY_VERSION > '1.9'
-    def call(object = nil, *attributes)
-      if attributes.empty?
-        array!(object) { |json, element| yield json, element }
-      else
-        extract!(object, *attributes)
-      end
+  def call(object = nil, *attributes)
+    if attributes.empty?
+      array!(object) { |_, element| yield self, element }
+    else
+      extract!(object, *attributes)
     end
   end
 
@@ -203,10 +197,10 @@ class Jbuilder < BlankSlate
   def attributes!
     @attributes
   end
-  
+
   # Encodes the current builder as JSON.
   def target!
-    MultiJson.encode @attributes
+    ::MultiJson.encode @attributes
   end
 
 
@@ -218,71 +212,60 @@ class Jbuilder < BlankSlate
 
   private
     def method_missing(method, value = nil, *args)
-      if block_given?
+      result = if ::Kernel.block_given?
         if value
           # json.comments @post.comments { |json, comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _yield_iteration(method, value) { |child, element| yield child, element }
+          _map_collection(value) { |element| yield self, element }
         else
           # json.comments { |json| ... }
           # { "comments": ... }
-          _yield_nesting(method) { |jbuilder| yield jbuilder }
+          _with_attributes { yield self }
         end
       else
         if args.empty?
-          if Jbuilder === value
+          if ::Jbuilder === value
             # json.age 32
             # json.person another_jbuilder
             # { "age": 32, "person": { ...  }
-            _set_value method, value.attributes!
+            value.attributes!
           else
             # json.age 32
             # { "age": 32 }
-            _set_value method, value
+            value
           end
         else
           if value.respond_to?(:each)
             # json.comments(@post.comments, :content, :created_at)
             # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-            _inline_nesting method, value, args
+            _map_collection(value) do |element|
+              args.each do |attribute|
+                _set_value attribute, element.send(attribute)
+              end
+            end
           else
             # json.author @post.creator, :name, :email_address
             # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-            _inline_extract method, value, args
+            _with_attributes { extract! value, *args }
           end
         end
       end
+      _set_value method, result
     end
 
-    # Overwrite in subclasses if you need to add initialization values
-    def _new_instance
-      __class__.new(@key_formatter)
-    end
-
-    def _yield_nesting(container)
-      _set_value container, _new_instance._tap { |jbuilder| yield jbuilder }.attributes!
-    end
-
-    def _inline_nesting(container, collection, attributes)
-      _yield_nesting(container) do |parent|
-        parent.array!(collection) do |child, element|
-          attributes.each do |attribute|
-            child._set_value attribute, element.send(attribute)
-          end
-        end
+    def _map_collection(collection)
+      collection.each.map do |element|
+        _with_attributes { yield element }
       end
     end
-    
-    def _yield_iteration(container, collection)
-      _yield_nesting(container) do |parent|
-        parent.array!(collection) do |child, element|
-          yield child, element
-        end
-      end
-    end
-    
-    def _inline_extract(container, record, attributes)
-      _yield_nesting(container) { |parent| parent.extract! record, *attributes }
+
+    def _with_attributes
+      parent_attributes, parent_formatter = @attributes, @key_formatter
+      @attributes = ::ActiveSupport::OrderedHash.new
+      yield
+      @attributes
+    ensure
+      @attributes, @key_formatter = parent_attributes, parent_formatter
     end
 end
 
