@@ -6,7 +6,7 @@ class JbuilderTemplate < Jbuilder
 
   def partial!(options, locals = {})
     case options
-    when Hash
+    when ::Hash
       options[:locals] ||= {}
       options[:locals].merge!(:json => self)
       @context.render(options)
