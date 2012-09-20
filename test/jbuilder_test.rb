@@ -395,4 +395,38 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal [], Jbuilder.send(:class_variable_get, "@@key_formatter").instance_variable_get("@cache").keys
   end
+
+  test "ignore_nil! without a parameter" do
+    json = Jbuilder.new
+    json.ignore_nil!
+    json.test nil
+
+    assert_equal [], json.attributes!.keys
+  end
+
+  test "ignore_nil! with parameter" do
+    json = Jbuilder.new
+    json.ignore_nil! true
+    json.name "Bob"
+    json.dne nil
+
+    assert_equal ["name"], json.attributes!.keys
+
+    json = Jbuilder.new
+    json.ignore_nil! false
+    json.name "Bob"
+    json.dne nil
+
+    assert_equal ["name", "dne"], json.attributes!.keys
+  end
+
+  test "default ignore_nil!" do
+    Jbuilder.ignore_nil
+    json = Jbuilder.new
+    json.name "Bob"
+    json.dne nil
+
+    assert_equal ["name"], json.attributes!.keys
+    Jbuilder.send(:class_variable_set, "@@ignore_nil", false)
+  end
 end
