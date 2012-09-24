@@ -165,7 +165,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   #   [1,2,3]
   def array!(collection)
-    @attributes = if block_given?
+    @attributes = if ::Kernel::block_given?
       _map_collection(collection) { |element| yield self, element }
     else
       collection
