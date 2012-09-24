@@ -2,7 +2,9 @@ require 'active_support/basic_object'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
+require 'active_support/core_ext/hash'
 require 'active_support/json'
+require 'active_support/cache'
 require 'multi_json'
 
 class Jbuilder < ActiveSupport::BasicObject
@@ -156,8 +158,18 @@ class Jbuilder < ActiveSupport::BasicObject
   #   end
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
+  #
+  # If you omit the block then you can set the top level array directly:
+  #
+  #   json.array! [1, 2, 3]
+  #
+  #   [1,2,3]
   def array!(collection)
-    @attributes = _map_collection(collection) { |element| yield self, element }
+    @attributes = if block_given?
+      _map_collection(collection) { |element| yield self, element }
+    else
+      collection
+    end
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -203,6 +215,30 @@ class Jbuilder < ActiveSupport::BasicObject
     ::MultiJson.encode @attributes
   end
 
+  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper 
+  # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
+  #
+  # Example:
+  #
+  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  #     json.extract! @person, :name, :age
+  #   end
+  def cache!(key=nil, options={}, &block)
+    cache_key = ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
+    value = ::Rails.cache.fetch(cache_key, options) do
+      jb = ::Jbuilder.new
+      yield jb
+      jb.attributes!
+    end
+
+    if value.is_a?(::Array)
+      array! value
+    else
+      value.each do |k, v|
+        set! k, v
+      end
+    end
+  end
 
   protected
     def _set_value(key, value)
