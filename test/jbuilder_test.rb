@@ -1,8 +1,31 @@
 require 'test/unit'
 require 'active_support/test_case'
+require 'active_support/cache'
 require 'active_support/inflector'
 
 require 'jbuilder'
+
+module Rails
+  class Cache
+    def initialize
+      @cache = {}
+    end
+
+    def write(k, v, opt={})
+      @cache[k] = v
+    end
+
+    def read(k, opt={})
+      @cache[k]
+    end
+
+    def fetch(k, opt={}, &block)
+      @cache[k] || @cache[k] = block.call
+    end
+  end
+
+  def self.cache; @cache ||= Cache.new; end
+end
 
 class JbuilderTest < ActiveSupport::TestCase
   test "single key" do
@@ -394,5 +417,43 @@ class JbuilderTest < ActiveSupport::TestCase
     json.key "value"
 
     assert_equal [], Jbuilder.send(:class_variable_get, "@@key_formatter").instance_variable_get("@cache").keys
+  end
+
+  test "fragment caching a JSON object" do
+    json = Jbuilder.encode do |json|
+      json.cache!("cachekey") do |json|
+        json.name "Cache"
+      end
+    end
+
+    Rails.cache.read("jbuilder/cachekey").tap do |parsed|
+      assert_equal "Cache", parsed['name']
+    end
+  end
+
+  test "fragment caching deserializes a JSON object" do
+    Rails.cache.write("jbuilder/cachekey", {'name' => "Something"})
+    json = Jbuilder.encode do |json|
+      json.cache!("cachekey") do |json|
+        json.name "Cache"
+      end
+    end
+
+    JSON.parse(json).tap do |parsed|
+      assert_equal "Something", parsed['name']
+    end
+  end
+
+  test "fragment caching deserializes an array" do
+    Rails.cache.write("jbuilder/cachekey", ["a", "b", "c"])
+    json = Jbuilder.encode do |json|
+      json.cache!("cachekey") do |json|
+        json.array! ['1', '2', '3']
+      end
+    end
+
+    JSON.parse(json).tap do |parsed|
+      assert_equal ["a", "b", "c"], parsed
+    end
   end
 end
