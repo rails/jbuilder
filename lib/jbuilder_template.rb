@@ -24,17 +24,13 @@ class JbuilderTemplate < Jbuilder
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
-    pos = @context.output_buffer.length
-    output_safe = @context.output_buffer.html_safe?
-    if output_safe
-      @context.output_buffer = @context.output_buffer.class.new(@context.output_buffer)
+    fragment = self.extract_output_buffer_change do
+      @context.cache(key, options) do
+        jb = ::JbuilderTemplate.new(@context)
+        block.call(jb)
+        @context.safe_concat(jb.target!.html_safe)
+      end
     end
-    @context.cache(key, options) do
-      jb = ::JbuilderTemplate.new(@context)
-      block.call(jb)
-      @context.safe_concat(jb.target!.html_safe)
-    end
-    fragment = @context.output_buffer.slice!(pos..-1)
     value = ::MultiJson.load(fragment)
 
     if value.is_a?(::Array)
@@ -44,6 +40,24 @@ class JbuilderTemplate < Jbuilder
         set! k, v
       end
     end
+  end
+
+  protected
+  def reset_safety_on_output_buffer
+    if @context.output_buffer
+      if @context.output_buffer.html_safe?
+        @context.output_buffer = @context.output_buffer.class.new(@context.output_buffer)
+      end
+    else
+      @context.output_buffer = ::ActionView::OutputBuffer.new
+    end
+  end
+
+  def extract_output_buffer_change
+    self.reset_safety_on_output_buffer
+    pos = @context.output_buffer.length
+    yield
+    @context.output_buffer.slice!(pos..-1)
   end
 end
 
