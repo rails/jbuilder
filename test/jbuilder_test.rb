@@ -249,6 +249,21 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal "david", MultiJson.load(json)["comments"].first["authors"].first["name"]
   end
 
+  test "Directly set an array nested in another array" do
+    data = [ { department: 'QA', not_in_json: 'hello', names: ['John', 'David'] } ]
+    json = Jbuilder.encode do |json|
+      json.array! data do |json, object|
+        json.department object[:department]
+        json.names do |json|
+          json.array! object[:names]
+        end
+      end
+    end
+
+    assert_equal 'David', MultiJson.load(json)[0]['names'].last
+    assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
+  end
+
   test "nested jbuilder objects" do
     to_nest = Jbuilder.new
     to_nest.nested_value "Nested Test"
@@ -456,4 +471,5 @@ class JbuilderTest < ActiveSupport::TestCase
       assert_equal ["a", "b", "c"], parsed
     end
   end
+
 end
