@@ -14,6 +14,31 @@ class JbuilderTemplate < Jbuilder
       @context.render(options, locals.merge(:json => self))
     end
   end
+
+  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper 
+  # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
+  #
+  # Example:
+  #
+  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  #     json.extract! @person, :name, :age
+  #   end
+  def cache!(key=nil, options={}, &block)
+    cache_key = ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
+    value = ::Rails.cache.fetch(cache_key, options) do
+      jb = ::JbuilderTemplate.new(@context)
+      yield jb
+      jb.attributes!
+    end
+
+    if value.is_a?(::Array)
+      array! value
+    else
+      value.each do |k, v|
+        set! k, v
+      end
+    end
+  end
 end
 
 class JbuilderHandler
