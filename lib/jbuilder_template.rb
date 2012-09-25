@@ -24,12 +24,18 @@ class JbuilderTemplate < Jbuilder
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
-    cache_key = ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
-    value = ::Rails.cache.fetch(cache_key, options) do
-      jb = ::JbuilderTemplate.new(@context)
-      yield jb
-      jb.attributes!
+    pos = @context.output_buffer.length
+    output_safe = @context.output_buffer.html_safe?
+    if output_safe
+      @context.output_buffer = @context.output_buffer.class.new(@context.output_buffer)
     end
+    @context.cache(key, options) do
+      jb = ::JbuilderTemplate.new(@context)
+      block.call(jb)
+      @context.safe_concat(jb.target!.html_safe)
+    end
+    fragment = @context.output_buffer.slice!(pos..-1)
+    value = ::MultiJson.load(fragment)
 
     if value.is_a?(::Array)
       array! value

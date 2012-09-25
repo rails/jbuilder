@@ -78,39 +78,41 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test "fragment caching a JSON object" do
-    json = render_jbuilder <<-JBUILDER
+    self.controller.perform_caching = true
+    self.controller.cache_store = :memory_store
+    render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do |json|
         json.name "Cache"
       end
     JBUILDER
 
-    Rails.cache.read("jbuilder/cachekey").tap do |parsed|
+    json = render_jbuilder <<-JBUILDER
+      json.cache!("cachekey") do |json|
+        json.name "Miss"
+      end
+    JBUILDER
+
+    MultiJson.load(json).tap do |parsed|
       assert_equal "Cache", parsed['name']
     end
   end
 
-  test "fragment caching deserializes a JSON object" do
-    Rails.cache.write("jbuilder/cachekey", {'name' => "Something"})
-    json = render_jbuilder <<-JBUILDER
+  test "fragment caching deserializes an array" do
+    self.controller.perform_caching = true
+    self.controller.cache_store = :memory_store
+    render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do |json|
-        json.name "Cache"
+        json.array! ['a', 'b', 'c']
       end
     JBUILDER
 
-    JSON.parse(json).tap do |parsed|
-      assert_equal "Something", parsed['name']
-    end
-  end
-
-  test "fragment caching deserializes an array" do
-    Rails.cache.write("jbuilder/cachekey", ["a", "b", "c"])
     json = render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do |json|
         json.array! ['1', '2', '3']
       end
     JBUILDER
 
-    JSON.parse(json).tap do |parsed|
+    MultiJson.load(json).tap do |parsed|
       assert_equal ["a", "b", "c"], parsed
     end
   end
