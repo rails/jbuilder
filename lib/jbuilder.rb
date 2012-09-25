@@ -215,36 +215,10 @@ class Jbuilder < ActiveSupport::BasicObject
     ::MultiJson.encode @attributes
   end
 
-  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper 
-  # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
-  #
-  # Example:
-  #
-  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
-  #     json.extract! @person, :name, :age
-  #   end
-  def cache!(key=nil, options={}, &block)
-    cache_key = ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
-    value = ::Rails.cache.fetch(cache_key, options) do
-      jb = ::Jbuilder.new
-      yield jb
-      jb.attributes!
-    end
-
-    if value.is_a?(::Array)
-      array! value
-    else
-      value.each do |k, v|
-        set! k, v
-      end
-    end
-  end
-
   protected
     def _set_value(key, value)
       @attributes[@key_formatter.format(key)] = value
     end
-
 
   private
     def method_missing(method, value = nil, *args)
