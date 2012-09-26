@@ -62,7 +62,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # You can also pass a block for nested attributes
   #
-  #   json.set!(:author) do |json|
+  #   json.set!(:author) do
   #     json.name "David"
   #     json.age 32
   #   end
@@ -83,7 +83,7 @@ class Jbuilder < ActiveSupport::BasicObject
   # Example:
   #
   #   json.key_format! :upcase
-  #   json.author do |json|
+  #   json.author do
   #     json.name "David"
   #     json.age 32
   #   end
@@ -117,16 +117,16 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # Example:
   #
-  #   json.comments do |json|
-  #     json.child! { |json| json.content "hello" }
-  #     json.child! { |json| json.content "world" }
+  #   json.comments do
+  #     json.child! { json.content "hello" }
+  #     json.child! { json.content "world" }
   #   end
   #
   #   { "comments": [ { "content": "hello" }, { "content": "world" } ]}
   #
   # More commonly, you'd use the combined iterator, though:
   #
-  #   json.comments(@post.comments) do |json, comment|
+  #   json.comments(@post.comments) do |comment|
   #     json.content comment.formatted_content
   #   end
   def child!
@@ -139,7 +139,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # Example:
   #
-  #   json.array!(@people) do |json, person|
+  #   json.array!(@people) do |person|
   #     json.name person.name
   #     json.age calculate_age(person.birthday)
   #   end
@@ -148,11 +148,11 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
   #
-  #   json.(@people) { |json, person| ... }
+  #   json.(@people) { |person| ... }
   #
   # It's generally only needed to use this method for top-level arrays. If you have named arrays, you can do:
   #
-  #   json.people(@people) do |json, person|
+  #   json.people(@people) do |person|
   #     json.name person.name
   #     json.age calculate_age(person.birthday)
   #   end
@@ -224,11 +224,11 @@ class Jbuilder < ActiveSupport::BasicObject
     def method_missing(method, value = nil, *args)
       result = if ::Kernel.block_given?
         if value
-          # json.comments @post.comments { |json, comment| ... }
+          # json.comments @post.comments { |comment| ... }
           # { "comments": [ { ... }, { ... } ] }
           _map_collection(value) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
         else
-          # json.comments { |json| ... }
+          # json.comments { ... }
           # { "comments": ... }
           _scope { yield self }
         end

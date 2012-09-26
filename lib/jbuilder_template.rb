@@ -20,7 +20,7 @@ class JbuilderTemplate < Jbuilder
   #
   # Example:
   #
-  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  #   json.cache! ['v1', @person], :expires_in => 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
