@@ -97,7 +97,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    JSON.parse(json).tap do |parsed|
+    MultiJson.load(json).tap do |parsed|
       assert_equal "Something", parsed['name']
     end
   end
@@ -110,7 +110,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    JSON.parse(json).tap do |parsed|
+    MultiJson.load(json).tap do |parsed|
       assert_equal ["a", "b", "c"], parsed
     end
   end

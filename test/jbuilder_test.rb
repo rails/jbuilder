@@ -258,7 +258,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test "directly set an array nested in another array" do
-    data = [ { department: 'QA', not_in_json: 'hello', names: ['John', 'David'] } ]
+    data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
     json = Jbuilder.encode do |json|
       json.array! data do |object|
         json.department object[:department]
@@ -273,7 +273,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test "directly set an array nested in another array with old api" do
-    data = [ { department: 'QA', not_in_json: 'hello', names: ['John', 'David'] } ]
+    data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
     json = Jbuilder.encode do |json|
       json.array! data do |json, object|
         json.department object[:department]
