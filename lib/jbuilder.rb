@@ -166,7 +166,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #   [1,2,3]
   def array!(collection)
     @attributes = if ::Kernel::block_given?
-      _map_collection(collection) { |element| yield self, element }
+      _map_collection(collection) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
     else
       collection
     end
@@ -199,7 +199,7 @@ class Jbuilder < ActiveSupport::BasicObject
 
   def call(object = nil, *attributes)
     if attributes.empty?
-      array!(object) { |_, element| yield self, element }
+      array!(object, &::Proc.new)
     else
       extract!(object, *attributes)
     end
@@ -226,7 +226,7 @@ class Jbuilder < ActiveSupport::BasicObject
         if value
           # json.comments @post.comments { |json, comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _map_collection(value) { |element| yield self, element }
+          _map_collection(value) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
         else
           # json.comments { |json| ... }
           # { "comments": ... }

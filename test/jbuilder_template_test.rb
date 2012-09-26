@@ -59,7 +59,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     json = render_jbuilder <<-JBUILDER
       json.key_format! :upcase
       json.level1 "one"
-      json.level2 do |json|
+      json.level2 do
         json.value "two"
       end
     JBUILDER
@@ -79,7 +79,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test "fragment caching a JSON object" do
     json = render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.name "Cache"
       end
     JBUILDER
@@ -92,7 +92,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test "fragment caching deserializes a JSON object" do
     Rails.cache.write("jbuilder/cachekey", {'name' => "Something"})
     json = render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.name "Cache"
       end
     JBUILDER
@@ -105,7 +105,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test "fragment caching deserializes an array" do
     Rails.cache.write("jbuilder/cachekey", ["a", "b", "c"])
     json = render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.array! ['1', '2', '3']
       end
     JBUILDER
