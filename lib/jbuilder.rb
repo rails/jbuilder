@@ -277,6 +277,15 @@ class Jbuilder < ActiveSupport::BasicObject
     ensure
       @attributes, @key_formatter = parent_attributes, parent_formatter
     end
+
+    def _merge(hash_or_array)
+      if hash_or_array.is_a?(::Array)
+        @attributes = [] unless @attributes.is_a? ::Array
+        @attributes.concat(hash_or_array)
+      else
+        @attributes.update(hash_or_array)
+      end
+    end
 end
 
 require "jbuilder_template" if defined?(ActionView::Template)
