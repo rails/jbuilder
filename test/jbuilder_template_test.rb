@@ -59,7 +59,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     json = render_jbuilder <<-JBUILDER
       json.key_format! :upcase
       json.level1 "one"
-      json.level2 do |json|
+      json.level2 do
         json.value "two"
       end
     JBUILDER
@@ -81,13 +81,13 @@ class JbuilderTemplateTest < ActionView::TestCase
     self.controller.perform_caching = true
     self.controller.cache_store = :memory_store
     render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.name "Cache"
       end
     JBUILDER
 
     json = render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.name "Miss"
       end
     JBUILDER
@@ -101,13 +101,13 @@ class JbuilderTemplateTest < ActionView::TestCase
     self.controller.perform_caching = true
     self.controller.cache_store = :memory_store
     render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.array! ['a', 'b', 'c']
       end
     JBUILDER
 
     json = render_jbuilder <<-JBUILDER
-      json.cache!("cachekey") do |json|
+      json.cache!("cachekey") do
         json.array! ['1', '2', '3']
       end
     JBUILDER

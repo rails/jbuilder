@@ -8,7 +8,7 @@ Jbuilder.encode do |json|
   json.content format_content(@message.content)
   json.(@message, :created_at, :updated_at)
 
-  json.author do |json|
+  json.author do
     json.name @message.creator.name.familiar
     json.email_address @message.creator.email_address_with_name
     json.url url_for(@message.creator, format: :json)
@@ -20,7 +20,7 @@ Jbuilder.encode do |json|
 
   json.comments @message.comments, :content, :created_at
   
-  json.attachments @message.attachments do |json, attachment|
+  json.attachments @message.attachments do |attachment|
     json.filename attachment.filename
     json.url url_for(attachment)
   end
@@ -59,7 +59,7 @@ Top level arrays can be handled directly.  Useful for index and other collection
 
 ``` ruby
 # @people = People.all
-json.array!(@people) do |json, person|
+json.array!(@people) do |person|
   json.name person.name
   json.age calculate_age(person.birthday)
 end
@@ -101,7 +101,7 @@ You can either use Jbuilder stand-alone or directly as an ActionView template la
 json.content format_content(@message.content)
 json.(@message, :created_at, :updated_at)
 
-json.author do |json|
+json.author do
   json.name @message.creator.name.familiar
   json.email_address @message.creator.email_address_with_name
   json.url url_for(@message.creator, format: :json)

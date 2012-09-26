@@ -15,31 +15,23 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
-  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper 
+  # Caches the json constructed within the block passed. Has the same signature as the `cache` helper
   # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
   #
   # Example:
   #
-  #   json.cache! ['v1', @person], :expires_in => 10.minutes do |json|
+  #   json.cache! ['v1', @person], :expires_in => 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
     fragment = self.extract_output_buffer_change do
       @context.cache(key, options) do
-        jb = ::JbuilderTemplate.new(@context)
-        block.call(jb)
-        @context.safe_concat(jb.target!.html_safe)
+        @context.safe_concat(
+          ::MultiJson.encode(_scope { yield self }).html_safe
+        )
       end
     end
-    value = ::MultiJson.load(fragment)
-
-    if value.is_a?(::Array)
-      array! value
-    else
-      value.each do |k, v|
-        set! k, v
-      end
-    end
+    _merge(::MultiJson.load(fragment))
   end
 
   protected
