@@ -70,7 +70,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #   { "author": { "name": "David", "age": 32 } }
   def set!(key, value = nil)
     if ::Kernel::block_given?
-      _set_value(key, _with_attributes { yield self })
+      _set_value(key, _scope { yield self })
     else
       _set_value(key, value)
     end
@@ -131,7 +131,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #   end
   def child!
     @attributes = [] unless @attributes.is_a? ::Array
-    @attributes << _with_attributes { yield self }
+    @attributes << _scope { yield self }
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as
@@ -230,7 +230,7 @@ class Jbuilder < ActiveSupport::BasicObject
         else
           # json.comments { |json| ... }
           # { "comments": ... }
-          _with_attributes { yield self }
+          _scope { yield self }
         end
       else
         if args.empty?
@@ -256,7 +256,7 @@ class Jbuilder < ActiveSupport::BasicObject
           else
             # json.author @post.creator, :name, :email_address
             # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-            _with_attributes { extract! value, *args }
+            _scope { extract! value, *args }
           end
         end
       end
@@ -265,11 +265,11 @@ class Jbuilder < ActiveSupport::BasicObject
 
     def _map_collection(collection)
       collection.each.map do |element|
-        _with_attributes { yield element }
+        _scope { yield element }
       end
     end
 
-    def _with_attributes
+    def _scope
       parent_attributes, parent_formatter = @attributes, @key_formatter
       @attributes = ::ActiveSupport::OrderedHash.new
       yield

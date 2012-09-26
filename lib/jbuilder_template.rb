@@ -26,7 +26,7 @@ class JbuilderTemplate < Jbuilder
   def cache!(key=nil, options={}, &block)
     cache_key = ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
     value = ::Rails.cache.fetch(cache_key, options) do
-      _with_attributes { yield self }
+      _scope { yield self }
     end
     _merge(value)
   end
