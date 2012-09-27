@@ -24,32 +24,20 @@ class JbuilderTemplate < Jbuilder
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
-    fragment = self.extract_output_buffer_change do
-      @context.cache(key, options) do
-        @context.safe_concat(
-          ::MultiJson.encode(_scope { yield self }).html_safe
-        )
-      end
+    options[:force] = true unless @context.controller.perform_caching
+    value = ::Rails.cache.fetch(_cache_key(key), options) do
+      _scope { yield self }
     end
-    _merge(::MultiJson.load(fragment))
+    _merge(value)
   end
 
   protected
-  def reset_safety_on_output_buffer
-    if @context.output_buffer
-      if @context.output_buffer.html_safe?
-        @context.output_buffer = @context.output_buffer.class.new(@context.output_buffer)
-      end
+  def _cache_key(key)
+    if @context.respond_to?(:fragment_name_with_digest)
+      @context.fragment_name_with_digest(key)
     else
-      @context.output_buffer = ::ActionView::OutputBuffer.new
+      ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
     end
-  end
-
-  def extract_output_buffer_change
-    self.reset_safety_on_output_buffer
-    pos = @context.output_buffer.length
-    yield
-    @context.output_buffer.slice!(pos..-1)
   end
 end
 

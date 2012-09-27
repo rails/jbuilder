@@ -8,8 +8,10 @@ require 'jbuilder'
 module Rails
   class Cache
     def initialize
-      @cache = {}
+      clear
     end
+
+    def clear; @cache = {}; end
 
     def write(k, v, opt={})
       @cache[k] = v
@@ -79,7 +81,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test "fragment caching a JSON object" do
     self.controller.perform_caching = true
-    self.controller.cache_store = :memory_store
+    Rails.cache.clear
     render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do
         json.name "Cache"
@@ -98,8 +100,8 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test "fragment caching deserializes an array" do
+    Rails.cache.clear
     self.controller.perform_caching = true
-    self.controller.cache_store = :memory_store
     render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do
         json.array! ['a', 'b', 'c']
