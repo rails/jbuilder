@@ -19,8 +19,8 @@ Jbuilder.encode do |json|
   end
 
   json.comments @message.comments, :content, :created_at
-  
-  json.attachments @message.attachments do |attachment|
+
+  json.attachments @message.attachments do |json, attachment|
     json.filename attachment.filename
     json.url url_for(attachment)
   end
@@ -30,7 +30,7 @@ end
 This will build the following structure:
 
 ``` javascript
-{ 
+{
   "content": "<p>This is <i>serious</i> monkey business",
   "created_at": "2011-10-29T20:45:28-05:00",
   "updated_at": "2011-10-29T20:45:28-05:00",
@@ -47,7 +47,7 @@ This will build the following structure:
     { "content": "Hello everyone!", "created_at": "2011-10-29T20:45:28-05:00" },
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
   ],
-  
+
   "attachments": [
     { "filename": "forecast.xls", "url": "http://example.com/downloads/forecast.xls" },
     { "filename": "presentation.pdf", "url": "http://example.com/downloads/presentation.pdf" }
