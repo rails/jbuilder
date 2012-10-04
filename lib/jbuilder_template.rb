@@ -28,17 +28,18 @@ class JbuilderTemplate < Jbuilder
     value = ::Rails.cache.fetch(_cache_key(key), options) do
       _scope { yield self }
     end
+
     _merge(value)
   end
 
   protected
-  def _cache_key(key)
-    if @context.respond_to?(:fragment_name_with_digest)
-      @context.fragment_name_with_digest(key)
-    else
-      ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
+    def _cache_key(key)
+      if @context.respond_to?(:fragment_name_with_digest)
+        @context.fragment_name_with_digest(key)
+      else
+        ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
+      end
     end
-  end
 end
 
 class JbuilderHandler
