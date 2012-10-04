@@ -2,7 +2,8 @@ require 'active_support/basic_object'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
-require 'active_support/json'
+require 'active_support/core_ext/hash'
+require 'active_support/cache'
 require 'multi_json'
 
 class Jbuilder < ActiveSupport::BasicObject
@@ -62,7 +63,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # You can also pass a block for nested attributes
   #
-  #   json.set!(:author) do |json|
+  #   json.set!(:author) do
   #     json.name "David"
   #     json.age 32
   #   end
@@ -70,7 +71,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #   { "author": { "name": "David", "age": 32 } }
   def set!(key, value = nil)
     if ::Kernel::block_given?
-      _set_value(key, _with_attributes { yield self })
+      _set_value(key, _scope { yield self })
     else
       _set_value(key, value)
     end
@@ -83,7 +84,7 @@ class Jbuilder < ActiveSupport::BasicObject
   # Example:
   #
   #   json.key_format! :upcase
-  #   json.author do |json|
+  #   json.author do
   #     json.name "David"
   #     json.age 32
   #   end
@@ -141,21 +142,21 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # Example:
   #
-  #   json.comments do |json|
-  #     json.child! { |json| json.content "hello" }
-  #     json.child! { |json| json.content "world" }
+  #   json.comments do
+  #     json.child! { json.content "hello" }
+  #     json.child! { json.content "world" }
   #   end
   #
   #   { "comments": [ { "content": "hello" }, { "content": "world" } ]}
   #
   # More commonly, you'd use the combined iterator, though:
   #
-  #   json.comments(@post.comments) do |json, comment|
+  #   json.comments(@post.comments) do |comment|
   #     json.content comment.formatted_content
   #   end
   def child!
     @attributes = [] unless @attributes.is_a? ::Array
-    @attributes << _with_attributes { yield self }
+    @attributes << _scope { yield self }
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as
@@ -163,7 +164,7 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # Example:
   #
-  #   json.array!(@people) do |json, person|
+  #   json.array!(@people) do |person|
   #     json.name person.name
   #     json.age calculate_age(person.birthday)
   #   end
@@ -172,18 +173,28 @@ class Jbuilder < ActiveSupport::BasicObject
   #
   # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
   #
-  #   json.(@people) { |json, person| ... }
+  #   json.(@people) { |person| ... }
   #
   # It's generally only needed to use this method for top-level arrays. If you have named arrays, you can do:
   #
-  #   json.people(@people) do |json, person|
+  #   json.people(@people) do |person|
   #     json.name person.name
   #     json.age calculate_age(person.birthday)
   #   end
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
+  #
+  # If you omit the block then you can set the top level array directly:
+  #
+  #   json.array! [1, 2, 3]
+  #
+  #   [1,2,3]
   def array!(collection)
-    @attributes = _map_collection(collection) { |element| yield self, element }
+    @attributes = if ::Kernel::block_given?
+      _map_collection(collection) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
+    else
+      collection
+    end
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -213,7 +224,7 @@ class Jbuilder < ActiveSupport::BasicObject
 
   def call(object = nil, *attributes)
     if attributes.empty?
-      array!(object) { |_, element| yield self, element }
+      array!(object, &::Proc.new)
     else
       extract!(object, *attributes)
     end
@@ -229,7 +240,6 @@ class Jbuilder < ActiveSupport::BasicObject
     ::MultiJson.encode @attributes
   end
 
-
   protected
     def _set_value(key, value)
       unless @ignore_nil && value.nil?
@@ -237,18 +247,17 @@ class Jbuilder < ActiveSupport::BasicObject
       end
     end
 
-
   private
     def method_missing(method, value = nil, *args)
       result = if ::Kernel.block_given?
         if value
-          # json.comments @post.comments { |json, comment| ... }
+          # json.comments @post.comments { |comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _map_collection(value) { |element| yield self, element }
+          _map_collection(value) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
         else
-          # json.comments { |json| ... }
+          # json.comments { ... }
           # { "comments": ... }
-          _with_attributes { yield self }
+          _scope { yield self }
         end
       else
         if args.empty?
@@ -274,7 +283,7 @@ class Jbuilder < ActiveSupport::BasicObject
           else
             # json.author @post.creator, :name, :email_address
             # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-            _with_attributes { extract! value, *args }
+            _scope { extract! value, *args }
           end
         end
       end
@@ -283,17 +292,26 @@ class Jbuilder < ActiveSupport::BasicObject
 
     def _map_collection(collection)
       collection.each.map do |element|
-        _with_attributes { yield element }
+        _scope { yield element }
       end
     end
 
-    def _with_attributes
+    def _scope
       parent_attributes, parent_formatter = @attributes, @key_formatter
       @attributes = ::ActiveSupport::OrderedHash.new
       yield
       @attributes
     ensure
       @attributes, @key_formatter = parent_attributes, parent_formatter
+    end
+
+    def _merge(hash_or_array)
+      if hash_or_array.is_a?(::Array)
+        @attributes = [] unless @attributes.is_a? ::Array
+        @attributes.concat(hash_or_array)
+      else
+        @attributes.update(hash_or_array)
+      end
     end
 end
 

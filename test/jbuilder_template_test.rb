@@ -1,8 +1,33 @@
 require 'test/unit'
 require 'action_view'
 require 'action_view/testing/resolvers'
+require 'active_support/cache'
 
 require 'jbuilder'
+
+module Rails
+  class Cache
+    def initialize
+      clear
+    end
+
+    def clear; @cache = {}; end
+
+    def write(k, v, opt={})
+      @cache[k] = v
+    end
+
+    def read(k, opt={})
+      @cache[k]
+    end
+
+    def fetch(k, opt={}, &block)
+      @cache[k] || @cache[k] = block.call
+    end
+  end
+
+  def self.cache; @cache ||= Cache.new; end
+end
 
 class JbuilderTemplateTest < ActionView::TestCase
   def partials
@@ -36,7 +61,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     json = render_jbuilder <<-JBUILDER
       json.key_format! :upcase
       json.level1 "one"
-      json.level2 do |json|
+      json.level2 do
         json.value "two"
       end
     JBUILDER
@@ -53,4 +78,45 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     assert_equal "hello", MultiJson.load(json)["content"]
   end
+
+  test "fragment caching a JSON object" do
+    self.controller.perform_caching = true
+    Rails.cache.clear
+    render_jbuilder <<-JBUILDER
+      json.cache!("cachekey") do
+        json.name "Cache"
+      end
+    JBUILDER
+
+    json = render_jbuilder <<-JBUILDER
+      json.cache!("cachekey") do
+        json.name "Miss"
+      end
+    JBUILDER
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal "Cache", parsed['name']
+    end
+  end
+
+  test "fragment caching deserializes an array" do
+    Rails.cache.clear
+    self.controller.perform_caching = true
+    render_jbuilder <<-JBUILDER
+      json.cache!("cachekey") do
+        json.array! ['a', 'b', 'c']
+      end
+    JBUILDER
+
+    json = render_jbuilder <<-JBUILDER
+      json.cache!("cachekey") do
+        json.array! ['1', '2', '3']
+      end
+    JBUILDER
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal ["a", "b", "c"], parsed
+    end
+  end
+
 end

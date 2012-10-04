@@ -87,7 +87,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "nesting single child with block" do
     json = Jbuilder.encode do |json|
-      json.author do |json|
+      json.author do
         json.name "David"
         json.age  32
       end
@@ -101,9 +101,9 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "nesting multiple children with block" do
     json = Jbuilder.encode do |json|
-      json.comments do |json|
-        json.child! { |json| json.content "hello" }
-        json.child! { |json| json.content "world" }
+      json.comments do
+        json.child! { json.content "hello" }
+        json.child! { json.content "world" }
       end
     end
 
@@ -164,6 +164,22 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
     json = Jbuilder.encode do |json|
+      json.comments comments do |comment|
+        json.content comment.content
+      end
+    end
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal ["content"], parsed["comments"].first.keys
+      assert_equal "hello", parsed["comments"].first["content"]
+      assert_equal "world", parsed["comments"].second["content"]
+    end
+  end
+
+  test "nesting multiple children from array with inline loop with old api" do
+    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+
+    json = Jbuilder.encode do |json|
       json.comments comments do |json, comment|
         json.content comment.content
       end
@@ -180,6 +196,21 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
     json = Jbuilder.encode do |json|
+      json.call(comments) do |comment|
+        json.content comment.content
+      end
+    end
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal "hello", parsed.first["content"]
+      assert_equal "world", parsed.second["content"]
+    end
+  end
+
+  test "nesting multiple children from array with inline loop on root with old api" do
+    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+
+    json = Jbuilder.encode do |json|
       json.call(comments) do |json, comment|
         json.content comment.content
       end
@@ -193,13 +224,13 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "array nested inside nested hash" do
     json = Jbuilder.encode do |json|
-      json.author do |json|
+      json.author do
         json.name "David"
         json.age  32
 
-        json.comments do |json|
-          json.child! { |json| json.content "hello" }
-          json.child! { |json| json.content "world" }
+        json.comments do
+          json.child! { json.content "hello" }
+          json.child! { json.content "world" }
         end
       end
     end
@@ -212,10 +243,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "array nested inside array" do
     json = Jbuilder.encode do |json|
-      json.comments do |json|
-        json.child! do |json|
-          json.authors do |json|
-            json.child! do |json|
+      json.comments do
+        json.child! do
+          json.authors do
+            json.child! do
               json.name "david"
             end
           end
@@ -224,6 +255,36 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal "david", MultiJson.load(json)["comments"].first["authors"].first["name"]
+  end
+
+  test "directly set an array nested in another array" do
+    data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
+    json = Jbuilder.encode do |json|
+      json.array! data do |object|
+        json.department object[:department]
+        json.names do
+          json.array! object[:names]
+        end
+      end
+    end
+
+    assert_equal 'David', MultiJson.load(json)[0]['names'].last
+    assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
+  end
+
+  test "directly set an array nested in another array with old api" do
+    data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
+    json = Jbuilder.encode do |json|
+      json.array! data do |json, object|
+        json.department object[:department]
+        json.names do
+          json.array! object[:names]
+        end
+      end
+    end
+
+    assert_equal 'David', MultiJson.load(json)[0]['names'].last
+    assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
   end
 
   test "nested jbuilder objects" do
@@ -242,7 +303,7 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
     json = Jbuilder.encode do |json|
-      json.array!(comments) do |json, comment|
+      json.array!(comments) do |comment|
         json.content comment.content
       end
     end
@@ -257,7 +318,7 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = []
 
     json = Jbuilder.encode do |json|
-      json.array!(comments) do |json, comment|
+      json.array!(comments) do |comment|
         json.content comment.content
       end
     end
@@ -275,7 +336,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "dynamically set a key/nested child with block" do
     json = Jbuilder.encode do |json|
-      json.set!(:author) do |json|
+      json.set!(:author) do
         json.name "David"
         json.age 32
       end
@@ -334,7 +395,7 @@ class JbuilderTest < ActiveSupport::TestCase
     json = Jbuilder.new
     json.key_format! :upcase
     json.level1 "one"
-    json.level2 do |json|
+    json.level2 do
       json.value "two"
     end
 
@@ -345,7 +406,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "key_format! resets after child element" do
     json = Jbuilder.new
-    json.level2 do |json|
+    json.level2 do
       json.key_format! :upcase
       json.value "two"
     end
