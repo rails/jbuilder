@@ -3,7 +3,6 @@ require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
-require 'active_support/json'
 require 'active_support/cache'
 require 'multi_json'
 
