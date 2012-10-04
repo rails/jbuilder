@@ -8,8 +8,10 @@ require 'jbuilder'
 module Rails
   class Cache
     def initialize
-      @cache = {}
+      clear
     end
+
+    def clear; @cache = {}; end
 
     def write(k, v, opt={})
       @cache[k] = v
@@ -78,32 +80,34 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test "fragment caching a JSON object" do
-    json = render_jbuilder <<-JBUILDER
+    self.controller.perform_caching = true
+    Rails.cache.clear
+    render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do
         json.name "Cache"
       end
     JBUILDER
 
-    Rails.cache.read("jbuilder/cachekey").tap do |parsed|
-      assert_equal "Cache", parsed['name']
-    end
-  end
-
-  test "fragment caching deserializes a JSON object" do
-    Rails.cache.write("jbuilder/cachekey", {'name' => "Something"})
     json = render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do
-        json.name "Cache"
+        json.name "Miss"
       end
     JBUILDER
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "Something", parsed['name']
+      assert_equal "Cache", parsed['name']
     end
   end
 
   test "fragment caching deserializes an array" do
-    Rails.cache.write("jbuilder/cachekey", ["a", "b", "c"])
+    Rails.cache.clear
+    self.controller.perform_caching = true
+    render_jbuilder <<-JBUILDER
+      json.cache!("cachekey") do
+        json.array! ['a', 'b', 'c']
+      end
+    JBUILDER
+
     json = render_jbuilder <<-JBUILDER
       json.cache!("cachekey") do
         json.array! ['1', '2', '3']
