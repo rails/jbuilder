@@ -45,10 +45,12 @@ class Jbuilder < ActiveSupport::BasicObject
   end
 
   @@key_formatter = KeyFormatter.new
+  @@ignore_nil    = false
 
-  def initialize(key_formatter = @@key_formatter.clone)
+  def initialize(key_formatter = @@key_formatter.clone, ignore_nil = @@ignore_nil)
     @attributes = ::ActiveSupport::OrderedHash.new
     @key_formatter = key_formatter
+    @ignore_nil = ignore_nil
   end
 
   # Dynamically set a key value pair.
@@ -110,6 +112,30 @@ class Jbuilder < ActiveSupport::BasicObject
   # Same as the instance method key_format! except sets the default.
   def self.key_format(*args)
     @@key_formatter = KeyFormatter.new(*args)
+  end
+
+  # If you want to skip adding nil values to your JSON hash. This is useful
+  # for JSON clients that don't deal well with nil values, and would prefer
+  # not to receive keys which have null values.
+  #
+  # Example:
+  #   json.ignore_nil!
+  #   json.id User.new.id
+  #
+  #   { "id": null }
+  #
+  #   json.ignore_nil
+  #   json.id User.new.id
+  #
+  #   {}
+  #
+  def ignore_nil!(value = true)
+    @ignore_nil = value
+  end
+
+  # Same as instance method ignore_nil! except sets the default.
+  def self.ignore_nil(value = true)
+    @@ignore_nil = value
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -216,7 +242,9 @@ class Jbuilder < ActiveSupport::BasicObject
 
   protected
     def _set_value(key, value)
-      @attributes[@key_formatter.format(key)] = value
+      unless @ignore_nil && value.nil?
+        @attributes[@key_formatter.format(key)] = value
+      end
     end
 
   private
