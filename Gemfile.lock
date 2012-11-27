@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jbuilder (0.8.0)
+    jbuilder (0.8.2)
       activesupport (>= 3.0.0)
 
 GEM
