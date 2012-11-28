@@ -291,7 +291,7 @@ class Jbuilder < ActiveSupport::BasicObject
     end
 
     def _map_collection(collection)
-      collection.each.map do |element|
+      collection.map do |element|
         _scope { yield element }
       end
     end
