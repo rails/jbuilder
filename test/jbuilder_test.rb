@@ -357,6 +357,8 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
     class RelationMock
+      include Enumerable
+
       def each(&block)
         [Person.new("Bob", 30), Person.new("Frank", 50)].each(&block)
       end
