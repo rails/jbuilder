@@ -44,13 +44,15 @@ class Jbuilder < ActiveSupport::BasicObject
     jbuilder.target!
   end
 
-  @@key_formatter = KeyFormatter.new
-  @@ignore_nil    = false
+  @@key_formatter              = KeyFormatter.new
+  @@ignore_nil                 = false
+  @@use_floating_point_numbers = false
 
-  def initialize(key_formatter = @@key_formatter.clone, ignore_nil = @@ignore_nil)
-    @attributes = ::ActiveSupport::OrderedHash.new
-    @key_formatter = key_formatter
-    @ignore_nil = ignore_nil
+  def initialize(key_formatter = @@key_formatter.clone, ignore_nil = @@ignore_nil, use_floating_point_numbers = @@use_floating_point_numbers)
+    @attributes                 = ::ActiveSupport::OrderedHash.new
+    @key_formatter              = key_formatter
+    @ignore_nil                 = ignore_nil
+    @use_floating_point_numbers = use_floating_point_numbers
   end
 
   # Dynamically set a key value pair.
@@ -136,6 +138,21 @@ class Jbuilder < ActiveSupport::BasicObject
   # Same as instance method ignore_nil! except sets the default.
   def self.ignore_nil(value = true)
     @@ignore_nil = value
+  end
+
+  # If you want BigDecimal values to be represented as floating point numbers,
+  # set the value to true. You might lose accuracy depending on the JSON parser.
+  #
+  # Example:
+  #   json.use_floating_point_numbers!
+  #
+  def use_floating_point_numbers!(value = true)
+    @use_floating_point_numbers = value
+  end
+
+  # Same as instance method use_floating_point_numbers! except sets the default.
+  def self.use_floating_point_numbers(value = true)
+    @@use_floating_point_numbers = value
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -235,9 +252,30 @@ class Jbuilder < ActiveSupport::BasicObject
     @attributes
   end
 
+  # Convert all BigDecimals to floating point numbers.
+  def force_floating_point_numbers(hash)
+    hash.each do |key, value|
+      if value.is_a?(::Hash)
+        force_floating_point_numbers(value)
+      elsif value.is_a?(::BigDecimal)
+        hash[key] = "XXX-#{value.to_s}" # this is a hack :D
+      else
+        hash[key] = value
+      end
+    end
+
+    hash
+  end
+
   # Encodes the current builder as JSON.
   def target!
-    ::MultiJson.encode @attributes
+    if @use_floating_point_numbers
+      result = ::MultiJson.encode(force_floating_point_numbers(@attributes.clone))
+      result = result.gsub(/"XXX-[^"]+"/){|big_decimal_value| big_decimal_value.gsub('"', '').gsub("XXX-", '') }
+      result
+    else
+      ::MultiJson.encode @attributes
+    end
   end
 
   protected
