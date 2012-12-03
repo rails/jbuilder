@@ -19,7 +19,7 @@ Jbuilder.encode do |json|
   end
 
   json.comments @message.comments, :content, :created_at
-  
+
   json.attachments @message.attachments do |attachment|
     json.filename attachment.filename
     json.url url_for(attachment)
@@ -30,7 +30,7 @@ end
 This will build the following structure:
 
 ``` javascript
-{ 
+{
   "content": "<p>This is <i>serious</i> monkey business",
   "created_at": "2011-10-29T20:45:28-05:00",
   "updated_at": "2011-10-29T20:45:28-05:00",
@@ -47,7 +47,7 @@ This will build the following structure:
     { "content": "Hello everyone!", "created_at": "2011-10-29T20:45:28-05:00" },
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
   ],
-  
+
   "attachments": [
     { "filename": "forecast.xls", "url": "http://example.com/downloads/forecast.xls" },
     { "filename": "presentation.pdf", "url": "http://example.com/downloads/presentation.pdf" }
@@ -131,6 +131,18 @@ You can set this globaly with the class method `key_format` (from inside your en
 
 ``` ruby
 Jbuilder.key_format :camelize => :lower
+```
+
+You can force BigDecimal to be represented as floating point numbers via the following configuration:
+
+``` ruby
+Jbuilder.use_floating_point_numbers
+
+json = Jbuilder.encode do |j|
+  j.a_number BigDecimal("1.123456789123456789")
+end
+
+# => "{\"a_number\":1.123456789123456789}"
 ```
 
 Libraries similar to this in some form or another include:
