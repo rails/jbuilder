@@ -5,8 +5,19 @@ require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
 require 'active_support/cache'
 require 'multi_json'
+require 'bigdecimal'
 
 class Jbuilder < ActiveSupport::BasicObject
+  class BigDecimalFloatingPointRepresentationFix < ::BigDecimal
+    def as_json(foo=nil)
+      self
+    end
+
+    def to_json
+      to_s
+    end
+  end
+
   class KeyFormatter
     def initialize(*args)
       @format = {}
@@ -258,9 +269,7 @@ class Jbuilder < ActiveSupport::BasicObject
       if value.is_a?(::Hash)
         force_floating_point_numbers(value)
       elsif value.is_a?(::BigDecimal)
-        # mark the value as converted to floating point number
-        # we will remove the marker later
-        hash[key] = "NUM-#{value.to_s}"
+        hash[key] = BigDecimalFloatingPointRepresentationFix.new(value.to_s)
       else
         hash[key] = value
       end
@@ -272,12 +281,10 @@ class Jbuilder < ActiveSupport::BasicObject
   # Encodes the current builder as JSON.
   def target!
     if @use_floating_point_numbers
-      result = ::MultiJson.encode(force_floating_point_numbers(@attributes.clone))
-      result = result.gsub(/"NUM-[^"]+"/){|big_decimal_value| big_decimal_value.gsub('"', '').gsub("NUM-", '') }
-      result
-    else
-      ::MultiJson.encode @attributes
+      force_floating_point_numbers(@attributes)
     end
+
+    ::MultiJson.encode @attributes
   end
 
   protected

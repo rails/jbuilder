@@ -509,7 +509,7 @@ class JbuilderTest < ActiveSupport::TestCase
       j.a_number BigDecimal("1.123456789123456789")
     end
 
-    Jbuilder.send(:class_variable_set, "@@use_floating_point_numbers", false)
+    Jbuilder.use_floating_point_numbers(false)
 
     assert_no_match(/:"1\.123456789123456789"/, json)
     assert_match(/:1\.123456789123456789/, json)
