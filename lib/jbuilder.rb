@@ -258,7 +258,9 @@ class Jbuilder < ActiveSupport::BasicObject
       if value.is_a?(::Hash)
         force_floating_point_numbers(value)
       elsif value.is_a?(::BigDecimal)
-        hash[key] = "XXX-#{value.to_s}" # this is a hack :D
+        # mark the value as converted to floating point number
+        # we will remove the marker later
+        hash[key] = "NUM-#{value.to_s}"
       else
         hash[key] = value
       end
@@ -271,7 +273,7 @@ class Jbuilder < ActiveSupport::BasicObject
   def target!
     if @use_floating_point_numbers
       result = ::MultiJson.encode(force_floating_point_numbers(@attributes.clone))
-      result = result.gsub(/"XXX-[^"]+"/){|big_decimal_value| big_decimal_value.gsub('"', '').gsub("XXX-", '') }
+      result = result.gsub(/"NUM-[^"]+"/){|big_decimal_value| big_decimal_value.gsub('"', '').gsub("NUM-", '') }
       result
     else
       ::MultiJson.encode @attributes
