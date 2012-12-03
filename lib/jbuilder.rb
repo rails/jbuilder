@@ -5,8 +5,14 @@ require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
 require 'active_support/cache'
 require 'multi_json'
+require 'bigdecimal'
 
 class Jbuilder < ActiveSupport::BasicObject
+  class BigDecimalFloatingPointRepresentationFix < ::BigDecimal
+    def as_json(x=nil); self; end
+    def to_json(x=nil); to_s; end
+  end
+
   class KeyFormatter
     def initialize(*args)
       @format = {}
@@ -44,13 +50,15 @@ class Jbuilder < ActiveSupport::BasicObject
     jbuilder.target!
   end
 
-  @@key_formatter = KeyFormatter.new
-  @@ignore_nil    = false
+  @@key_formatter              = KeyFormatter.new
+  @@ignore_nil                 = false
+  @@use_floating_point_numbers = false
 
-  def initialize(key_formatter = @@key_formatter.clone, ignore_nil = @@ignore_nil)
-    @attributes = ::ActiveSupport::OrderedHash.new
-    @key_formatter = key_formatter
-    @ignore_nil = ignore_nil
+  def initialize(key_formatter = @@key_formatter.clone, ignore_nil = @@ignore_nil, use_floating_point_numbers = @@use_floating_point_numbers)
+    @attributes                 = ::ActiveSupport::OrderedHash.new
+    @key_formatter              = key_formatter
+    @ignore_nil                 = ignore_nil
+    @use_floating_point_numbers = use_floating_point_numbers
   end
 
   # Dynamically set a key value pair.
@@ -136,6 +144,21 @@ class Jbuilder < ActiveSupport::BasicObject
   # Same as instance method ignore_nil! except sets the default.
   def self.ignore_nil(value = true)
     @@ignore_nil = value
+  end
+
+  # If you want BigDecimal values to be represented as floating point numbers,
+  # set the value to true. You might lose accuracy depending on the JSON parser.
+  #
+  # Example:
+  #   json.use_floating_point_numbers!
+  #
+  def use_floating_point_numbers!(value = true)
+    @use_floating_point_numbers = value
+  end
+
+  # Same as instance method use_floating_point_numbers! except sets the default.
+  def self.use_floating_point_numbers(value = true)
+    @@use_floating_point_numbers = value
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -235,8 +258,31 @@ class Jbuilder < ActiveSupport::BasicObject
     @attributes
   end
 
+  # Convert all BigDecimals to floating point numbers.
+  def force_floating_point_numbers(hash_or_array_or_value)
+    if hash_or_array_or_value.respond_to?(:each)
+      if hash_or_array_or_value.kind_of?(::Hash)
+        hash_or_array_or_value.each do |key, value|
+          hash_or_array_or_value[key] = force_floating_point_numbers(value)
+        end
+      elsif hash_or_array_or_value.kind_of?(::Array)
+        hash_or_array_or_value.map! do |value|
+          force_floating_point_numbers(value)
+        end
+      end
+    elsif hash_or_array_or_value.is_a?(::BigDecimal)
+      BigDecimalFloatingPointRepresentationFix.new(hash_or_array_or_value.to_s)
+    else
+      hash_or_array_or_value
+    end
+  end
+
   # Encodes the current builder as JSON.
   def target!
+    if @use_floating_point_numbers
+      force_floating_point_numbers(@attributes)
+    end
+
     ::MultiJson.encode @attributes
   end
 

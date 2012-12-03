@@ -118,5 +118,4 @@ class JbuilderTemplateTest < ActionView::TestCase
       assert_equal ["a", "b", "c"], parsed
     end
   end
-
 end

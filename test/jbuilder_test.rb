@@ -492,4 +492,86 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ["name"], json.attributes!.keys
     Jbuilder.send(:class_variable_set, "@@ignore_nil", false)
   end
+
+  test "don't convert BigDecimals into floating point representation if use_floating_point_numbers is disabled" do
+    json = Jbuilder.encode do |j|
+      j.a_number BigDecimal("1.123456789123456789")
+    end
+
+    assert_match(/:"1\.123456789123456789"/, json)
+    assert_no_match(/:1\.123456789123456789/, json)
+  end
+
+  test "convert BigDecimals into a floating point representation if use_floating_point_numbers is enabled" do
+    Jbuilder.use_floating_point_numbers
+
+    json = Jbuilder.encode do |j|
+      j.a_number BigDecimal("1.123456789123456789")
+    end
+
+    Jbuilder.use_floating_point_numbers(false)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+  end
+
+  test "convert BigDecimals into a floating point representation if use_floating_point_numbers is enabled and if objects are nested" do
+    Jbuilder.use_floating_point_numbers
+
+    json = Jbuilder.encode do |j|
+      j.a_number BigDecimal("1.123456789123456789")
+      j.nested do |j|
+        j.another_number BigDecimal("1.987654321987654321")
+      end
+    end
+
+    Jbuilder.use_floating_point_numbers(false)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+    assert_match(/:1\.987654321987654321/, json)
+  end
+
+  test "convert BigDecimals into floating point representation if ordered hashes are passed" do
+    ordered_hash                     = ActiveSupport::OrderedHash.new
+    ordered_hash[:nested]            = ActiveSupport::OrderedHash.new
+    ordered_hash[:nested][:a_number] = BigDecimal("1.123456789123456789")
+
+    Jbuilder.use_floating_point_numbers
+    json = MultiJson.encode(Jbuilder.new.force_floating_point_numbers(ordered_hash))
+    Jbuilder.use_floating_point_numbers(false)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+  end
+
+  test "convert BigDecimals into floating point representation if input is an array of hashes" do
+    Jbuilder.use_floating_point_numbers
+    input = Jbuilder.new.force_floating_point_numbers([{
+      :a_number => BigDecimal("1.123456789123456789")
+    }])
+    Jbuilder.use_floating_point_numbers(false)
+
+    json = MultiJson.encode(input)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+  end
+
+  test "converts BigDecimals into floating point representation if input is deeply nested" do
+    Jbuilder.use_floating_point_numbers
+    input = Jbuilder.new.force_floating_point_numbers([{
+      :a_number => BigDecimal("1.123456789123456789"),
+      :fnord => {
+        :another_number => BigDecimal("1.987654321987654321")
+      }
+    }])
+    Jbuilder.use_floating_point_numbers(false)
+
+    json = MultiJson.encode(input)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+    assert_match(/:1\.987654321987654321/, json)
+  end
 end
