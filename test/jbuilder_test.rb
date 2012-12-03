@@ -492,4 +492,26 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ["name"], json.attributes!.keys
     Jbuilder.send(:class_variable_set, "@@ignore_nil", false)
   end
+
+  test "don't convert BigDecimals into floating point representation if use_floating_point_numbers is disabled" do
+    json = Jbuilder.encode do |j|
+      j.a_number BigDecimal("1.123456789123456789")
+    end
+
+    assert_match(/:"1\.123456789123456789"/, json)
+    assert_no_match(/:1\.123456789123456789/, json)
+  end
+
+  test "convert BigDecimals into a floating point representation if use_floating_point_numbers is enabled" do
+    Jbuilder.use_floating_point_numbers
+
+    json = Jbuilder.encode do |j|
+      j.a_number BigDecimal("1.123456789123456789")
+    end
+
+    Jbuilder.send(:class_variable_set, "@@use_floating_point_numbers", false)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+  end
 end
