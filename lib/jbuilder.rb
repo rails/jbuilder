@@ -9,13 +9,8 @@ require 'bigdecimal'
 
 class Jbuilder < ActiveSupport::BasicObject
   class BigDecimalFloatingPointRepresentationFix < ::BigDecimal
-    def as_json(foo=nil)
-      self
-    end
-
-    def to_json
-      to_s
-    end
+    def as_json(x=nil); self; end
+    def to_json(x=nil); to_s; end
   end
 
   class KeyFormatter
