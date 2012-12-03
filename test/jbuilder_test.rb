@@ -557,4 +557,21 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_no_match(/:"1\.123456789123456789"/, json)
     assert_match(/:1\.123456789123456789/, json)
   end
+
+  test "converts BigDecimals into floating point representation if input is deeply nested" do
+    Jbuilder.use_floating_point_numbers
+    input = Jbuilder.new.force_floating_point_numbers([{
+      :a_number => BigDecimal("1.123456789123456789"),
+      :fnord => {
+        :another_number => BigDecimal("1.987654321987654321")
+      }
+    }])
+    Jbuilder.use_floating_point_numbers(false)
+
+    json = MultiJson.encode(input)
+
+    assert_no_match(/:"1\.123456789123456789"/, json)
+    assert_match(/:1\.123456789123456789/, json)
+    assert_match(/:1\.987654321987654321/, json)
+  end
 end

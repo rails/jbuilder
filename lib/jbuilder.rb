@@ -260,13 +260,15 @@ class Jbuilder < ActiveSupport::BasicObject
 
   # Convert all BigDecimals to floating point numbers.
   def force_floating_point_numbers(hash_or_array_or_value)
-    if hash_or_array_or_value.respond_to?(:map)
-      result = hash_or_array_or_value.map { |item| force_floating_point_numbers(item) }
-
+    if hash_or_array_or_value.respond_to?(:each)
       if hash_or_array_or_value.kind_of?(::Hash)
-        hash_or_array_or_value.class.send(:[], *result.flatten)
-      else
-        result
+        hash_or_array_or_value.each do |key, value|
+          hash_or_array_or_value[key] = force_floating_point_numbers(value)
+        end
+      elsif hash_or_array_or_value.kind_of?(::Array)
+        hash_or_array_or_value.map! do |value|
+          force_floating_point_numbers(value)
+        end
       end
     elsif hash_or_array_or_value.is_a?(::BigDecimal)
       BigDecimalFloatingPointRepresentationFix.new(hash_or_array_or_value.to_s)
@@ -278,7 +280,7 @@ class Jbuilder < ActiveSupport::BasicObject
   # Encodes the current builder as JSON.
   def target!
     if @use_floating_point_numbers
-      @attributes = force_floating_point_numbers(@attributes)
+      force_floating_point_numbers(@attributes)
     end
 
     ::MultiJson.encode @attributes
