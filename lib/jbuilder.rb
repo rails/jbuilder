@@ -1,4 +1,4 @@
-require 'active_support/basic_object'
+require 'active_support/proxy_object'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
@@ -6,7 +6,7 @@ require 'active_support/core_ext/hash'
 require 'active_support/cache'
 require 'multi_json'
 
-class Jbuilder < ActiveSupport::BasicObject
+class Jbuilder < ActiveSupport::ProxyObject
   class KeyFormatter
     def initialize(*args)
       @format = {}
