@@ -1,4 +1,3 @@
-require 'active_support/basic_object'
 require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
@@ -6,7 +5,18 @@ require 'active_support/core_ext/hash'
 require 'active_support/cache'
 require 'multi_json'
 
-class Jbuilder < ActiveSupport::BasicObject
+# In Rails 4, +ActiveSupport::BasicObject+ is deprecated and renamed to
+# # +ActiveSupport::ProxyObject+. A check and assignment are used to support
+# Rails 4 and maintain backwards compatibility.
+begin
+  require 'active_support/proxy_object'
+  jbuilder = ::ActiveSupport::ProxyObject
+rescue LoadError => e
+  require 'active_support/basic_object'
+  jbuilder = ::ActiveSupport::BasicObject
+end
+
+class Jbuilder < jbuilder
   class KeyFormatter
     def initialize(*args)
       @format = {}
