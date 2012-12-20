@@ -7,13 +7,13 @@ require 'multi_json'
 
 begin
   require 'active_support/proxy_object'
-  base = ActiveSupport::ProxyObject
+  JbuilderProxy = ActiveSupport::ProxyObject
 rescue LoadError
   require 'active_support/basic_object'
-  base = ActiveSupport::BasicObject
+  JbuilderProxy = ActiveSupport::BasicObject
 end
 
-class Jbuilder < base
+class Jbuilder < JbuilderProxy
   class KeyFormatter
     def initialize(*args)
       @format = {}
