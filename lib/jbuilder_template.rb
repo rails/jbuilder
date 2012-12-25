@@ -1,7 +1,7 @@
 class JbuilderTemplate < Jbuilder
-  def initialize(context, *args)
+  def initialize(context, *args, &block)
     @context = context
-    super(*args)
+    super(*args, &block)
   end
 
   def partial!(options, locals = {})
