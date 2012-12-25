@@ -45,10 +45,8 @@ class Jbuilder < JbuilderProxy
   end
 
   # Yields a builder and automatically turns the result into a JSON string
-  def self.encode(*args)
-    jbuilder = new(*args)
-    yield jbuilder
-    jbuilder.target!
+  def self.encode(*args, &block)
+    new(*args, &block).target!
   end
 
   @@key_formatter = KeyFormatter.new
@@ -58,6 +56,7 @@ class Jbuilder < JbuilderProxy
     @attributes = ::ActiveSupport::OrderedHash.new
     @key_formatter = key_formatter
     @ignore_nil = ignore_nil
+    yield self if ::Kernel.block_given?
   end
 
   # Dynamically set a key value pair.

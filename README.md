@@ -19,7 +19,7 @@ Jbuilder.encode do |json|
   end
 
   json.comments @message.comments, :content, :created_at
-  
+
   json.attachments @message.attachments do |attachment|
     json.filename attachment.filename
     json.url url_for(attachment)
@@ -30,7 +30,7 @@ end
 This will build the following structure:
 
 ``` javascript
-{ 
+{
   "content": "<p>This is <i>serious</i> monkey business",
   "created_at": "2011-10-29T20:45:28-05:00",
   "updated_at": "2011-10-29T20:45:28-05:00",
@@ -47,7 +47,7 @@ This will build the following structure:
     { "content": "Hello everyone!", "created_at": "2011-10-29T20:45:28-05:00" },
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
   ],
-  
+
   "attachments": [
     { "filename": "forecast.xls", "url": "http://example.com/downloads/forecast.xls" },
     { "filename": "presentation.pdf", "url": "http://example.com/downloads/presentation.pdf" }
@@ -72,19 +72,19 @@ Jbuilder objects can be directly nested inside each other.  Useful for composing
 class Person
   # ... Class Definition ... #
   def to_builder
-    person = Jbuilder.new
-    person.(self, :name, :age)
-    person
+    Jbuilder.new do |person|
+      person.(self, :name, :age)
+    end
   end
 end
 
 class Company
   # ... Class Definition ... #
   def to_builder
-    company = Jbuilder.new
-    company.name name
-    company.president president.to_builder
-    company
+    Jbuilder.new do |company|
+      company.name name
+      company.president president.to_builder
+    end
   end
 end
 
