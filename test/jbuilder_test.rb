@@ -176,6 +176,16 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
+  test "handles nil-collections as empty arrays" do
+    json = Jbuilder.encode do |json|
+      json.comments nil do |comment|
+        json.content comment.content
+      end
+    end
+
+    assert_equal [], MultiJson.load(json)["comments"]
+  end
+
   test "nesting multiple children from array with inline loop with old api" do
     comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
 
