@@ -254,9 +254,12 @@ class Jbuilder < JbuilderProxy
     end
 
   private
-    def method_missing(method, value = nil, *args)
+
+    BLANK = ::Object.new
+
+    def method_missing(method, value = BLANK, *args)
       result = if ::Kernel.block_given?
-        if value
+        if value != BLANK
           # json.comments @post.comments { |comment| ... }
           # { "comments": [ { ... }, { ... } ] }
           _map_collection(value) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
@@ -278,7 +281,7 @@ class Jbuilder < JbuilderProxy
             value
           end
         else
-          if value.respond_to?(:each)
+          if value.kind_of?(::Enumerable)
             # json.comments(@post.comments, :content, :created_at)
             # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
             _map_collection(value) do |element|
@@ -297,6 +300,8 @@ class Jbuilder < JbuilderProxy
     end
 
     def _map_collection(collection)
+      return [] if collection.nil?
+
       collection.map do |element|
         _scope { yield element }
       end
