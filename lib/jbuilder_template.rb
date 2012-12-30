@@ -37,7 +37,7 @@ class JbuilderTemplate < Jbuilder
       if @context.respond_to?(:fragment_name_with_digest)
         @context.fragment_name_with_digest(key)
       else
-        ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split("://").last : key, :jbuilder)
+        ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
       end
     end
 end

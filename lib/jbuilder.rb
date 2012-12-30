@@ -326,4 +326,4 @@ class Jbuilder < JbuilderProxy
     end
 end
 
-require "jbuilder_template" if defined?(ActionView::Template)
+require 'jbuilder_template' if defined?(ActionView::Template)

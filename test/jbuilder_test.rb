@@ -5,163 +5,163 @@ require 'active_support/inflector'
 require 'jbuilder'
 
 class JbuilderTest < ActiveSupport::TestCase
-  test "single key" do
+  test 'single key' do
     json = Jbuilder.encode do |json|
-      json.content "hello"
+      json.content 'hello'
     end
 
-    assert_equal "hello", MultiJson.load(json)["content"]
+    assert_equal 'hello', MultiJson.load(json)['content']
   end
 
-  test "single key with false value" do
+  test 'single key with false value' do
     json = Jbuilder.encode do |json|
       json.content false
     end
 
-    assert_equal false, MultiJson.load(json)["content"]
+    assert_equal false, MultiJson.load(json)['content']
   end
 
-  test "single key with nil value" do
+  test 'single key with nil value' do
     json = Jbuilder.encode do |json|
       json.content nil
     end
 
-    assert MultiJson.load(json).has_key?("content")
-    assert_equal nil, MultiJson.load(json)["content"]
+    assert MultiJson.load(json).has_key?('content')
+    assert_equal nil, MultiJson.load(json)['content']
   end
 
-  test "multiple keys" do
+  test 'multiple keys' do
     json = Jbuilder.encode do |json|
-      json.title "hello"
-      json.content "world"
+      json.title 'hello'
+      json.content 'world'
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "hello", parsed["title"]
-      assert_equal "world", parsed["content"]
+      assert_equal 'hello', parsed['title']
+      assert_equal 'world', parsed['content']
     end
   end
 
-  test "extracting from object" do
-    person = Struct.new(:name, :age).new("David", 32)
+  test 'extracting from object' do
+    person = Struct.new(:name, :age).new('David', 32)
 
     json = Jbuilder.encode do |json|
       json.extract! person, :name, :age
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "David", parsed["name"]
-      assert_equal 32, parsed["age"]
+      assert_equal 'David', parsed['name']
+      assert_equal 32, parsed['age']
     end
   end
 
-  test "extracting from object using call style for 1.9" do
-    person = Struct.new(:name, :age).new("David", 32)
+  test 'extracting from object using call style for 1.9' do
+    person = Struct.new(:name, :age).new('David', 32)
 
     json = Jbuilder.encode do |json|
       if ::RUBY_VERSION > '1.9'
-        instance_eval "json.(person, :name, :age)"
+        instance_eval 'json.(person, :name, :age)'
       else
-        instance_eval "json.call(person, :name, :age)"
+        instance_eval 'json.call(person, :name, :age)'
       end
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "David", parsed["name"]
-      assert_equal 32, parsed["age"]
+      assert_equal 'David', parsed['name']
+      assert_equal 32, parsed['age']
     end
   end
 
-  test "extracting from hash" do
-    person = {:name => "Jim", :age => 34}
+  test 'extracting from hash' do
+    person = {:name => 'Jim', :age => 34}
 
     json = Jbuilder.encode do |json|
       json.extract! person, :name, :age
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "Jim", parsed["name"]
-      assert_equal 34, parsed["age"]
+      assert_equal 'Jim', parsed['name']
+      assert_equal 34, parsed['age']
     end
   end
 
-  test "nesting single child with block" do
+  test 'nesting single child with block' do
     json = Jbuilder.encode do |json|
       json.author do
-        json.name "David"
+        json.name 'David'
         json.age  32
       end
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "David", parsed["author"]["name"]
-      assert_equal 32, parsed["author"]["age"]
+      assert_equal 'David', parsed['author']['name']
+      assert_equal 32, parsed['author']['age']
     end
   end
 
-  test "nesting multiple children with block" do
+  test 'nesting multiple children with block' do
     json = Jbuilder.encode do |json|
       json.comments do
-        json.child! { json.content "hello" }
-        json.child! { json.content "world" }
+        json.child! { json.content 'hello' }
+        json.child! { json.content 'world' }
       end
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "hello", parsed["comments"].first["content"]
-      assert_equal "world", parsed["comments"].second["content"]
+      assert_equal 'hello', parsed['comments'].first['content']
+      assert_equal 'world', parsed['comments'].second['content']
     end
   end
 
-  test "nesting single child with inline extract" do
+  test 'nesting single child with inline extract' do
     person = Class.new do
       attr_reader :name, :age
 
       def initialize(name, age)
         @name, @age = name, age
       end
-    end.new("David", 32)
+    end.new('David', 32)
 
     json = Jbuilder.encode do |json|
       json.author person, :name, :age
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "David", parsed["author"]["name"]
-      assert_equal 32,      parsed["author"]["age"]
+      assert_equal 'David', parsed['author']['name']
+      assert_equal 32,      parsed['author']['age']
     end
   end
 
-  test "nesting multiple children from array" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  test 'nesting multiple children from array' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.comments comments, :content
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal ["content"], parsed["comments"].first.keys
-      assert_equal "hello", parsed["comments"].first["content"]
-      assert_equal "world", parsed["comments"].second["content"]
+      assert_equal ['content'], parsed['comments'].first.keys
+      assert_equal 'hello', parsed['comments'].first['content']
+      assert_equal 'world', parsed['comments'].second['content']
     end
   end
 
-  test "nesting multiple children from array when child array is empty" do
+  test 'nesting multiple children from array when child array is empty' do
     comments = []
 
     json = Jbuilder.encode do |json|
-      json.name "Parent"
+      json.name 'Parent'
       json.comments comments, :content
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "Parent", parsed["name"]
-      assert_equal [], parsed["comments"]
+      assert_equal 'Parent', parsed['name']
+      assert_equal [], parsed['comments']
     end
   end
 
-  test "nesting multiple children from array with inline loop" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  test 'nesting multiple children from array with inline loop' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.comments comments do |comment|
@@ -170,24 +170,24 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal ["content"], parsed["comments"].first.keys
-      assert_equal "hello", parsed["comments"].first["content"]
-      assert_equal "world", parsed["comments"].second["content"]
+      assert_equal ['content'], parsed['comments'].first.keys
+      assert_equal 'hello', parsed['comments'].first['content']
+      assert_equal 'world', parsed['comments'].second['content']
     end
   end
 
-  test "handles nil-collections as empty arrays" do
+  test 'handles nil-collections as empty arrays' do
     json = Jbuilder.encode do |json|
       json.comments nil do |comment|
         json.content comment.content
       end
     end
 
-    assert_equal [], MultiJson.load(json)["comments"]
+    assert_equal [], MultiJson.load(json)['comments']
   end
 
-  test "nesting multiple children from array with inline loop with old api" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  test 'nesting multiple children from array with inline loop with old api' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.comments comments do |json, comment|
@@ -196,14 +196,14 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal ["content"], parsed["comments"].first.keys
-      assert_equal "hello", parsed["comments"].first["content"]
-      assert_equal "world", parsed["comments"].second["content"]
+      assert_equal ['content'], parsed['comments'].first.keys
+      assert_equal 'hello', parsed['comments'].first['content']
+      assert_equal 'world', parsed['comments'].second['content']
     end
   end
 
-  test "nesting multiple children from array with inline loop on root" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  test 'nesting multiple children from array with inline loop on root' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.call(comments) do |comment|
@@ -212,13 +212,13 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "hello", parsed.first["content"]
-      assert_equal "world", parsed.second["content"]
+      assert_equal 'hello', parsed.first['content']
+      assert_equal 'world', parsed.second['content']
     end
   end
 
-  test "nesting multiple children from array with inline loop on root with old api" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  test 'nesting multiple children from array with inline loop on root with old api' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.call(comments) do |json, comment|
@@ -227,47 +227,47 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "hello", parsed.first["content"]
-      assert_equal "world", parsed.second["content"]
+      assert_equal 'hello', parsed.first['content']
+      assert_equal 'world', parsed.second['content']
     end
   end
 
-  test "array nested inside nested hash" do
+  test 'array nested inside nested hash' do
     json = Jbuilder.encode do |json|
       json.author do
-        json.name "David"
+        json.name 'David'
         json.age  32
 
         json.comments do
-          json.child! { json.content "hello" }
-          json.child! { json.content "world" }
+          json.child! { json.content 'hello' }
+          json.child! { json.content 'world' }
         end
       end
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "hello", parsed["author"]["comments"].first["content"]
-      assert_equal "world", parsed["author"]["comments"].second["content"]
+      assert_equal 'hello', parsed['author']['comments'].first['content']
+      assert_equal 'world', parsed['author']['comments'].second['content']
     end
   end
 
-  test "array nested inside array" do
+  test 'array nested inside array' do
     json = Jbuilder.encode do |json|
       json.comments do
         json.child! do
           json.authors do
             json.child! do
-              json.name "david"
+              json.name 'david'
             end
           end
         end
       end
     end
 
-    assert_equal "david", MultiJson.load(json)["comments"].first["authors"].first["name"]
+    assert_equal 'david', MultiJson.load(json)['comments'].first['authors'].first['name']
   end
 
-  test "directly set an array nested in another array" do
+  test 'directly set an array nested in another array' do
     data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
     json = Jbuilder.encode do |json|
       json.array! data do |object|
@@ -282,7 +282,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
   end
 
-  test "directly set an array nested in another array with old api" do
+  test 'directly set an array nested in another array with old api' do
     data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
     json = Jbuilder.encode do |json|
       json.array! data do |json, object|
@@ -297,20 +297,20 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
   end
 
-  test "nested jbuilder objects" do
+  test 'nested jbuilder objects' do
     to_nest = Jbuilder.new
-    to_nest.nested_value "Nested Test"
+    to_nest.nested_value 'Nested Test'
     json = Jbuilder.encode do |json|
-      json.value "Test"
+      json.value 'Test'
       json.nested to_nest
     end
     parsed = MultiJson.load(json)
-    assert_equal "Test", parsed['value']
-    assert_equal "Nested Test", parsed["nested"]["nested_value"]
+    assert_equal 'Test', parsed['value']
+    assert_equal 'Nested Test', parsed['nested']['nested_value']
   end
 
-  test "top-level array" do
-    comments = [ Struct.new(:content, :id).new("hello", 1), Struct.new(:content, :id).new("world", 2) ]
+  test 'top-level array' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.array!(comments) do |comment|
@@ -319,12 +319,12 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "hello", parsed.first["content"]
-      assert_equal "world", parsed.second["content"]
+      assert_equal 'hello', parsed.first['content']
+      assert_equal 'world', parsed.second['content']
     end
   end
 
-  test "empty top-level array" do
+  test 'empty top-level array' do
     comments = []
 
     json = Jbuilder.encode do |json|
@@ -336,29 +336,29 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal [], MultiJson.load(json)
   end
 
-  test "dynamically set a key/value" do
+  test 'dynamically set a key/value' do
     json = Jbuilder.encode do |json|
-      json.set!(:each, "stuff")
+      json.set!(:each, 'stuff')
     end
 
-    assert_equal "stuff", MultiJson.load(json)["each"]
+    assert_equal 'stuff', MultiJson.load(json)['each']
   end
 
-  test "dynamically set a key/nested child with block" do
+  test 'dynamically set a key/nested child with block' do
     json = Jbuilder.encode do |json|
       json.set!(:author) do
-        json.name "David"
+        json.name 'David'
         json.age 32
       end
     end
 
     MultiJson.load(json).tap do |parsed|
-      assert_equal "David", parsed["author"]["name"]
-      assert_equal 32, parsed["author"]["age"]
+      assert_equal 'David', parsed['author']['name']
+      assert_equal 32, parsed['author']['age']
     end
   end
 
-  test "query like object" do
+  test 'query like object' do
     class Person
       attr_reader :name, :age
 
@@ -370,7 +370,7 @@ class JbuilderTest < ActiveSupport::TestCase
       include Enumerable
 
       def each(&block)
-        [Person.new("Bob", 30), Person.new("Frank", 50)].each(&block)
+        [Person.new('Bob', 30), Person.new('Frank', 50)].each(&block)
       end
       def empty?
         false
@@ -382,94 +382,94 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     parsed = MultiJson.load(result)
-    assert_equal 2, parsed["relations"].length
-    assert_equal "Bob", parsed["relations"][0]["name"]
-    assert_equal 50, parsed["relations"][1]["age"]
+    assert_equal 2, parsed['relations'].length
+    assert_equal 'Bob', parsed['relations'][0]['name']
+    assert_equal 50, parsed['relations'][1]['age']
   end
 
-  test "key_format! with parameter" do
+  test 'key_format! with parameter' do
     json = Jbuilder.new
     json.key_format! :camelize => [:lower]
-    json.camel_style "for JS"
+    json.camel_style 'for JS'
 
     assert_equal ['camelStyle'], json.attributes!.keys
   end
 
-  test "key_format! with parameter not as an array" do
+  test 'key_format! with parameter not as an array' do
     json = Jbuilder.new
     json.key_format! :camelize => :lower
-    json.camel_style "for JS"
+    json.camel_style 'for JS'
 
     assert_equal ['camelStyle'], json.attributes!.keys
   end
 
-  test "key_format! propagates to child elements" do
+  test 'key_format! propagates to child elements' do
     json = Jbuilder.new
     json.key_format! :upcase
-    json.level1 "one"
+    json.level1 'one'
     json.level2 do
-      json.value "two"
+      json.value 'two'
     end
 
     result = json.attributes!
-    assert_equal "one", result["LEVEL1"]
-    assert_equal "two", result["LEVEL2"]["VALUE"]
+    assert_equal 'one', result['LEVEL1']
+    assert_equal 'two', result['LEVEL2']['VALUE']
   end
 
-  test "key_format! resets after child element" do
+  test 'key_format! resets after child element' do
     json = Jbuilder.new
     json.level2 do
       json.key_format! :upcase
-      json.value "two"
+      json.value 'two'
     end
-    json.level1 "one"
+    json.level1 'one'
 
     result = json.attributes!
-    assert_equal "two", result["level2"]["VALUE"]
-    assert_equal "one", result["level1"]
+    assert_equal 'two', result['level2']['VALUE']
+    assert_equal 'one', result['level1']
   end
 
-  test "key_format! with no parameter" do
+  test 'key_format! with no parameter' do
     json = Jbuilder.new
     json.key_format! :upcase
-    json.lower "Value"
+    json.lower 'Value'
 
     assert_equal ['LOWER'], json.attributes!.keys
   end
 
-  test "key_format! with multiple steps" do
+  test 'key_format! with multiple steps' do
     json = Jbuilder.new
     json.key_format! :upcase, :pluralize
-    json.pill ""
+    json.pill ''
 
-    assert_equal ["PILLs"], json.attributes!.keys
+    assert_equal ['PILLs'], json.attributes!.keys
   end
 
-  test "key_format! with lambda/proc" do
+  test 'key_format! with lambda/proc' do
     json = Jbuilder.new
-    json.key_format! lambda { |key| key + " and friends" }
-    json.oats ""
+    json.key_format! lambda { |key| key + ' and friends' }
+    json.oats ''
 
-    assert_equal ["oats and friends"], json.attributes!.keys
+    assert_equal ['oats and friends'], json.attributes!.keys
   end
 
-  test "default key_format!" do
+  test 'default key_format!' do
     Jbuilder.key_format :camelize => :lower
     json = Jbuilder.new
-    json.camel_style "for JS"
+    json.camel_style 'for JS'
 
     assert_equal ['camelStyle'], json.attributes!.keys
-    Jbuilder.send(:class_variable_set, "@@key_formatter", Jbuilder::KeyFormatter.new)
+    Jbuilder.send(:class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new)
   end
 
-  test "don't use default key formatter directly" do
+  test 'do not use default key formatter directly' do
     json = Jbuilder.new
-    json.key "value"
+    json.key 'value'
 
-    assert_equal [], Jbuilder.send(:class_variable_get, "@@key_formatter").instance_variable_get("@cache").keys
+    assert_equal [], Jbuilder.send(:class_variable_get, '@@key_formatter').instance_variable_get('@cache').keys
   end
 
-  test "ignore_nil! without a parameter" do
+  test 'ignore_nil! without a parameter' do
     json = Jbuilder.new
     json.ignore_nil!
     json.test nil
@@ -477,29 +477,29 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal [], json.attributes!.keys
   end
 
-  test "ignore_nil! with parameter" do
+  test 'ignore_nil! with parameter' do
     json = Jbuilder.new
     json.ignore_nil! true
-    json.name "Bob"
+    json.name 'Bob'
     json.dne nil
 
-    assert_equal ["name"], json.attributes!.keys
+    assert_equal ['name'], json.attributes!.keys
 
     json = Jbuilder.new
     json.ignore_nil! false
-    json.name "Bob"
+    json.name 'Bob'
     json.dne nil
 
-    assert_equal ["name", "dne"], json.attributes!.keys
+    assert_equal ['name', 'dne'], json.attributes!.keys
   end
 
-  test "default ignore_nil!" do
+  test 'default ignore_nil!' do
     Jbuilder.ignore_nil
     json = Jbuilder.new
-    json.name "Bob"
+    json.name 'Bob'
     json.dne nil
 
-    assert_equal ["name"], json.attributes!.keys
-    Jbuilder.send(:class_variable_set, "@@ignore_nil", false)
+    assert_equal ['name'], json.attributes!.keys
+    Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
   end
 end
