@@ -259,7 +259,7 @@ class Jbuilder < JbuilderProxy
 
     def method_missing(method, value = BLANK, *args)
       result = if ::Kernel.block_given?
-        if value != BLANK
+        if BLANK != value
           # json.comments @post.comments { |comment| ... }
           # { "comments": [ { ... }, { ... } ] }
           _map_collection(value) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
