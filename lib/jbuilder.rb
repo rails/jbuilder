@@ -16,7 +16,7 @@ end
 class Jbuilder < JbuilderProxy
   class KeyFormatter
     def initialize(*args)
-      @format = {}
+      @format = ::ActiveSupport::OrderedHash.new
       @cache = {}
 
       options = args.extract_options!
