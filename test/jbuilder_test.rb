@@ -4,6 +4,13 @@ require 'active_support/inflector'
 
 require 'jbuilder'
 
+class JbuilderProxy
+  # Faking Object#instance_eval for 1.8
+  def instance_eval(code)
+    eval code
+  end
+end if ::RUBY_VERSION < '1.9'
+
 class JbuilderTest < ActiveSupport::TestCase
   test 'single key' do
     json = Jbuilder.encode do |json|
