@@ -52,10 +52,17 @@ class Jbuilder < JbuilderProxy
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
 
-  def initialize(key_formatter = @@key_formatter.clone, ignore_nil = @@ignore_nil)
+  def initialize(*args)
     @attributes = ::ActiveSupport::OrderedHash.new
-    @key_formatter = key_formatter
-    @ignore_nil = ignore_nil
+
+    options = args.extract_options!
+    @key_formatter = options.fetch(:key_formatter, @@key_formatter.clone)
+    @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
+
+    # old-style initialization compatibility
+    @key_formatter = args.shift if args.any?
+    @ignore_nil = args.shift if args.any?
+
     yield self if ::Kernel.block_given?
   end
 
