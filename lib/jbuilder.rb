@@ -60,8 +60,12 @@ class Jbuilder < JbuilderProxy
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
 
     # old-style initialization compatibility
-    @key_formatter = args.shift if args.any?
-    @ignore_nil = args.shift if args.any?
+    if args.any?
+      @key_formatter = args.shift
+      @ignore_nil = args.shift if args.any?
+      ::ActiveSupport::Deprecation.warn 'Initialization with positioned ' +
+        'arguments is deprecated. Use hash syntax instead.'
+    end
 
     yield self if ::Kernel.block_given?
   end

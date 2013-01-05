@@ -394,10 +394,12 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 50, parsed['relations'][1]['age']
   end
 
-  test 'initialize with positioned arguments' do
-    jbuilder = Jbuilder.new(1, 2)
-    assert_equal 1, jbuilder.instance_eval('@key_formatter')
-    assert_equal 2, jbuilder.instance_eval('@ignore_nil')
+  test 'initialize with positioned arguments (deprecated)' do
+    ::ActiveSupport::Deprecation.silence do
+      jbuilder = Jbuilder.new(1, 2)
+      assert_equal 1, jbuilder.instance_eval('@key_formatter')
+      assert_equal 2, jbuilder.instance_eval('@ignore_nil')
+    end
   end
 
   test 'initialize via options hash' do
