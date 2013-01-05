@@ -1,6 +1,6 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
 
 gemspec
 
-gem "actionpack"
-gem "rake"
+gem 'actionpack'
+gem 'rake'
