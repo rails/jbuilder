@@ -338,3 +338,4 @@ class Jbuilder < JbuilderProxy
 end
 
 require 'jbuilder/jbuilder_template' if defined?(ActionView::Template)
+require 'jbuilder/engine' if defined?(Rails)
