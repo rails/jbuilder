@@ -1,0 +1,1 @@
+json.extract! @<%= singular_table_name %>, <%= attributes.map{ |a| ":#{a.name}" } * ', ' %>
