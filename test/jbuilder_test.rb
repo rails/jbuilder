@@ -11,6 +11,16 @@ class JbuilderProxy
   end
 end if ::RUBY_VERSION < '1.9'
 
+class NonEnumerable
+  def initialize(collection)
+    @collection = collection
+  end
+
+  def map(&block)
+    @collection.map(&block)
+  end
+end
+
 class JbuilderTest < ActiveSupport::TestCase
   test 'single key' do
     json = Jbuilder.encode do |json|
@@ -191,6 +201,36 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal [], MultiJson.load(json)['comments']
+  end
+
+  test 'nesting multiple children from a non-Enumerable that responds to #map' do
+    comments = NonEnumerable.new([ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ])
+
+    json = Jbuilder.encode do |json|
+      json.comments comments, :content
+    end
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal ['content'], parsed['comments'].first.keys
+      assert_equal 'hello', parsed['comments'].first['content']
+      assert_equal 'world', parsed['comments'].second['content']
+    end
+  end
+
+  test 'nesting multiple chilren from a non-Enumerable that responds to #map with inline loop' do
+    comments = NonEnumerable.new([ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ])
+
+    json = Jbuilder.encode do |json|
+      json.comments comments do |comment|
+        json.content comment.content
+      end
+    end
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal ['content'], parsed['comments'].first.keys
+      assert_equal 'hello', parsed['comments'].first['content']
+      assert_equal 'world', parsed['comments'].second['content']
+    end
   end
 
   test 'nesting multiple children from array with inline loop with old api' do
