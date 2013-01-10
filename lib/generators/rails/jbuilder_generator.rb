@@ -21,15 +21,18 @@ module Rails
         end
       end
 
-      protected
 
+      protected
         def filename_with_extensions(name)
           [name, :json, :jbuilder] * '.'
         end
 
-        def attributes_list
-          attrs = attributes_names + %w(created_at updated_at)
-          attrs.map{ |a| ":#{a}"} * ', '
+        def attributes_list_with_timestamps
+          attributes_list(attributes_names + %w(created_at updated_at))
+        end
+        
+        def attributes_list(attributes = attributes_names)
+          attributes.map { |a| ":#{a}"} * ', '
         end
     end
   end
