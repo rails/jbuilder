@@ -2,7 +2,6 @@ require 'test/unit'
 require 'action_view'
 require 'action_view/testing/resolvers'
 require 'active_support/cache'
-
 require 'jbuilder'
 
 module Rails
