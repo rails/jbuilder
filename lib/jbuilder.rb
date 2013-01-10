@@ -338,3 +338,8 @@ class Jbuilder < JbuilderProxy
 end
 
 require 'jbuilder_template' if defined?(ActionView::Template)
+
+begin
+  require 'railtie' if Rails::VERSION::MAJOR == 4
+rescue NameError
+end
