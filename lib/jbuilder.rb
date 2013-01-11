@@ -292,7 +292,7 @@ class Jbuilder < JbuilderProxy
             value
           end
         else
-          if value.kind_of?(::Enumerable)
+          if value.respond_to?(:map)
             # json.comments(@post.comments, :content, :created_at)
             # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
             _map_collection(value) do |element|
