@@ -20,13 +20,12 @@ class JbuilderGeneratorTest < Rails::Generators::TestCase
 
     assert_file 'app/views/posts/index.json.jbuilder' do |content|
       assert_match /json\.array!\(@posts\) do \|post\|/, content
-      assert_match /json\.extract! post, :title, :body, :created_at, :updated_at/, content
-      assert_match /json\.url post_url\(post\)/, content
+      assert_match /json\.extract! post, :title, :body/, content
+      assert_match /json\.url post_url\(post\, format: :json\)/, content
     end
 
     assert_file 'app/views/posts/show.json.jbuilder' do |content|
       assert_match /json\.extract! @post, :title, :body, :created_at, :updated_at/, content
-      assert_match /json\.url post_url\(@post\)/, content
     end
   end
 end
