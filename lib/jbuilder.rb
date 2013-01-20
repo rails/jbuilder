@@ -206,9 +206,9 @@ class Jbuilder < JbuilderProxy
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection)
+  def array!(collection, &block)
     @attributes = if ::Kernel::block_given?
-      _map_collection(collection) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
+      _map_collection(collection) { |element| block.arity == 2 ? block[self, element] : block[element] }
     else
       collection
     end
@@ -233,9 +233,9 @@ class Jbuilder < JbuilderProxy
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
     if object.is_a?(::Hash)
-      attributes.each {|attribute| _set_value attribute, object.send(:fetch, attribute)}
+      attributes.each { |attribute| _set_value attribute, object.fetch(attribute) }
     else
-      attributes.each {|attribute| _set_value attribute, object.send(attribute)}
+      attributes.each { |attribute| _set_value attribute, object.send(attribute) }
     end
   end
 
@@ -268,12 +268,12 @@ class Jbuilder < JbuilderProxy
 
     BLANK = ::Object.new
 
-    def method_missing(method, value = BLANK, *args)
+    def method_missing(method, value = BLANK, *args, &block)
       result = if ::Kernel.block_given?
         if BLANK != value
           # json.comments @post.comments { |comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _map_collection(value) { |element| if ::Proc.new.arity == 2 then yield self, element else yield element end }
+          _map_collection(value) { |element| block.arity == 2 ? block[self, element] : block[element] }
         else
           # json.comments { ... }
           # { "comments": ... }
