@@ -20,7 +20,7 @@ Jbuilder.encode do |json|
 
   json.comments @message.comments, :content, :created_at
 
-  json.attachments @message.attachments do |attachment|
+  json.attachments @message.attachments do |json, attachment|
     json.filename attachment.filename
     json.url url_for(attachment)
   end
