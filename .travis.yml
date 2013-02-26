@@ -4,14 +4,14 @@ matrix:
   include:
     - rvm: 1.9.3
       gemfile: Gemfile
-    - rvm: 1.9.2
-      gemfile: Gemfile
     - rvm: ruby-head
       gemfile: Gemfile
     - rvm: jruby-19mode
       gemfile: Gemfile
     - rvm: rbx-19mode
       gemfile: Gemfile
+    - rvm: 1.9.2
+      gemfile: Gemfile-1.8
     - rvm: 1.8.7
       gemfile: Gemfile-1.8
     - rvm: jruby-18mode
