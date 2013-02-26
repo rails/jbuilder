@@ -2,7 +2,5 @@ source 'https://rubygems.org'
 
 gemspec
 
-git 'git://github.com/rails/rails.git' do
-  gem 'railties'
-  gem 'actionpack'
-end
+gem 'railties', '~> 4.0.0.beta1'
+gem 'actionpack', '~> 4.0.0.beta1'
