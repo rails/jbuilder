@@ -55,6 +55,16 @@ This will build the following structure:
 }
 ```
 
+To define attribute and structure names dynamically, use the `set!` method:
+
+``` ruby
+json.set!(:author) do
+  json.set!(:name, "David")
+end
+
+# => "author": { "name": "David" }
+```
+
 Top level arrays can be handled directly.  Useful for index and other collection actions.
 
 ``` ruby
@@ -63,6 +73,7 @@ json.array!(@people) do |person|
   json.name person.name
   json.age calculate_age(person.birthday)
 end
+
 # => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
 ```
 
@@ -124,7 +135,7 @@ Keys can be auto formatted using `key_format!`, this can be used to convert keyn
 json.key_format! :camelize => :lower
 json.first_name "David"
 
-# { "firstName": "David" }
+# => { "firstName": "David" }
 ```
 
 You can set this globaly with the class method `key_format` (from inside your enviorment.rb for example):
