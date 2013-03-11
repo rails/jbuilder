@@ -239,6 +239,18 @@ class Jbuilder < JbuilderProxy
     end
   end
 
+  # Almost same as using json.key, but with key passed explicitly as an argument
+  # 
+  # common_collections_map.each do |key, collection|
+  #   json.key! key, collection  do |item|
+  #     json.call item, :name
+  #   end
+  # end
+  # 
+  def key! name, *args, &block
+    _build name, *args, &block
+  end
+
   def call(object = nil, *attributes)
     if attributes.empty?
       array!(object, &::Proc.new)
@@ -268,7 +280,11 @@ class Jbuilder < JbuilderProxy
 
     BLANK = ::Object.new
 
-    def method_missing(method, value = BLANK, *args, &block)
+    def method_missing(method, *args, &block)
+      _build method, *args, &block
+    end
+
+    def _build(method, value = BLANK, *args, &block)
       result = if ::Kernel.block_given?
         if BLANK != value
           # json.comments @post.comments { |comment| ... }
