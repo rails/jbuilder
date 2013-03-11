@@ -31,7 +31,7 @@ This will build the following structure:
 
 ``` javascript
 {
-  "content": "<p>This is <i>serious</i> monkey business",
+  "content": "<p>This is <i>serious</i> monkey business</p>",
   "created_at": "2011-10-29T20:45:28-05:00",
   "updated_at": "2011-10-29T20:45:28-05:00",
 
@@ -59,7 +59,7 @@ To define attribute and structure names dynamically, use the `set!` method:
 
 ``` ruby
 json.set!(:author) do
-  json.set!(:name, "David")
+  json.set! :name, "David"
 end
 
 # => "author": { "name": "David" }
