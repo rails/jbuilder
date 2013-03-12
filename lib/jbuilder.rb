@@ -279,33 +279,29 @@ class Jbuilder < JbuilderProxy
           # { "comments": ... }
           _scope { yield self }
         end
-      else
-        if args.empty?
-          if ::Jbuilder === value
-            # json.age 32
-            # json.person another_jbuilder
-            # { "age": 32, "person": { ...  }
-            value.attributes!
-          else
-            # json.age 32
-            # { "age": 32 }
-            value
-          end
+      elsif args.empty?
+        if ::Jbuilder === value
+          # json.age 32
+          # json.person another_jbuilder
+          # { "age": 32, "person": { ...  }
+          value.attributes!
         else
-          if value.respond_to?(:map)
-            # json.comments(@post.comments, :content, :created_at)
-            # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-            _map_collection(value) do |element|
-              args.each do |attribute|
-                _set_value attribute, element.send(attribute)
-              end
-            end
-          else
-            # json.author @post.creator, :name, :email_address
-            # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-            _scope { extract! value, *args }
+          # json.age 32
+          # { "age": 32 }
+          value
+        end
+      elsif value.respond_to?(:map)
+        # json.comments(@post.comments, :content, :created_at)
+        # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
+        _map_collection(value) do |element|
+          args.each do |attribute|
+            _set_value attribute, element.send(attribute)
           end
         end
+      else
+        # json.author @post.creator, :name, :email_address
+        # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
+        _scope { extract! value, *args }
       end
       _set_value method, result
     end
