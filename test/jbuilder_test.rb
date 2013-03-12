@@ -53,10 +53,9 @@ class JbuilderTest < ActiveSupport::TestCase
       json.content 'world'
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'hello', parsed['title']
-      assert_equal 'world', parsed['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed['title']
+    assert_equal 'world', parsed['content']
   end
 
   test 'extracting from object' do
@@ -66,10 +65,9 @@ class JbuilderTest < ActiveSupport::TestCase
       json.extract! person, :name, :age
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'David', parsed['name']
-      assert_equal 32, parsed['age']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'David', parsed['name']
+    assert_equal 32, parsed['age']
   end
 
   test 'extracting from object using call style for 1.9' do
@@ -83,10 +81,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'David', parsed['name']
-      assert_equal 32, parsed['age']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'David', parsed['name']
+    assert_equal 32, parsed['age']
   end
 
   test 'extracting from hash' do
@@ -96,10 +93,9 @@ class JbuilderTest < ActiveSupport::TestCase
       json.extract! person, :name, :age
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'Jim', parsed['name']
-      assert_equal 34, parsed['age']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'Jim', parsed['name']
+    assert_equal 34, parsed['age']
   end
 
   test 'nesting single child with block' do
@@ -110,10 +106,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'David', parsed['author']['name']
-      assert_equal 32, parsed['author']['age']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'David', parsed['author']['name']
+    assert_equal 32, parsed['author']['age']
   end
 
   test 'nesting multiple children with block' do
@@ -124,10 +119,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'hello', parsed['comments'].first['content']
-      assert_equal 'world', parsed['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
   end
 
   test 'nesting single child with inline extract' do
@@ -143,10 +137,9 @@ class JbuilderTest < ActiveSupport::TestCase
       json.author person, :name, :age
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'David', parsed['author']['name']
-      assert_equal 32,      parsed['author']['age']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'David', parsed['author']['name']
+    assert_equal 32,      parsed['author']['age']
   end
 
   test 'nesting multiple children from array' do
@@ -156,11 +149,10 @@ class JbuilderTest < ActiveSupport::TestCase
       json.comments comments, :content
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal ['content'], parsed['comments'].first.keys
-      assert_equal 'hello', parsed['comments'].first['content']
-      assert_equal 'world', parsed['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal ['content'], parsed['comments'].first.keys
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
   end
 
   test 'nesting multiple children from array when child array is empty' do
@@ -171,10 +163,9 @@ class JbuilderTest < ActiveSupport::TestCase
       json.comments comments, :content
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'Parent', parsed['name']
-      assert_equal [], parsed['comments']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'Parent', parsed['name']
+    assert_equal [], parsed['comments']
   end
 
   test 'nesting multiple children from array with inline loop' do
@@ -186,11 +177,10 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal ['content'], parsed['comments'].first.keys
-      assert_equal 'hello', parsed['comments'].first['content']
-      assert_equal 'world', parsed['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal ['content'], parsed['comments'].first.keys
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
   end
 
   test 'handles nil-collections as empty arrays' do
@@ -210,11 +200,10 @@ class JbuilderTest < ActiveSupport::TestCase
       json.comments comments, :content
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal ['content'], parsed['comments'].first.keys
-      assert_equal 'hello', parsed['comments'].first['content']
-      assert_equal 'world', parsed['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal ['content'], parsed['comments'].first.keys
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
   end
 
   test 'nesting multiple chilren from a non-Enumerable that responds to #map with inline loop' do
@@ -226,11 +215,10 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal ['content'], parsed['comments'].first.keys
-      assert_equal 'hello', parsed['comments'].first['content']
-      assert_equal 'world', parsed['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal ['content'], parsed['comments'].first.keys
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
   end
 
   test 'nesting multiple children from array with inline loop with old api' do
@@ -242,11 +230,10 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal ['content'], parsed['comments'].first.keys
-      assert_equal 'hello', parsed['comments'].first['content']
-      assert_equal 'world', parsed['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal ['content'], parsed['comments'].first.keys
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
   end
 
   test 'nesting multiple children from array with inline loop on root' do
@@ -258,10 +245,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'hello', parsed.first['content']
-      assert_equal 'world', parsed.second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed.first['content']
+    assert_equal 'world', parsed.second['content']
   end
 
   test 'nesting multiple children from array with inline loop on root with old api' do
@@ -273,10 +259,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'hello', parsed.first['content']
-      assert_equal 'world', parsed.second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed.first['content']
+    assert_equal 'world', parsed.second['content']
   end
 
   test 'array nested inside nested hash' do
@@ -292,10 +277,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'hello', parsed['author']['comments'].first['content']
-      assert_equal 'world', parsed['author']['comments'].second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed['author']['comments'].first['content']
+    assert_equal 'world', parsed['author']['comments'].second['content']
   end
 
   test 'array nested inside array' do
@@ -365,10 +349,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'hello', parsed.first['content']
-      assert_equal 'world', parsed.second['content']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed.first['content']
+    assert_equal 'world', parsed.second['content']
   end
 
   test 'empty top-level array' do
@@ -385,7 +368,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'dynamically set a key/value' do
     json = Jbuilder.encode do |json|
-      json.set!(:each, 'stuff')
+      json.set! :each, 'stuff'
     end
 
     assert_equal 'stuff', MultiJson.load(json)['each']
@@ -399,10 +382,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal 'David', parsed['author']['name']
-      assert_equal 32, parsed['author']['age']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'David', parsed['author']['name']
+    assert_equal 32, parsed['author']['age']
   end
 
   test 'query like object' do

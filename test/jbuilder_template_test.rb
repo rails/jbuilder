@@ -93,9 +93,8 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal "Cache", parsed['name']
-    end
+    parsed = MultiJson.load(json)
+    assert_equal 'Cache', parsed['name']
   end
 
   test "fragment caching deserializes an array" do
@@ -113,9 +112,8 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    MultiJson.load(json).tap do |parsed|
-      assert_equal ["a", "b", "c"], parsed
-    end
+    parsed = MultiJson.load(json)
+    assert_equal %w(a b c), parsed
   end
 
 end
