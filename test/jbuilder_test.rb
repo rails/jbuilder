@@ -387,6 +387,19 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, parsed['author']['age']
   end
 
+  test 'dynamically sets a collection' do
+    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+
+    json = Jbuilder.encode do |json|
+      json.set! :comments, comments, :content
+    end
+
+    parsed = MultiJson.load(json)
+    assert_equal ['content'], parsed['comments'].first.keys
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal 'world', parsed['comments'].second['content']
+  end
+
   test 'query like object' do
     class Person
       attr_reader :name, :age
