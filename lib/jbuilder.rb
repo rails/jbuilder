@@ -274,7 +274,7 @@ class Jbuilder < JbuilderProxy
         if BLANK != value
           # json.comments @post.comments { |comment| ... }
           # { "comments": [ { ... }, { ... } ] }
-          _map_collection(value) { |element| block.arity == 2 ? block[self, element] : block[element] }
+          _scope{ array! value, &block }
         else
           # json.comments { ... }
           # { "comments": ... }
@@ -292,18 +292,15 @@ class Jbuilder < JbuilderProxy
           value
         end
       elsif value.respond_to?(:map)
-        # json.comments(@post.comments, :content, :created_at)
+        # json.comments @post.comments, :content, :created_at
         # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-        _map_collection(value) do |element|
-          args.each do |attribute|
-            _set_value attribute, element.send(attribute)
-          end
-        end
+        _map_collection(value){ |element| extract! element, *args }
       else
         # json.author @post.creator, :name, :email_address
         # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
         _scope { extract! value, *args }
       end
+
       _set_value method, result
     end
 
