@@ -35,10 +35,10 @@ class Jbuilder < JbuilderProxy
     def format(key)
       @cache[key] ||= @format.inject(key.to_s) do |result, args|
         func, args = args
-        if func.is_a? Proc
-          func.call(result, *args)
+        if func.is_a?(::Proc)
+          func.call result, *args
         else
-          result.send(func, *args)
+          result.send func, *args
         end
       end
     end
@@ -172,7 +172,7 @@ class Jbuilder < JbuilderProxy
   #     json.content comment.formatted_content
   #   end
   def child!
-    @attributes = [] unless @attributes.is_a? ::Array
+    @attributes = [] unless @attributes.is_a?(::Array)
     @attributes << _scope { yield self }
   end
 
@@ -241,9 +241,9 @@ class Jbuilder < JbuilderProxy
 
   def call(object = nil, *attributes)
     if attributes.empty?
-      array!(object, &::Proc.new)
+      array! object, &::Proc.new
     else
-      extract!(object, *attributes)
+      extract! object, *attributes
     end
   end
 
@@ -258,6 +258,7 @@ class Jbuilder < JbuilderProxy
   end
 
   protected
+
     def _set_value(key, value)
       unless @ignore_nil && value.nil?
         @attributes[@key_formatter.format(key)] = value
@@ -280,7 +281,7 @@ class Jbuilder < JbuilderProxy
           _scope { yield self }
         end
       elsif args.empty?
-        if ::Jbuilder === value
+        if value.is_a?(::Jbuilder)
           # json.age 32
           # json.person another_jbuilder
           # { "age": 32, "person": { ...  }
@@ -325,10 +326,10 @@ class Jbuilder < JbuilderProxy
 
     def _merge(hash_or_array)
       if hash_or_array.is_a?(::Array)
-        @attributes = [] unless @attributes.is_a? ::Array
-        @attributes.concat(hash_or_array)
+        @attributes = [] unless @attributes.is_a?(::Array)
+        @attributes.concat hash_or_array
       else
-        @attributes.update(hash_or_array)
+        @attributes.update hash_or_array
       end
     end
 end
