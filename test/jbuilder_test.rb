@@ -89,6 +89,28 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
+  test 'building by name using []' do
+    json = Jbuilder.encode do |json|
+      json.key! :key, 'value'
+    end
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal 'value', parsed['key']
+    end
+  end
+
+  test 'nested building by name using []' do
+    json = Jbuilder.encode do |json|
+      json.key! :author do |json|
+        json.name 'David'
+      end
+    end
+
+    MultiJson.load(json).tap do |parsed|
+      assert_equal 'David', parsed['author']['name']
+    end
+  end
+
   test 'extracting from hash' do
     person = {:name => 'Jim', :age => 34}
 
