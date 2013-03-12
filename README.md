@@ -74,7 +74,7 @@ json.array!(@people) do |person|
   json.age calculate_age(person.birthday)
 end
 
-# => [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
+# => [ { "name": "David", "age": 32 }, { "name": "Jamie", "age": 31 } ]
 ```
 
 Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
