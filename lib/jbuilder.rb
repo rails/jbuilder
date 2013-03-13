@@ -70,29 +70,46 @@ class Jbuilder < JbuilderProxy
     yield self if ::Kernel.block_given?
   end
 
-  # Dynamically set a key value pair.
-  #
-  # Example:
-  #
-  #   json.set!(:each, "stuff")
-  #
-  #   { "each": "stuff" }
-  #
-  # You can also pass a block for nested attributes
-  #
-  #   json.set!(:author) do
-  #     json.name "David"
-  #     json.age 32
-  #   end
-  #
-  #   { "author": { "name": "David", "age": 32 } }
-  def set!(key, value = nil)
-    if ::Kernel::block_given?
-      _set_value(key, _scope { yield self })
+  BLANK = ::Object.new
+
+  def set!(key, value = BLANK, *args, &block)
+    result = if ::Kernel.block_given?
+      if BLANK != value
+        # json.comments @post.comments { |comment| ... }
+        # { "comments": [ { ... }, { ... } ] }
+        _scope{ array! value, &block }
+      else
+        # json.comments { ... }
+        # { "comments": ... }
+        _scope { yield self }
+      end
+    elsif args.empty?
+      if value.is_a?(::Jbuilder)
+        # json.age 32
+        # json.person another_jbuilder
+        # { "age": 32, "person": { ...  }
+        value.attributes!
+      else
+        # json.age 32
+        # { "age": 32 }
+        value
+      end
+    elsif value.respond_to?(:map)
+      # json.comments @post.comments, :content, :created_at
+      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
+      _map_collection(value){ |element| extract! element, *args }
     else
-      _set_value(key, value)
+      # json.author @post.creator, :name, :email_address
+      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
+      _scope { extract! value, *args }
     end
+
+    _set_value key, result
   end
+
+  alias_method :method_missing, :set!
+  private :method_missing
+
 
   # Specifies formatting to be applied to the key. Passing in a name of a function
   # will cause that function to be called on the key.  So :upcase will upper case
@@ -257,51 +274,12 @@ class Jbuilder < JbuilderProxy
     ::MultiJson.encode @attributes
   end
 
-  protected
+  private
 
     def _set_value(key, value)
       unless @ignore_nil && value.nil?
         @attributes[@key_formatter.format(key)] = value
       end
-    end
-
-  private
-
-    BLANK = ::Object.new
-
-    def method_missing(method, value = BLANK, *args, &block)
-      result = if ::Kernel.block_given?
-        if BLANK != value
-          # json.comments @post.comments { |comment| ... }
-          # { "comments": [ { ... }, { ... } ] }
-          _scope{ array! value, &block }
-        else
-          # json.comments { ... }
-          # { "comments": ... }
-          _scope { yield self }
-        end
-      elsif args.empty?
-        if value.is_a?(::Jbuilder)
-          # json.age 32
-          # json.person another_jbuilder
-          # { "age": 32, "person": { ...  }
-          value.attributes!
-        else
-          # json.age 32
-          # { "age": 32 }
-          value
-        end
-      elsif value.respond_to?(:map)
-        # json.comments @post.comments, :content, :created_at
-        # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-        _map_collection(value){ |element| extract! element, *args }
-      else
-        # json.author @post.creator, :name, :email_address
-        # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-        _scope { extract! value, *args }
-      end
-
-      _set_value method, result
     end
 
     def _map_collection(collection)
