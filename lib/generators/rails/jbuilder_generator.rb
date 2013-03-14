@@ -32,6 +32,10 @@ module Rails
         end
         
         def attributes_list(attributes = attributes_names)
+          if self.attributes.any? {|attr| attr.name == 'password' && attr.type == :digest}
+            attributes = attributes.reject {|name| %w(password password_confirmation).include? name}
+          end
+
           attributes.map { |a| ":#{a}"} * ', '
         end
     end
