@@ -310,4 +310,4 @@ class Jbuilder < JbuilderProxy
 end
 
 require 'jbuilder/jbuilder_template' if defined?(ActionView::Template)
-require 'juilder/railtie' if defined?(Rails::VERSION::MAJOR) && Rails::VERSION::MAJOR == 4
+require 'jbuilder/railtie' if defined?(Rails::VERSION::MAJOR) && Rails::VERSION::MAJOR == 4
