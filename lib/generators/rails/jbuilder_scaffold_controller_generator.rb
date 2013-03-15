@@ -5,7 +5,7 @@ module Rails
     class JbuilderScaffoldControllerGenerator < ScaffoldControllerGenerator
       source_root File.expand_path('../templates', __FILE__)
 
-      hook_for :json_template_engine, as: :scaffold
+      hook_for :json_template_engine, as: :scaffold_controller
     end
   end
 end
