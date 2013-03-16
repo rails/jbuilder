@@ -4,7 +4,7 @@ require 'generators/rails/scaffold_controller_generator'
 class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
   tests Rails::Generators::ScaffoldControllerGenerator
   arguments %w(Post title body:text)
-  destination File.expand_path('../tmp', File.dirname(__FILE__))
+  destination File.expand_path('../tmp', __FILE__)
   setup :prepare_destination
 
   test 'controller content' do

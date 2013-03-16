@@ -4,7 +4,7 @@ require 'generators/rails/jbuilder_generator'
 class JbuilderGeneratorTest < Rails::Generators::TestCase
   tests Rails::Generators::JbuilderGenerator
   arguments %w(Post title body:text password:digest)
-  destination File.expand_path('../tmp', File.dirname(__FILE__))
+  destination File.expand_path('../tmp', __FILE__)
   setup :prepare_destination
 
   test 'views are generated' do
