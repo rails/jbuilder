@@ -1,8 +1,11 @@
-require 'rails/engine'
+require 'rails/railtie'
 
 class Jbuilder
-  class Engine < ::Rails::Engine
-    config.app_generators.scaffold_controller = :jbuilder_scaffold_controller
-    config.app_generators.json_template_engine = :jbuilder
+  class Railtie < ::Rails::Railtie
+    generators do |app|
+      Rails::Generators.configure! app.config.generators
+      Rails::Generators.hidden_namespaces.uniq!
+      require 'generators/rails/scaffold_controller_generator'
+    end
   end
 end

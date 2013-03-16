@@ -1,11 +1,12 @@
+require 'rails/generators'
 require 'rails/generators/rails/scaffold_controller/scaffold_controller_generator'
 
 module Rails
   module Generators
-    class JbuilderScaffoldControllerGenerator < ScaffoldControllerGenerator
+    class ScaffoldControllerGenerator
       source_root File.expand_path('../templates', __FILE__)
 
-      hook_for :json_template_engine, as: :scaffold
+      hook_for :jbuilder, default: true
     end
   end
 end

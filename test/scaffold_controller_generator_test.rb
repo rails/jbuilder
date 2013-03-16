@@ -1,8 +1,8 @@
 require 'rails/generators/test_case'
-require 'generators/rails/jbuilder_scaffold_controller_generator'
+require 'generators/rails/scaffold_controller_generator'
 
 class JbuilderScaffoldControllerGeneratorTest < Rails::Generators::TestCase
-  tests Rails::Generators::JbuilderScaffoldControllerGenerator
+  tests Rails::Generators::ScaffoldControllerGenerator
   arguments %w(Post title body:text)
   destination File.expand_path('../tmp', File.dirname(__FILE__))
   setup :prepare_destination

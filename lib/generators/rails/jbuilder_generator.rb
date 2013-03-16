@@ -11,7 +11,8 @@ module Rails
       argument :attributes, type: :array, default: [], banner: 'field:type field:type'
 
       def create_root_folder
-        empty_directory File.join('app/views', controller_file_path)
+        path = File.join('app/views', controller_file_path)
+        empty_directory path unless File.directory?(path)
       end
 
       def copy_view_files
@@ -30,7 +31,7 @@ module Rails
         def attributes_list_with_timestamps
           attributes_list(attributes_names + %w(created_at updated_at))
         end
-        
+
         def attributes_list(attributes = attributes_names)
           if self.attributes.any? {|attr| attr.name == 'password' && attr.type == :digest}
             attributes = attributes.reject {|name| %w(password password_confirmation).include? name}
