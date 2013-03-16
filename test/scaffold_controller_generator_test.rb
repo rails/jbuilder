@@ -1,7 +1,7 @@
 require 'rails/generators/test_case'
 require 'generators/rails/scaffold_controller_generator'
 
-class JbuilderScaffoldControllerGeneratorTest < Rails::Generators::TestCase
+class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
   tests Rails::Generators::ScaffoldControllerGenerator
   arguments %w(Post title body:text)
   destination File.expand_path('../tmp', File.dirname(__FILE__))
