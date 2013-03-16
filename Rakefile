@@ -4,10 +4,10 @@ require 'rake/testtask'
 Bundler.require
 
 Rake::TestTask.new do |test|
-  if ::RUBY_VERSION < '1.9.3'
-    test.test_files = %w(test/jbuilder_template_test.rb test/jbuilder_test.rb)
-  else
+  if defined?(::Rails::Railtie)
     test.test_files = FileList['test/*_test.rb']
+  else
+    test.test_files = %w(test/jbuilder_template_test.rb test/jbuilder_test.rb)
   end
 end
 
