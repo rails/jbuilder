@@ -4,6 +4,8 @@ require 'active_support/inflector'
 
 require 'jbuilder'
 
+Comment = Struct.new(:content, :id)
+
 class JbuilderProxy
   # Faking Object#instance_eval for 1.8
   def instance_eval(code)
@@ -143,7 +145,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.comments comments, :content
@@ -169,7 +171,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array with inline loop' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.comments comments do |comment|
@@ -194,7 +196,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from a non-Enumerable that responds to #map' do
-    comments = NonEnumerable.new([ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ])
+    comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     json = Jbuilder.encode do |json|
       json.comments comments, :content
@@ -207,7 +209,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple chilren from a non-Enumerable that responds to #map with inline loop' do
-    comments = NonEnumerable.new([ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ])
+    comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     json = Jbuilder.encode do |json|
       json.comments comments do |comment|
@@ -222,7 +224,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array with inline loop with old api' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.comments comments do |json, comment|
@@ -237,7 +239,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array with inline loop on root' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.call(comments) do |comment|
@@ -251,7 +253,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nesting multiple children from array with inline loop on root with old api' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.call(comments) do |json, comment|
@@ -341,7 +343,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'top-level array' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.array!(comments) do |comment|
@@ -388,7 +390,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'dynamically sets a collection' do
-    comments = [ Struct.new(:content, :id).new('hello', 1), Struct.new(:content, :id).new('world', 2) ]
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.set! :comments, comments, :content
