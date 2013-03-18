@@ -153,12 +153,12 @@ class Jbuilder < JbuilderProxy
   # not to receive keys which have null values.
   #
   # Example:
-  #   json.ignore_nil!
+  #   json.ignore_nil! false
   #   json.id User.new.id
   #
   #   { "id": null }
   #
-  #   json.ignore_nil
+  #   json.ignore_nil!
   #   json.id User.new.id
   #
   #   {}

@@ -138,7 +138,7 @@ json.first_name "David"
 # => { "firstName": "David" }
 ```
 
-You can set this globaly with the class method `key_format` (from inside your enviorment.rb for example):
+You can set this globaly with the class method `key_format` (from inside your environment.rb for example):
 
 ``` ruby
 Jbuilder.key_format :camelize => :lower
