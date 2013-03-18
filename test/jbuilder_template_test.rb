@@ -28,6 +28,20 @@ module Rails
   def self.cache; @cache ||= Cache.new; end
 end
 
+module ActiveSupport
+  module Cache
+    @@called = false
+    
+    def self.expand_cache_key(key, namespace = nil)
+      @@called = true
+    end
+    
+    def self.called
+      @@called
+    end
+  end
+end
+
 class JbuilderTemplateTest < ActionView::TestCase
   def partials
     { '_partial.json.jbuilder' => 'json.content "hello"' }
@@ -79,6 +93,11 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching a JSON object' do
+    self.class_eval do
+      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
+      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
+    end
+    
     self.controller.perform_caching = true
     Rails.cache.clear
     render_jbuilder <<-JBUILDER
@@ -98,6 +117,11 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching deserializes an array' do
+    self.class_eval do
+      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
+      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
+    end
+    
     Rails.cache.clear
     self.controller.perform_caching = true
     render_jbuilder <<-JBUILDER
@@ -114,6 +138,58 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     parsed = MultiJson.load(json)
     assert_equal %w(a b c), parsed
+  end
+  
+  test 'fragment caching works with previous version of cache digests' do
+    self.class_eval do
+      attr_reader :called
+      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
+      def fragment_name_with_digest(*args)
+        @called = true
+      end
+    end
+    self.controller.perform_caching = true
+    Rails.cache.clear
+    render_jbuilder <<-JBUILDER
+      json.cache! 'cachekey' do
+        json.name 'Cache'
+      end
+    JBUILDER
+    assert(self.called)
+  end
+  
+  test 'fragment caching works with current cache digests' do
+    self.class_eval do
+      attr_reader :called
+      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
+      def cache_fragment_name(*args)
+        @called = true
+      end
+    end
+    self.controller.perform_caching = true
+    Rails.cache.clear
+    render_jbuilder <<-JBUILDER
+      json.cache! 'cachekey' do
+        json.name 'Cache'
+      end
+    JBUILDER
+    assert(self.called)
+  end
+
+  test 'fragment caching falls back on ActiveSupport::Cache.expand_cache_key' do
+    self.class_eval do
+      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
+      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
+    end
+
+    self.controller.perform_caching = true
+    Rails.cache.clear
+    render_jbuilder <<-JBUILDER
+      json.cache! 'cachekey' do
+        json.name 'Cache'
+      end
+    JBUILDER
+    assert(::ActiveSupport::Cache.called)
   end
 
 end
