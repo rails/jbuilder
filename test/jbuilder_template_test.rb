@@ -29,6 +29,12 @@ module Rails
 end
 
 class JbuilderTemplateTest < ActionView::TestCase
+
+  setup do
+    MultiJson.use :ok_json
+    ActiveSupport.escape_html_entities_in_json = true
+  end
+
   def partials
     { '_partial.json.jbuilder' => 'json.content "hello"' }
   end
@@ -68,6 +74,18 @@ class JbuilderTemplateTest < ActionView::TestCase
     result = MultiJson.load(json)
     assert_equal 'one', result['LEVEL1']
     assert_equal 'two', result['LEVEL2']['VALUE']
+  end
+
+  test 'safe_escape! propagates to children' do
+    json = render_jbuilder <<-JBUILDER
+      json.safe_escape!
+      json.parent do
+        json.safe_escape! false
+        json.foo '<script>'
+      end
+    JBUILDER
+
+    assert_equal '{"parent":{"foo":"\\u003Cscript\\u003E"}}', json
   end
 
   test 'partial! renders partial' do

@@ -1,7 +1,6 @@
 require 'test/unit'
 require 'active_support/test_case'
 require 'active_support/inflector'
-
 require 'jbuilder'
 
 Comment = Struct.new(:content, :id)
@@ -24,6 +23,12 @@ class NonEnumerable
 end
 
 class JbuilderTest < ActiveSupport::TestCase
+
+  setup do
+    MultiJson.use :ok_json
+    ActiveSupport.escape_html_entities_in_json = true
+  end
+
   test 'single key' do
     json = Jbuilder.encode do |json|
       json.content 'hello'
@@ -431,6 +436,13 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 50, parsed['relations'][1]['age']
   end
 
+  test 'supports safe option key for json escaping' do
+    jbuilder = Jbuilder.new(:safe => true)
+    jbuilder.foo '<script>'
+
+    assert_equal '{"foo":"\\u003Cscript\\u003E"}', jbuilder.target!
+  end
+
   test 'initialize with positioned arguments (deprecated)' do
     ::ActiveSupport::Deprecation.silence do
       jbuilder = Jbuilder.new(1, 2)
@@ -440,9 +452,10 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'initialize via options hash' do
-    jbuilder = Jbuilder.new(:key_formatter => 1, :ignore_nil => 2)
+    jbuilder = Jbuilder.new(:key_formatter => 1, :ignore_nil => 2, :safe => 3)
     assert_equal 1, jbuilder.instance_eval('@key_formatter')
     assert_equal 2, jbuilder.instance_eval('@ignore_nil')
+    assert_equal 3, jbuilder.instance_eval('@safe_escape')
   end
 
   test 'key_format! with parameter' do
@@ -518,6 +531,29 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal ['camelStyle'], json.attributes!.keys
     Jbuilder.send(:class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new)
+  end
+
+  test 'default safe_escape!' do
+    Jbuilder.safe_escape true
+    jbuilder = Jbuilder.new
+    assert jbuilder.instance_eval('@safe_escape')
+    Jbuilder.send(:class_variable_set, '@@safe_escape', false)
+  end
+
+  test 'instance safe_escape' do
+    jbuilder = Jbuilder.new
+    assert !jbuilder.instance_eval('@safe_escape')
+    jbuilder.safe_escape!
+    assert jbuilder.instance_eval('@safe_escape')
+    jbuilder.safe_escape! true
+    assert jbuilder.instance_eval('@safe_escape')
+    jbuilder.safe_escape! false
+    assert !jbuilder.instance_eval('@safe_escape')
+  end
+
+  test 'can set safe_escape via option' do
+    jbuilder = Jbuilder.new(:safe => true)
+    assert jbuilder.instance_eval('@safe_escape')
   end
 
   test 'do not use default key formatter directly' do
