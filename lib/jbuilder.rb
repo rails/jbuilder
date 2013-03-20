@@ -271,7 +271,7 @@ class Jbuilder < JbuilderProxy
 
   # Encodes the current builder as JSON.
   def target!
-    ::MultiJson.encode @attributes
+    ::MultiJson.dump @attributes
   end
 
   private
