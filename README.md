@@ -58,7 +58,7 @@ This will build the following structure:
 To define attribute and structure names dynamically, use the `set!` method:
 
 ``` ruby
-json.set!(:author) do
+json.set! :author do
   json.set! :name, "David"
 end
 
@@ -69,7 +69,7 @@ Top level arrays can be handled directly.  Useful for index and other collection
 
 ``` ruby
 # @people = People.all
-json.array!(@people) do |person|
+json.array! @people do |person|
   json.name person.name
   json.age calculate_age(person.birthday)
 end
