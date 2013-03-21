@@ -27,6 +27,14 @@ class JbuilderTemplateTest < ActionView::TestCase
     ActionView::Template.new(source, 'test', JbuilderHandler, :virtual_path => 'test').render(self, {}).strip
   end
 
+  def undef_context_methods(*names)
+    self.class_eval do
+      names.each do |name|
+        undef_method name.to_sym if self.method_defined?(name.to_sym)
+      end
+    end
+  end
+
   test 'rendering' do
     json = render_jbuilder <<-JBUILDER
       json.content 'hello'
@@ -67,10 +75,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching a JSON object' do
-    class << @context
-      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
-      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
-    end
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
     render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
@@ -89,10 +94,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching deserializes an array' do
-    class << @context
-      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
-      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
-    end
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
     render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
@@ -111,9 +113,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching works with previous version of cache digests' do
-    class << @context
-      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
-    end
+    undef_context_methods :cache_fragment_name
 
     @context.expects :fragment_name_with_digest
 
@@ -125,9 +125,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching works with current cache digests' do
-    class << @context
-      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
-    end
+    undef_context_methods :fragment_name_with_digest
 
     @context.expects :cache_fragment_name
 
@@ -139,10 +137,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching falls back on ActiveSupport::Cache.expand_cache_key' do
-    class << @context
-      undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
-      undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
-    end
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
     ActiveSupport::Cache.expects :expand_cache_key
 
