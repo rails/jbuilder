@@ -1,7 +1,6 @@
 require 'test/unit'
 require 'active_support/test_case'
 require 'active_support/inflector'
-
 require 'jbuilder'
 
 Comment = Struct.new(:content, :id)
