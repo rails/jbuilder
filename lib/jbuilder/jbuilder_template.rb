@@ -34,7 +34,12 @@ class JbuilderTemplate < Jbuilder
 
   protected
     def _cache_key(key)
-      if @context.respond_to?(:fragment_name_with_digest)
+      if @context.respond_to?(:cache_fragment_name)
+        # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
+        # should be used instead.
+        @context.cache_fragment_name(key)
+      elsif @context.respond_to?(:fragment_name_with_digest)
+        # Backwards compatibility for period of time when fragment_name_with_digest was made public.
         @context.fragment_name_with_digest(key)
       else
         ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
