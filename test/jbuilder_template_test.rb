@@ -5,37 +5,19 @@ require 'active_support/cache'
 require 'jbuilder'
 
 module Rails
-  class Cache
-    def initialize
-      clear
-    end
-
-    def clear; @cache = {}; end
-
-    def write(k, v, opt={})
-      @cache[k] = v
-    end
-
-    def read(k, opt={})
-      @cache[k]
-    end
-
-    def fetch(k, opt={}, &block)
-      @cache[k] || @cache[k] = block.call
-    end
+  def self.cache
+    @cache ||= ActiveSupport::Cache::MemoryStore.new
   end
-
-  def self.cache; @cache ||= Cache.new; end
 end
 
 module ActiveSupport
   module Cache
     @@called = false
-    
+
     def self.expand_cache_key(key, namespace = nil)
       @@called = true
     end
-    
+
     def self.called
       @@called
     end
@@ -97,7 +79,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
       undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
     end
-    
+
     self.controller.perform_caching = true
     Rails.cache.clear
     render_jbuilder <<-JBUILDER
@@ -121,7 +103,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       undef_method :fragment_name_with_digest if self.method_defined?(:fragment_name_with_digest)
       undef_method :cache_fragment_name if self.method_defined?(:cache_fragment_name)
     end
-    
+
     Rails.cache.clear
     self.controller.perform_caching = true
     render_jbuilder <<-JBUILDER
@@ -139,7 +121,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     parsed = MultiJson.load(json)
     assert_equal %w(a b c), parsed
   end
-  
+
   test 'fragment caching works with previous version of cache digests' do
     self.class_eval do
       attr_reader :called
@@ -157,7 +139,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
     assert(self.called)
   end
-  
+
   test 'fragment caching works with current cache digests' do
     self.class_eval do
       attr_reader :called
