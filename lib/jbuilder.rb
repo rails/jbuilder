@@ -84,7 +84,7 @@ class Jbuilder < JbuilderProxy
         _scope { yield self }
       end
     elsif args.empty?
-      if value.is_a?(::Jbuilder)
+      if ::Jbuilder === value
         # json.age 32
         # json.person another_jbuilder
         # { "age": 32, "person": { ...  }

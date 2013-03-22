@@ -336,9 +336,21 @@ class JbuilderTest < ActiveSupport::TestCase
       json.value 'Test'
       json.nested to_nest
     end
-    parsed = MultiJson.load(json)
-    assert_equal 'Test', parsed['value']
-    assert_equal 'Nested Test', parsed['nested']['nested_value']
+
+    result = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
+    assert_equal result, MultiJson.load(json)
+  end
+
+  test 'nested jbuilder object via set!' do
+    to_nest = Jbuilder.new
+    to_nest.nested_value 'Nested Test'
+    json = Jbuilder.encode do |json|
+      json.value 'Test'
+      json.set! :nested, to_nest
+    end
+
+    result = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
+    assert_equal result, MultiJson.load(json)
   end
 
   test 'top-level array' do
