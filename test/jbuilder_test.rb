@@ -339,6 +339,7 @@ class JbuilderTest < ActiveSupport::TestCase
     parsed = MultiJson.load(json)
     assert_equal 'Test', parsed['value']
     assert_equal 'Nested Test', parsed['nested']['nested_value']
+    assert_equal 1, parsed['nested'].size
   end
 
   test 'top-level array' do
@@ -373,6 +374,14 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal 'stuff', MultiJson.load(json)['each']
+  end
+
+  test 'dynamically set a value with key :is_a?' do
+    json = Jbuilder.encode do |json|
+      json.set! :is_a?, 'stuff'
+    end
+
+    assert_equal 'stuff', MultiJson.load(json)['is_a?']
   end
 
   test 'dynamically set a key/nested child with block' do

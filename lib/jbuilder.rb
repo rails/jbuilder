@@ -274,6 +274,24 @@ class Jbuilder < JbuilderProxy
     ::MultiJson.dump @attributes
   end
 
+  # Implementation of is_a? to support the internal workings
+  # of the Jbuilder class.
+  #
+  # Note: this method name breaks the pattern of all method names ending
+  # in '!'.  It is still possible to define a key with value 'is_a?', but
+  # it requires direct use of the set! command.  Example:
+  #
+  # json.set! :is_a? "test"
+  # { "is_a?": "test" }
+  #
+  # Note: This implementation ensures the correct behavior
+  # for set! for subclasses of Jbuilder, but it will not 
+  # behave in a way consistent with Object::is_a?
+  # for subclasses of Jbuilder.  This is expected behavior.
+  def is_a?(klass)
+    klass == ::Jbuilder
+  end
+
   private
 
     def _set_value(key, value)
