@@ -98,6 +98,8 @@ class Jbuilder < JbuilderProxy
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       _map_collection(value){ |element| extract! element, *args }
+    elsif value.nil?
+      value
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
