@@ -9,9 +9,9 @@ class JbuilderTemplate < Jbuilder
     when ::Hash
       options[:locals] ||= {}
       options[:locals].merge!(:json => self)
-      @context.render(options.reverse_merge(:formats => [:json]))
+      @context.render(options.reverse_merge(:handlers => [:jbuilder]))
     else # String
-      @context.render(:partial => options, :locals => locals.merge(:json => self), :formats => [:json])
+      @context.render(:partial => options, :locals => locals.merge(:json => self), :handlers => [:jbuilder])
     end
   end
 
