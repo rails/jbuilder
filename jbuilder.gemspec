@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.add_dependency 'activesupport', '>= 3.0.0'
+  s.add_dependency 'multi_json', '>= 1.2.0'
   s.add_development_dependency 'rake', '~> 10.0.3'
 
   s.files         = `git ls-files`.split("\n")
