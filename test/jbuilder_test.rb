@@ -571,4 +571,10 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ['name'], json.attributes!.keys
     Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
   end
+
+  test "nil!" do
+    json = Jbuilder.new
+    json.nil!
+    assert_equal nil, json.attributes!
+  end
 end
