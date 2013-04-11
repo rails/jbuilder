@@ -73,6 +73,7 @@ class Jbuilder < JbuilderProxy
   BLANK = ::Object.new
 
   def set!(key, value = BLANK, *args, &block)
+
     result = if ::Kernel.block_given?
       if BLANK != value
         # json.comments @post.comments { |comment| ... }
@@ -255,6 +256,14 @@ class Jbuilder < JbuilderProxy
       attributes.each { |attribute| _set_value attribute, object.send(attribute) }
     end
   end
+
+  # Returns the nil JSON.
+  def nil!
+    @attributes = nil
+  end
+
+  alias_method :null!, :nil!
+
 
   def call(object = nil, *attributes)
     if attributes.empty?
