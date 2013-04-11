@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name    = 'jbuilder'
-  s.version = '1.2.1'
+  s.version = '1.3.0'
   s.author  = 'David Heinemeier Hansson'
   s.email   = 'david@37signals.com'
   s.summary = 'Create JSON structures via a Builder-style DSL'
