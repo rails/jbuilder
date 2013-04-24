@@ -77,6 +77,16 @@ end
 # => [ { "name": "David", "age": 32 }, { "name": "Jamie", "age": 31 } ]
 ```
 
+You can also extract attributes from array directly.
+
+``` ruby
+# @people = People.all
+json.array! @people :id :name
+
+# => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
+```
+
+
 Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
 
 ``` ruby
