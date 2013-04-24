@@ -325,8 +325,9 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal 'David', MultiJson.load(json)[0]['names'].last
-    assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
+    parsed = MultiJson.load(json)
+    assert_equal 'David', parsed.first['names'].last
+    assert_not_equal 'hello', parsed.first['not_in_json']
   end
 
   test 'nested jbuilder objects' do
