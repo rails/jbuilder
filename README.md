@@ -81,7 +81,7 @@ You can also extract attributes from array directly.
 
 ``` ruby
 # @people = People.all
-json.array! @people :id :name
+json.array! @people, :id, :name
 
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
