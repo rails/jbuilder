@@ -367,6 +367,20 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', parsed.second['content']
   end
 
+  test 'extract attributes directly from array' do
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+
+    json = Jbuilder.encode do |json|
+      json.array! comments, :content, :id
+    end
+
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed.first['content']
+    assert_equal       1, parsed.first['id']
+    assert_equal 'world', parsed.second['content']
+    assert_equal       2, parsed.second['id']
+  end
+
   test 'empty top-level array' do
     comments = []
 

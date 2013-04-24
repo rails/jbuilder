@@ -224,8 +224,10 @@ class Jbuilder < JbuilderProxy
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection, &block)
-    @attributes = if ::Kernel::block_given?
+  def array!(collection, *attributes, &block)
+    @attributes = if attributes.present?
+      _map_collection(collection) { |element| extract!(element, *attributes) }
+    elsif ::Kernel::block_given?
       _map_collection(collection) { |element| block.arity == 2 ? block[self, element] : block[element] }
     else
       collection
