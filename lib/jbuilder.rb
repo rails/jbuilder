@@ -225,10 +225,10 @@ class Jbuilder < JbuilderProxy
   #
   #   [1,2,3]
   def array!(collection, *attributes, &block)
-    @attributes = if attributes.present?
-      _map_collection(collection) { |element| extract!(element, *attributes) }
-    elsif ::Kernel::block_given?
+    @attributes = if ::Kernel::block_given?
       _map_collection(collection) { |element| block.arity == 2 ? block[self, element] : block[element] }
+    elsif attributes.any?
+      _map_collection(collection) { |element| extract! element, *attributes }
     else
       collection
     end
