@@ -52,7 +52,7 @@ class Jbuilder < JbuilderProxy
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
 
-  def initialize(*args)
+  def initialize(*args, &block)
     @attributes = ::ActiveSupport::OrderedHash.new
 
     options = args.extract_options!
@@ -67,14 +67,14 @@ class Jbuilder < JbuilderProxy
         'arguments is deprecated. Use hash syntax instead.'
     end
 
-    yield self if ::Kernel.block_given?
+    yield self if block
   end
 
   BLANK = ::Object.new
 
   def set!(key, value = BLANK, *args, &block)
 
-    result = if ::Kernel.block_given?
+    result = if block
       if BLANK != value
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
@@ -225,7 +225,7 @@ class Jbuilder < JbuilderProxy
   #
   #   [1,2,3]
   def array!(collection, *attributes, &block)
-    @attributes = if ::Kernel::block_given?
+    @attributes = if block
       _map_collection(collection) { |element| block.arity == 2 ? block[self, element] : block[element] }
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
