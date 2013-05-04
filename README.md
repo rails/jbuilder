@@ -139,6 +139,20 @@ end
 json.partial! "api/comments/comments", comments: @message.comments
 ```
 
+You can explicitly make Jbuilder object return null if you want:
+
+``` ruby
+json.extract! @post, :id, :title, :content, :published_at
+json.author do
+  if @post.anonymous?
+    json.null! # or json.nil!
+  else
+    json.first_name @post.author_first_name
+    json.last_name @post.author_last_name
+  end
+end
+```
+
 Keys can be auto formatted using `key_format!`, this can be used to convert keynames from the standard ruby_format to CamelCase:
 
 ``` ruby
