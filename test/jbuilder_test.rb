@@ -600,4 +600,10 @@ class JbuilderTest < ActiveSupport::TestCase
     json.null!
     assert_nil json.attributes!
   end
+
+  test 'throws meaningfull error when on trying to add properties to null' do
+    json = Jbuilder.new
+    json.null!
+    assert_raise(Jbuilder::NullError) { json.foo 'bar' }
+  end
 end

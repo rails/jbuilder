@@ -14,6 +14,12 @@ rescue LoadError
 end
 
 class Jbuilder < JbuilderProxy
+  class NullError < ::NoMethodError
+    def initialize(key)
+      super "Failed to add #{key.to_s.inspect} property to null object"
+    end
+  end
+
   class KeyFormatter
     def initialize(*args)
       @format = ::ActiveSupport::OrderedHash.new
@@ -288,6 +294,7 @@ class Jbuilder < JbuilderProxy
   private
 
     def _set_value(key, value)
+      raise NullError, key if @attributes.nil?
       unless @ignore_nil && value.nil?
         @attributes[@key_formatter.format(key)] = value
       end
