@@ -59,7 +59,7 @@ To define attribute and structure names dynamically, use the `set!` method:
 
 ``` ruby
 json.set! :author do
-  json.set! :name, "David"
+  json.set! :name, 'David'
 end
 
 # => "author": { "name": "David" }
@@ -109,7 +109,7 @@ class Company
   end
 end
 
-company = Company.new("Doodle Corp", Person.new("John Stobs", 58))
+company = Company.new('Doodle Corp', Person.new('John Stobs', 58))
 company.to_builder.target!
 
 # => {"name":"Doodle Corp","president":{"name":"John Stobs","age":58}}
@@ -136,7 +136,7 @@ end
 # RAILS_ROOT/app/views/api/comments/_comments, and set a local variable
 # 'comments' with all this message's comments, which you can use inside
 # the partial.
-json.partial! "api/comments/comments", comments: @message.comments
+json.partial! 'api/comments/comments', comments: @message.comments
 ```
 
 You can explicitly make Jbuilder object return null if you want:
@@ -157,7 +157,7 @@ Keys can be auto formatted using `key_format!`, this can be used to convert keyn
 
 ``` ruby
 json.key_format! :camelize => :lower
-json.first_name "David"
+json.first_name 'David'
 
 # => { "firstName": "David" }
 ```
