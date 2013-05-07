@@ -133,7 +133,7 @@ if current_user.admin?
 end
 
 # You can use partials as well. The following line will render the file
-# RAILS_ROOT/app/views/api/comments/_comments, and set a local variable
+# RAILS_ROOT/app/views/api/comments/_comments.json.jbuilder, and set a local variable
 # 'comments' with all this message's comments, which you can use inside
 # the partial.
 json.partial! 'api/comments/comments', comments: @message.comments
