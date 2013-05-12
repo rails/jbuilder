@@ -258,21 +258,20 @@ class Jbuilder < JbuilderProxy
     end
   end
 
+  def call(object, *attributes, &block)
+    if block
+      array! object, &block
+    else
+      extract! object, *attributes
+    end
+  end
+
   # Returns the nil JSON.
   def nil!
     @attributes = nil
   end
 
   alias_method :null!, :nil!
-
-
-  def call(object = nil, *attributes)
-    if attributes.empty?
-      array! object, &::Proc.new
-    else
-      extract! object, *attributes
-    end
-  end
 
   # Returns the attributes of the current builder.
   def attributes!
