@@ -95,7 +95,7 @@ class Jbuilder < JbuilderProxy
     elsif value.respond_to?(:map)
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      _map_collection(value){ |element| extract! element, *args }
+      _scope{ array! value, *args }
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
