@@ -222,8 +222,10 @@ class Jbuilder < JbuilderProxy
   #
   #   [1,2,3]
   def array!(collection, *attributes, &block)
-    @attributes = if block
-      _map_collection(collection) { |element| block.arity == 2 ? block[self, element] : block[element] }
+    @attributes = if block && block.arity == 2
+      _two_arguments_map_collection(collection, &block)
+    elsif block
+      _map_collection(collection, &block)
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
@@ -315,6 +317,22 @@ class Jbuilder < JbuilderProxy
       else
         @attributes.update hash_or_array
       end
+    end
+
+    def _two_arguments_map_collection(collection, &block)
+      message = "Passing jbuilder object to block is " \
+        "deprecated and will be removed soon."
+
+      if block.respond_to?(:parameters)
+        arguments  = block.parameters.map(&:last)
+        actual     = "|#{arguments.drop(1) * ', '}|"
+        deprecated = "|#{arguments * ', '}|"
+        message   += "\nUse #{actual} instead of #{deprecated} as block arguments"
+      end
+
+      ::ActiveSupport::Deprecation.warn message, ::Kernel.caller(5)
+
+      _map_collection(collection){ |element| block[self, element] }
     end
 end
 
