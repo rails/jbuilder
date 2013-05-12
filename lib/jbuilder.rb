@@ -41,7 +41,7 @@ class Jbuilder < JbuilderProxy
     def format(key)
       @cache[key] ||= @format.inject(key.to_s) do |result, args|
         func, args = args
-        if func.is_a?(::Proc)
+        if ::Proc === func
           func.call result, *args
         else
           result.send func, *args
@@ -187,7 +187,7 @@ class Jbuilder < JbuilderProxy
   #     json.content comment.formatted_content
   #   end
   def child!
-    @attributes = [] unless @attributes.is_a?(::Array)
+    @attributes = [] unless ::Array === @attributes
     @attributes << _scope { yield self }
   end
 
@@ -251,7 +251,7 @@ class Jbuilder < JbuilderProxy
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    if object.is_a?(::Hash)
+    if ::Hash === object
       attributes.each { |attribute| _set_value attribute, object.fetch(attribute) }
     else
       attributes.each { |attribute| _set_value attribute, object.send(attribute) }
@@ -310,8 +310,8 @@ class Jbuilder < JbuilderProxy
     end
 
     def _merge(hash_or_array)
-      if hash_or_array.is_a?(::Array)
-        @attributes = [] unless @attributes.is_a?(::Array)
+      if ::Array === hash_or_array
+        @attributes = [] unless ::Array === @attributes
         @attributes.concat hash_or_array
       else
         @attributes.update hash_or_array
