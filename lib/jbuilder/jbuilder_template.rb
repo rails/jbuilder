@@ -1,3 +1,5 @@
+require 'action_dispatch/http/mime_type'
+
 class JbuilderTemplate < Jbuilder
   def initialize(context, *args, &block)
     @context = context
