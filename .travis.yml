@@ -1,6 +1,7 @@
 language: ruby
 before_install:
   - travis_retry gem install bundler
+
 rvm:
   - 1.8.7
   - 1.9.2
@@ -12,12 +13,14 @@ rvm:
   - jruby-19mode
   - rbx-18mode
   - rbx-19mode
+
 gemfile:
   - Gemfile
   - Gemfile.edge
+
 matrix:
   exclude:
-    # Edge Rails is only compatible with 1.9.3
+    # Edge Rails is only compatible with 1.9.3+
     - gemfile: Gemfile.edge
       rvm: 1.8.7
     - gemfile: Gemfile.edge
