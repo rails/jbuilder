@@ -24,6 +24,16 @@ Jbuilder.encode do |json|
     json.filename attachment.filename
     json.url url_for(attachment)
   end
+
+  json.attachments @message.attachments, except: [:filename] do |attachment|
+    json.filename attachment.filename
+    json.url url_for(attachment)
+  end
+
+  json.attachments @message.attachments, only: [:filename] do |attachment|
+    json.filename attachment.filename
+    json.url url_for(attachment)
+  end
 end
 ```
 
@@ -51,6 +61,16 @@ This will build the following structure:
   "attachments": [
     { "filename": "forecast.xls", "url": "http://example.com/downloads/forecast.xls" },
     { "filename": "presentation.pdf", "url": "http://example.com/downloads/presentation.pdf" }
+  ]
+
+  "attachments": [
+    { "url": "http://example.com/downloads/forecast.xls" },
+    { "url": "http://example.com/downloads/presentation.pdf" }
+  ]
+
+  "attachments": [
+    { "filename": "forecast.xls" },
+    { "filename": "presentation.pdf" }
   ]
 }
 ```
@@ -84,6 +104,30 @@ You can also extract attributes from array directly.
 json.array! @people, :id, :name
 
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
+```
+
+You can also exclude predefined keys to be rendered.
+
+``` ruby
+# @people = People.all
+json.people @people, except: [:id] do |person|
+  json.id person.id
+  json.name person.name
+end
+
+# => [ { name": "David" }, { "name": "Jamie" } ]
+```
+
+You can also select predefined keys to be rendered.
+
+``` ruby
+# @people = People.all
+json.people @people, only: [:id] do |person|
+  json.id person.id
+  json.name person.name
+end
+
+# => [ { "id": 1 }, { "id": 2 } ]
 ```
 
 

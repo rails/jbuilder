@@ -60,6 +60,7 @@ class Jbuilder < JbuilderProxy
 
   def initialize(*args, &block)
     @attributes = ::ActiveSupport::OrderedHash.new
+    @except     = []
 
     options = args.extract_options!
     @key_formatter = options.fetch(:key_formatter, @@key_formatter.clone)
@@ -75,7 +76,7 @@ class Jbuilder < JbuilderProxy
       if BLANK != value
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &block }
+        _scope{ array! value, *args, &block }
       else
         # json.comments { ... }
         # { "comments": ... }
@@ -216,14 +217,38 @@ class Jbuilder < JbuilderProxy
   #
   #   { "people": [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ] }
   #
+  # You can also blacklist keys, you can do:
+  #
+  #   json.people(@people, except: [:age]) do |person|
+  #     json.name person.name
+  #     json.age calculate_age(person.birthday)
+  #   end
+  #
+  #   { "people": [ { "name": David" }, { "name": Jamie" } ] }
+  #
+  # You can also whitelist keys, you can do:
+  #
+  #   json.people(@people, only: [:name]) do |person|
+  #     json.name person.name
+  #     json.age calculate_age(person.birthday)
+  #   end
+  #
+  #   { "people": [ { "name": David" }, { "name": Jamie" } ] }
+  #
   # If you omit the block then you can set the top level array directly:
   #
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
   def array!(collection, *attributes, &block)
+    @except = []
+
     @attributes = if block && block.arity == 2
       _two_arguments_map_collection(collection, &block)
+    elsif block && attributes.any? && attributes[0].is_a?(::Hash)
+      @except = attributes[0].delete(:except).map(&:to_sym) if attributes[0][:except]
+      @only   = attributes[0].delete(:only).map(&:to_sym)   if attributes[0][:only]
+      _map_collection(collection, &block)
     elsif block
       _map_collection(collection, &block)
     elsif attributes.any?
@@ -231,6 +256,8 @@ class Jbuilder < JbuilderProxy
     else
       collection
     end
+
+    @only = nil
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -287,6 +314,10 @@ class Jbuilder < JbuilderProxy
 
     def _set_value(key, value)
       raise NullError, key if @attributes.nil?
+
+      return if @except.include?(key)
+      return if @only && !@only.include?(key)
+
       unless @ignore_nil && value.nil?
         @attributes[@key_formatter.format(key)] = value
       end
