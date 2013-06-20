@@ -388,6 +388,40 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal       2, parsed.second['id']
   end
 
+  test 'extract attributes directly from array except listed keys' do
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+
+    json = Jbuilder.encode do |json|
+      json.comments comments, except: [:content] do |comment|
+        json.content comment.content
+        json.id comment.id
+      end
+    end
+
+    parsed = MultiJson.load(json)
+    assert_equal nil, parsed['comments'].first['content']
+    assert_equal   1, parsed['comments'].first['id']
+    assert_equal nil, parsed['comments'].second['content']
+    assert_equal   2, parsed['comments'].second['id']
+  end
+
+  test 'extract attributes directly from array only listed keys' do
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+
+    json = Jbuilder.encode do |json|
+      json.comments comments, only: [:content] do |comment|
+        json.content comment.content
+        json.id comment.id
+      end
+    end
+
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed['comments'].first['content']
+    assert_equal     nil, parsed['comments'].first['id']
+    assert_equal 'world', parsed['comments'].second['content']
+    assert_equal     nil, parsed['comments'].second['id']
+  end
+
   test 'empty top-level array' do
     comments = []
 
