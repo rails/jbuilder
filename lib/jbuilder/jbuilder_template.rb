@@ -26,9 +26,12 @@ class JbuilderTemplate < Jbuilder
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
-    options[:force] = true unless @context.controller.perform_caching
-    value = ::Rails.cache.fetch(_cache_key(key), options) do
-      _scope { yield self }
+    if @context.controller.perform_caching
+      value = ::Rails.cache.fetch(_cache_key(key), options) do
+        _scope { yield self }
+      end
+    else
+      value = _scope { yield self }
     end
 
     _merge(value)

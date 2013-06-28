@@ -148,4 +148,18 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
+  test 'controller disabling cache does not WRITE to cache' do
+
+    @context.controller.perform_caching = false
+
+    render_jbuilder <<-JBUILDER
+      json.cache! 'cachekey' do
+        json.name 'Cache'
+      end
+    JBUILDER
+
+    assert_nil Rails.cache.read("jbuilder/cachekey")
+
+  end
+
 end
