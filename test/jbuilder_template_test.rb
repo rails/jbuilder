@@ -136,6 +136,17 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
+  test 'does not perform caching when controller.perform_caching is false' do
+    controller.perform_caching = false
+    render_jbuilder <<-JBUILDER
+      json.cache! 'cachekey' do
+        json.name 'Cache'
+      end
+    JBUILDER
+
+    assert_equal Rails.cache.inspect[/entries=(\d+)/, 1], '0'
+  end
+
   test 'fragment caching falls back on ActiveSupport::Cache.expand_cache_key' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
