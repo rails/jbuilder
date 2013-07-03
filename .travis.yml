@@ -29,6 +29,8 @@ matrix:
       rvm: jruby-18mode
     - gemfile: Gemfile.edge
       rvm: rbx-18mode
+  allow_failures:
+    - rvm: ruby-head
 
 notifications:
   email: false
