@@ -3,9 +3,6 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'rake'
+gem 'railties',   '~> 4.0.0'
+gem 'actionpack', '~> 4.0.0'
 gem 'mocha', require: false
-
-git 'git://github.com/rails/rails.git', branch: '4-0-stable' do
-  gem 'railties', require: 'rails/railtie'
-  gem 'actionpack'
-end
