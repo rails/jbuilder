@@ -5,12 +5,14 @@ require 'jbuilder'
 
 Comment = Struct.new(:content, :id)
 
-class JbuilderProxy
-  # Faking Object#instance_eval for 1.8
-  def instance_eval(code)
-    eval code
+unless JbuilderProxy.method_defined? :instance_eval
+  # Faking Object#instance_eval for 1.8 and some newer JRubies
+  class JbuilderProxy
+    def instance_eval(code)
+      eval code
+    end
   end
-end if ::RUBY_VERSION < '1.9'
+end
 
 class NonEnumerable
   def initialize(collection)
