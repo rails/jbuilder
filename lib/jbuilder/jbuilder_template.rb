@@ -6,15 +6,20 @@ class JbuilderTemplate < Jbuilder
     super(*args, &block)
   end
 
-  def partial!(options, locals = {})
-    case options
+  def partial!(name_or_options, locals = {})
+    case name_or_options
     when ::Hash
-      options[:locals] ||= {}
-      options[:locals].merge!(:json => self)
-      @context.render(options.reverse_merge(:handlers => [:jbuilder]))
-    else # String
-      @context.render(:partial => options, :locals => locals.merge(:json => self), :handlers => [:jbuilder])
+      # partial! partial: 'name', locals: { foo: 'bar' }
+      options = name_or_options
+    else
+      # partial! 'name', foo: 'bar'
+      options = { :partial => name_or_options, :locals => locals }
+      as = locals.delete(:as)
+      options[:as] = as if as.present?
+      options[:collection] = locals[:collection]
     end
+
+    _handle_partial_options options
   end
 
   # Caches the json constructed within the block passed. Has the same signature as the `cache` helper
@@ -38,6 +43,26 @@ class JbuilderTemplate < Jbuilder
   end
 
   protected
+    def _handle_partial_options(options)
+      options.reverse_merge!(:locals => {}, :handlers => [:jbuilder])
+      collection = options.delete(:collection)
+      as = options[:as]
+
+      if collection && as
+        array!(collection) do |member|
+          options[:locals].merge!(as => member, :collection => collection)
+          _render_partial options
+        end
+      else
+        _render_partial options
+      end
+    end
+
+    def _render_partial(options)
+      options[:locals].merge!(:json => self)
+      @context.render options
+    end
+
     def _cache_key(key)
       if @context.respond_to?(:cache_fragment_name)
         # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name

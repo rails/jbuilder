@@ -5,6 +5,20 @@ require 'action_view/testing/resolvers'
 require 'active_support/cache'
 require 'jbuilder'
 
+
+BLOG_POST_PARTIAL = <<-JBUILDER
+  json.extract! blog_post, :id, :body
+  json.author do
+    name = blog_post.author_name.split(nil, 2)
+    json.first_name name[0]
+    json.last_name  name[1]
+  end
+JBUILDER
+
+BlogPost = Struct.new(:id, :body, :author_name)
+blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
+BLOG_POST_COLLECTION = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
+
 module Rails
   def self.cache
     @cache ||= ActiveSupport::Cache::MemoryStore.new
@@ -18,7 +32,10 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   def partials
-    { '_partial.json.jbuilder' => 'json.content "hello"' }
+    {
+      '_partial.json.jbuilder'  => 'json.content "hello"',
+      '_blog_post.json.jbuilder' => BLOG_POST_PARTIAL
+    }
   end
 
   def render_jbuilder(source)
@@ -72,6 +89,34 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
 
     assert_equal 'hello', MultiJson.load(json)['content']
+  end
+
+  test 'partial! renders collections' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
+    JBUILDER
+
+    result = MultiJson.load(json)
+
+    assert_equal 10, result.length
+    assert_equal Array, result.class
+    assert_equal 'post body 5',        result[4]['body']
+    assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
+    assert_equal 'Pavel',              result[5]['author']['first_name']
+  end
+
+  test 'partial! renders collection (alt. syntax)' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! :partial => 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
+    JBUILDER
+
+    result = MultiJson.load(json)
+
+    assert_equal 10, result.length
+    assert_equal Array, result.class
+    # assert_equal 'post body 5',        result[4]['body']
+    assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
+    assert_equal 'Pavel',              result[5]['author']['first_name']
   end
 
   test 'fragment caching a JSON object' do
