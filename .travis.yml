@@ -31,6 +31,8 @@ matrix:
       rvm: rbx-18mode
   allow_failures:
     - rvm: ruby-head
+    - rvm: rbx-18mode
+    - rvm: rbx-19mode
 
 notifications:
   email: false
