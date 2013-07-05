@@ -114,7 +114,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     assert_equal 10, result.length
     assert_equal Array, result.class
-    # assert_equal 'post body 5',        result[4]['body']
+    assert_equal 'post body 5',        result[4]['body']
     assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
     assert_equal 'Pavel',              result[5]['author']['first_name']
   end
