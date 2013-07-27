@@ -131,12 +131,30 @@ end
 if current_user.admin?
   json.visitors calculate_visitors(@message)
 end
+```
 
-# You can use partials as well. The following line will render the file
-# RAILS_ROOT/app/views/api/comments/_comments.json.jbuilder, and set a local variable
-# 'comments' with all this message's comments, which you can use inside
-# the partial.
+
+You can use partials as well. The following will render the file
+`RAILS_ROOT/app/views/api/comments/_comments.json.jbuilder`, and set a local variable
+`comments` with all this message's comments, which you can use inside
+the partial.
+
+```ruby
 json.partial! 'api/comments/comments', comments: @message.comments
+```
+
+It's also possible to render collections of partials:
+
+```ruby
+json.array! @posts, partial: 'views/posts/post', as: :post
+
+# or
+
+json.partial! 'views/post/post', collection: @posts, as: :post
+
+# or
+
+json.partial! partial: 'views/post/post', collection: @posts, as: :post
 ```
 
 You can explicitly make Jbuilder object return null if you want:
