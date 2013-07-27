@@ -291,17 +291,13 @@ class Jbuilder < JbuilderProxy
 
     def _extract_method_values(object, *attributes)
       attributes.each do |method_name|
-        value = if object.respond_to?(method_name)
-          object.public_send(method_name)
-        else
+        unless object.respond_to?(method_name)
           message = "Private method #{method_name.inspect} was used to " +
             'extract value. This will be an error in future versions of Jbuilder'
-
-          ::ActiveSupport::Deprecation.warn message
-          object.send(method_name)
         end
 
-        _set_value method_name, value
+        _set_value method_name, object.send(method_name)
+        ::ActiveSupport::Deprecation.warn message if message
       end
     end
 
