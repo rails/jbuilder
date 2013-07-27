@@ -135,7 +135,7 @@ end
 
 
 You can use partials as well. The following will render the file
-`RAILS_ROOT/app/views/comments/_comments.json.jbuilder`, and set a local variable
+`views/comments/_comments.json.jbuilder`, and set a local variable
 `comments` with all this message's comments, which you can use inside
 the partial.
 
