@@ -22,6 +22,16 @@ class JbuilderTemplate < Jbuilder
     _handle_partial_options options
   end
 
+  def array!(collection, *attributes, &block)
+    options = attributes.extract_options!
+
+    if options.key?(:partial)
+      partial! options[:partial], options.merge(:collection => collection)
+    else
+      super
+    end
+  end
+
   # Caches the json constructed within the block passed. Has the same signature as the `cache` helper
   # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
   #

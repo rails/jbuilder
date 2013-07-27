@@ -52,6 +52,16 @@ class JbuilderTemplateTest < ActionView::TestCase
     end
   end
 
+  def assert_collection_rendered(json)
+    result = MultiJson.load(json)
+
+    assert_equal 10, result.length
+    assert_equal Array, result.class
+    assert_equal 'post body 5',        result[4]['body']
+    assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
+    assert_equal 'Pavel',              result[5]['author']['first_name']
+  end
+
   test 'rendering' do
     json = render_jbuilder <<-JBUILDER
       json.content 'hello'
@@ -96,13 +106,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.partial! 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
     JBUILDER
 
-    result = MultiJson.load(json)
-
-    assert_equal 10, result.length
-    assert_equal Array, result.class
-    assert_equal 'post body 5',        result[4]['body']
-    assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
-    assert_equal 'Pavel',              result[5]['author']['first_name']
+    assert_collection_rendered json
   end
 
   test 'partial! renders collection (alt. syntax)' do
@@ -110,13 +114,15 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.partial! :partial => 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
     JBUILDER
 
-    result = MultiJson.load(json)
+    assert_collection_rendered json
+  end
 
-    assert_equal 10, result.length
-    assert_equal Array, result.class
-    assert_equal 'post body 5',        result[4]['body']
-    assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
-    assert_equal 'Pavel',              result[5]['author']['first_name']
+  test 'render array of partials' do
+    json = render_jbuilder <<-JBUILDER
+      json.array! BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
+    JBUILDER
+
+    assert_collection_rendered json
   end
 
   test 'fragment caching a JSON object' do
