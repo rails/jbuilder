@@ -188,6 +188,7 @@ Jbuilder.key_format :camelize => :lower
 
 Libraries similar to this in some form or another include:
 
+* Active Model Serializers: https://github.com/rails-api/active_model_serializers
 * RABL: https://github.com/nesquena/rabl
 * JsonBuilder: https://github.com/nov/jsonbuilder
 * JSON Builder: https://github.com/dewski/json_builder
