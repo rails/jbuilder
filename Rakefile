@@ -4,6 +4,10 @@ require 'rake/testtask'
 Bundler.require
 
 Rake::TestTask.new do |test|
+  require 'coveralls'
+  Coveralls.wear!
+  SimpleCov.command_name 'Unit Tests'
+
   if defined?(::Rails::Railtie)
     test.test_files = FileList['test/*_test.rb']
   else
