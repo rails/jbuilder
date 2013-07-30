@@ -86,7 +86,6 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
-
 Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
 
 ``` ruby
@@ -168,6 +167,14 @@ json.author do
     json.first_name @post.author_first_name
     json.last_name @post.author_last_name
   end
+end
+```
+
+Fragment caching is supported, it uses `Rails.cache` and works like caching in HTML templates:
+
+```ruby
+json.cache! ['v1', @person], :expires_in => 10.minutes do
+  json.extract! @person, :name, :age
 end
 ```
 
