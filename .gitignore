@@ -2,4 +2,3 @@ tmp
 Gemfile.lock
 Gemfile.edge.lock
 .ruby-version
-coverage

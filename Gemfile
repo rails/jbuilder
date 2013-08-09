@@ -5,4 +5,3 @@ gemspec
 gem 'rake'
 gem 'mocha', :require => false
 gem 'actionpack', '~> 3.0'
-gem 'coveralls', :require => false
