@@ -52,8 +52,9 @@ class JbuilderTemplateTest < ActionView::TestCase
     end
   end
 
-  def assert_collection_rendered(json)
+  def assert_collection_rendered(json, context = nil)
     result = MultiJson.load(json)
+    result = result.fetch(context) if context
 
     assert_equal 10, result.length
     assert_equal Array, result.class
@@ -123,6 +124,14 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
 
     assert_collection_rendered json
+  end
+
+  test 'render array if partials as a value' do
+    json = render_jbuilder <<-JBUILDER
+      json.posts BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
+    JBUILDER
+
+    assert_collection_rendered json, 'posts'
   end
 
   test 'fragment caching a JSON object' do

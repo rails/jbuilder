@@ -154,6 +154,10 @@ json.partial! 'posts/post', collection: @posts, as: :post
 # or
 
 json.partial! partial: 'posts/post', collection: @posts, as: :post
+
+# or
+
+json.comments @post.comments, partial: 'comment/comment', as: :comment
 ```
 
 You can explicitly make Jbuilder object return null if you want:
