@@ -177,7 +177,7 @@ end
 Fragment caching is supported, it uses `Rails.cache` and works like caching in HTML templates:
 
 ```ruby
-json.cache! ['v1', @person], :expires_in => 10.minutes do
+json.cache! ['v1', @person], expires_in: 10.minutes do
   json.extract! @person, :name, :age
 end
 ```
@@ -185,7 +185,7 @@ end
 Keys can be auto formatted using `key_format!`, this can be used to convert keynames from the standard ruby_format to CamelCase:
 
 ``` ruby
-json.key_format! :camelize => :lower
+json.key_format! camelize: :lower
 json.first_name 'David'
 
 # => { "firstName": "David" }
@@ -194,7 +194,7 @@ json.first_name 'David'
 You can set this globally with the class method `key_format` (from inside your environment.rb for example):
 
 ``` ruby
-Jbuilder.key_format :camelize => :lower
+Jbuilder.key_format camelize: :lower
 ```
 
 Libraries similar to this in some form or another include:
