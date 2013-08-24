@@ -1,6 +1,13 @@
 require 'action_dispatch/http/mime_type'
 
 class JbuilderTemplate < Jbuilder
+  class_attribute :template_lookup_options,
+    :instance_reader => false,
+    :instance_writer => false,
+    :instance_predicate => false
+
+  self.template_lookup_options = { :handlers => [:jbuilder] }
+
   def initialize(context, *args, &block)
     @context = context
     super(*args, &block)
@@ -54,7 +61,8 @@ class JbuilderTemplate < Jbuilder
 
   protected
     def _handle_partial_options(options)
-      options.reverse_merge!(:locals => {}, :handlers => [:jbuilder])
+      options.reverse_merge! :locals => {}
+      options.reverse_merge! ::JbuilderTemplate.template_lookup_options
       collection = options.delete(:collection)
       as = options[:as]
 
