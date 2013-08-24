@@ -1,10 +1,9 @@
 require 'action_dispatch/http/mime_type'
 
 class JbuilderTemplate < Jbuilder
-  class_attribute :template_lookup_options,
-    :instance_reader => false,
-    :instance_writer => false,
-    :instance_predicate => false
+  class << self
+    attr_accessor :template_lookup_options
+  end
 
   self.template_lookup_options = { :handlers => [:jbuilder] }
 
