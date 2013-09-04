@@ -38,7 +38,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
 
       assert_instance_method :update, content do |m|
         assert_match /format\.html \{ redirect_to @post, notice: 'Post was successfully updated\.' \}/, m
-        assert_match /format\.json \{ head :no_content \}/, m
+        assert_match /format\.json \{ render action: 'show', status: :ok, location: @post \}/, m
         assert_match /format\.html \{ render action: 'edit' \}/, m
         assert_match /format\.json \{ render json: @post.errors, status: :unprocessable_entity \}/, m
       end
