@@ -62,7 +62,7 @@ class Jbuilder < JbuilderProxy
     @attributes = ::ActiveSupport::OrderedHash.new
 
     options = args.extract_options!
-    @key_formatter = options.fetch(:key_formatter, @@key_formatter.clone)
+    @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
     yield self if block
   end
