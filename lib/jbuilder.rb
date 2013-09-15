@@ -125,7 +125,7 @@ class Jbuilder < JbuilderProxy
   #
   # You can pass parameters to the method using a hash pair.
   #
-  #   json.key_format! :camelize => :lower
+  #   json.key_format! camelize: :lower
   #   json.first_name "David"
   #
   #   { "firstName": "David" }
@@ -237,17 +237,17 @@ class Jbuilder < JbuilderProxy
   #
   # Example:
   #
-  #   @person = Struct.new(:name, :age).new("David", 32)
+  #   @person = Struct.new(:name, :age).new('David', 32)
   #
   #   or you can utilize a Hash
   #
-  #   @person = {:name => "David", :age => 32}
+  #   @person = { name: 'David', age: 32 }
   #
   #   json.extract! @person, :name, :age
   #
   #   { "name": David", "age": 32 }, { "name": Jamie", "age": 31 }
   #
-  # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
+  # You can also use the call syntax instead of an explicit extract! call:
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
