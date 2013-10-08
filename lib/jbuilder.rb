@@ -92,7 +92,7 @@ class Jbuilder < JbuilderProxy
         # { "age": 32 }
         value
       end
-    elsif value.respond_to?(:map)
+    elsif value.respond_to?(:map) || ((opts = args.last).respond_to?(:map) && opts[:as])
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       _scope{ array! value, *args }
@@ -221,7 +221,7 @@ class Jbuilder < JbuilderProxy
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection, *attributes, &block)
+  def array!(collection = [], *attributes, &block)
     @attributes = if block && block.arity == 2
       _two_arguments_map_collection(collection, &block)
     elsif block

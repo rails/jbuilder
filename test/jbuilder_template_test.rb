@@ -110,12 +110,28 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_collection_rendered json
   end
 
+  test 'partial! renders as empty array for nil-collection' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! 'blog_post', :collection => nil, :as => :blog_post
+    JBUILDER
+
+    assert_equal '[]', json
+  end
+
   test 'partial! renders collection (alt. syntax)' do
     json = render_jbuilder <<-JBUILDER
       json.partial! :partial => 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
     JBUILDER
 
     assert_collection_rendered json
+  end
+
+  test 'partial! renders as empty array for nil-collection (alt. syntax)' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! :partial => 'blog_post', :collection => nil, :as => :blog_post
+    JBUILDER
+
+    assert_equal '[]', json
   end
 
   test 'render array of partials' do
@@ -126,12 +142,28 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_collection_rendered json
   end
 
+  test 'render array of partials as empty array with nil-collection' do
+    json = render_jbuilder <<-JBUILDER
+      json.array! nil, :partial => 'blog_post', :as => :blog_post
+    JBUILDER
+
+    assert_equal '[]', json
+  end
+
   test 'render array if partials as a value' do
     json = render_jbuilder <<-JBUILDER
       json.posts BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
     JBUILDER
 
     assert_collection_rendered json, 'posts'
+  end
+
+  test 'render as empty array if partials as a nil value' do
+    json = render_jbuilder <<-JBUILDER
+      json.posts nil, :partial => 'blog_post', :as => :blog_post
+    JBUILDER
+
+    assert_equal '{"posts":[]}', json
   end
 
   test 'fragment caching a JSON object' do
