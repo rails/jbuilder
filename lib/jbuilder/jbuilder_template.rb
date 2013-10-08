@@ -22,13 +22,15 @@ class JbuilderTemplate < Jbuilder
       options = { :partial => name_or_options, :locals => locals }
       as = locals.delete(:as)
       options[:as] = as if as.present?
-      options[:collection] = locals[:collection]
+      options[:collection] = locals[:collection] if locals.key?(:collection)
     end
+
+    options[:collection] ||= [] if options.key?(:collection)
 
     _handle_partial_options options
   end
 
-  def array!(collection, *attributes, &block)
+  def array!(collection = [], *attributes, &block)
     options = attributes.extract_options!
 
     if options.key?(:partial)
