@@ -92,7 +92,7 @@ class Jbuilder < JbuilderProxy
         # { "age": 32 }
         value
       end
-    elsif value.respond_to?(:map) || ((opts = args.last).respond_to?(:map) && opts[:as])
+    elsif _mapable_arguments?(value, *args)
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       _scope{ array! value, *args }
@@ -348,6 +348,10 @@ class Jbuilder < JbuilderProxy
       ::ActiveSupport::Deprecation.warn message, ::Kernel.caller(5)
 
       _map_collection(collection){ |element| block[self, element] }
+    end
+
+    def _mapable_arguments?(value, *args)
+      value.respond_to?(:map)
     end
 end
 

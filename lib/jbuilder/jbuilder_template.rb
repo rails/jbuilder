@@ -94,6 +94,14 @@ class JbuilderTemplate < Jbuilder
         ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
       end
     end
+
+  private
+
+    def _mapable_arguments?(value, *args)
+      return true if super
+      options = args.last
+      ::Hash === options && options.key?(:as)
+    end
 end
 
 class JbuilderHandler
