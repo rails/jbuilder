@@ -1,8 +1,6 @@
-require 'active_support/ordered_hash'
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
-require 'active_support/cache'
 require 'multi_json'
 
 begin
@@ -22,7 +20,7 @@ class Jbuilder < JbuilderProxy
 
   class KeyFormatter
     def initialize(*args)
-      @format = ::ActiveSupport::OrderedHash.new
+      @format = {}
       @cache = {}
 
       options = args.extract_options!
@@ -59,7 +57,7 @@ class Jbuilder < JbuilderProxy
   @@ignore_nil    = false
 
   def initialize(*args, &block)
-    @attributes = ::ActiveSupport::OrderedHash.new
+    @attributes = {}
 
     options = args.extract_options!
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
@@ -318,7 +316,7 @@ class Jbuilder < JbuilderProxy
 
     def _scope
       parent_attributes, parent_formatter = @attributes, @key_formatter
-      @attributes = ::ActiveSupport::OrderedHash.new
+      @attributes = {}
       yield
       @attributes
     ensure
