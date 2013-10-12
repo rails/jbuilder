@@ -3,7 +3,7 @@ require 'mocha/setup'
 require 'action_view'
 require 'action_view/testing/resolvers'
 require 'active_support/cache'
-require 'jbuilder'
+require 'jbuilder/jbuilder_template'
 
 
 BLOG_POST_PARTIAL = <<-JBUILDER
