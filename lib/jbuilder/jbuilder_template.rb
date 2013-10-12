@@ -7,7 +7,7 @@ class JbuilderTemplate < Jbuilder
     attr_accessor :template_lookup_options
   end
 
-  self.template_lookup_options = { :handlers => [:jbuilder] }
+  self.template_lookup_options = { handlers: [:jbuilder] }
 
   def initialize(context, *args, &block)
     @context = context
@@ -21,7 +21,7 @@ class JbuilderTemplate < Jbuilder
       options = name_or_options
     else
       # partial! 'name', foo: 'bar'
-      options = { :partial => name_or_options, :locals => locals }
+      options = { partial: name_or_options, locals: locals }
       as = locals.delete(:as)
       options[:as] = as if as.present?
       options[:collection] = locals[:collection] if locals.key?(:collection)
@@ -36,7 +36,7 @@ class JbuilderTemplate < Jbuilder
     options = attributes.extract_options!
 
     if options.key?(:partial)
-      partial! options[:partial], options.merge(:collection => collection)
+      partial! options[:partial], options.merge(collection: collection)
     else
       super
     end
@@ -64,14 +64,15 @@ class JbuilderTemplate < Jbuilder
 
   protected
     def _handle_partial_options(options)
-      options.reverse_merge! :locals => {}
+      options.reverse_merge! locals: {}
       options.reverse_merge! ::JbuilderTemplate.template_lookup_options
       collection = options.delete(:collection)
       as = options[:as]
 
       if collection && as
         array!(collection) do |member|
-          options[:locals].merge!(as => member, :collection => collection)
+          options[:locals].merge! as => member
+          options[:locals].merge! collection: collection
           _render_partial options
         end
       else
@@ -80,7 +81,7 @@ class JbuilderTemplate < Jbuilder
     end
 
     def _render_partial(options)
-      options[:locals].merge!(:json => self)
+      options[:locals].merge! json: self
       @context.render options
     end
 
