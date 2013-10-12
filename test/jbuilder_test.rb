@@ -241,45 +241,12 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', parsed['comments'].second['content']
   end
 
-  test 'nesting multiple children from array with inline loop with old api' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
-
-    json = Jbuilder.encode do |json|
-      ::ActiveSupport::Deprecation.silence do
-        json.comments comments do |json, comment|
-          json.content comment.content
-        end
-      end
-    end
-
-    parsed = MultiJson.load(json)
-    assert_equal ['content'], parsed['comments'].first.keys
-    assert_equal 'hello', parsed['comments'].first['content']
-    assert_equal 'world', parsed['comments'].second['content']
-  end
-
   test 'nesting multiple children from array with inline loop on root' do
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     json = Jbuilder.encode do |json|
       json.call(comments) do |comment|
         json.content comment.content
-      end
-    end
-
-    parsed = MultiJson.load(json)
-    assert_equal 'hello', parsed.first['content']
-    assert_equal 'world', parsed.second['content']
-  end
-
-  test 'nesting multiple children from array with inline loop on root with old api' do
-    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
-
-    json = Jbuilder.encode do |json|
-      ::ActiveSupport::Deprecation.silence do
-        json.call(comments) do |json, comment|
-          json.content comment.content
-        end
       end
     end
 
@@ -335,24 +302,6 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal 'David', MultiJson.load(json)[0]['names'].last
     assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
-  end
-
-  test 'directly set an array nested in another array with old api' do
-    data = [ { :department => 'QA', :not_in_json => 'hello', :names => ['John', 'David'] } ]
-    json = Jbuilder.encode do |json|
-      ::ActiveSupport::Deprecation.silence do
-        json.array! data do |json, object|
-          json.department object[:department]
-          json.names do
-            json.array! object[:names]
-          end
-        end
-      end
-    end
-
-    parsed = MultiJson.load(json)
-    assert_equal 'David', parsed.first['names'].last
-    assert_not_equal 'hello', parsed.first['not_in_json']
   end
 
   test 'nested jbuilder objects' do
