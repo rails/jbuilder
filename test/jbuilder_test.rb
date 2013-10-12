@@ -73,23 +73,6 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, parsed['age']
   end
 
-  test 'extracting from object using private method' do
-    person = Struct.new(:name) do
-      private
-      def age
-        32
-      end
-    end.new('David')
-
-    message = 'Private method :age was used to extract value. This will be' +
-      ' an error in future versions of Jbuilder'
-
-    ::ActiveSupport::Deprecation.expects(:warn).with(message)
-    json = Jbuilder.encode do |json|
-      json.extract! person, :name, :age
-    end
-  end
-
   test 'extracting from object using call style for 1.9' do
     person = Struct.new(:name, :age).new('David', 32)
 
