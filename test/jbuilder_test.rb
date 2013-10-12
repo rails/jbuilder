@@ -77,11 +77,7 @@ class JbuilderTest < ActiveSupport::TestCase
     person = Struct.new(:name, :age).new('David', 32)
 
     json = Jbuilder.encode do |json|
-      if ::RUBY_VERSION > '1.9'
-        instance_eval 'json.(person, :name, :age)'
-      else
-        instance_eval 'json.call(person, :name, :age)'
-      end
+      json.(person, :name, :age)
     end
 
     parsed = MultiJson.load(json)
