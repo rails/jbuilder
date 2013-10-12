@@ -403,8 +403,8 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'initialize via options hash' do
     jbuilder = Jbuilder.new(:key_formatter => 1, :ignore_nil => 2)
-    assert_equal 1, jbuilder.instance_eval('@key_formatter')
-    assert_equal 2, jbuilder.instance_eval('@ignore_nil')
+    assert_equal 1, jbuilder.instance_eval{ @key_formatter }
+    assert_equal 2, jbuilder.instance_eval{ @ignore_nil }
   end
 
   test 'key_format! with parameter' do
