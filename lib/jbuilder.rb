@@ -56,10 +56,9 @@ class Jbuilder < JbuilderProxy
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
 
-  def initialize(*args, &block)
+  def initialize(options = {}, &block)
     @attributes = {}
 
-    options = args.extract_options!
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
     yield self if block
