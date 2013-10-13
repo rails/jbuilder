@@ -60,4 +60,13 @@ class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
 
       assert_equal %w[comments/comment], dependencies
     end
+
+    test 'detects explicit depedency' do
+      dependencies = track_dependencies <<-RUBY
+        # Template Dependency: path/to/partial
+        json.foo 'bar'
+      RUBY
+
+      assert_equal %w[path/to/partial], dependencies
+    end
 end
