@@ -6,12 +6,13 @@ class Jbuilder
   class DependencyTracker < ::ActionView::DependencyTracker::ERBTracker
     # Matches:
     #   json.partial! "messages/message"
+    #   json.partial!('messages/message')
+    #
     DIRECT_RENDERS = /
       \w+\.partial!     # json.partial!
       \(?\s*            # optional parenthesis
       (['"])([^""]+)\1  # quoted value
     /x
-
 
     # Matches:
     #   json.partial! partial: "comments/comment"
@@ -20,14 +21,16 @@ class Jbuilder
     #   = render partial: "account"
     #
     INDIRECT_RENDERS = /
-      (?::partial\s*=>|partial:)
-      \s*
-      (['"])([^'"]+)\1
+      (?::partial\s*=>|partial:)  # partial: or :partial =>
+      \s*                         # optional whitespace
+      (['"])([^'"]+)\1            # quoted value
     /x
 
     def dependencies
       direct_dependencies + indirect_dependencies + explicit_dependencies
     end
+
+    private
 
     def direct_dependencies
       source.scan(DIRECT_RENDERS).map(&:second)
