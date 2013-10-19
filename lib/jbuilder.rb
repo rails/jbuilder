@@ -280,7 +280,7 @@ class Jbuilder < JbuilderProxy
 
   private
 
-    def  _extract_hash_values(object, *attributes)
+    def _extract_hash_values(object, *attributes)
       attributes.each{ |key| _set_value key, object.fetch(key) }
     end
 
