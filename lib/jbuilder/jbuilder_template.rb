@@ -32,6 +32,7 @@ class JbuilderTemplate < Jbuilder
 
   def array!(collection = [], *attributes, &block)
     options = attributes.extract_options!
+    collection.flatten! if collection.present? && collection.all? { |e| e.respond_to?(:[]) }
 
     if options.key?(:partial)
       partial! options[:partial], options.merge(collection: collection)
