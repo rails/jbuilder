@@ -273,6 +273,16 @@ class Jbuilder < JbuilderProxy
     @attributes
   end
 
+  # Merges hash or array into current builder.
+  def merge!(hash_or_array)
+    if ::Array === hash_or_array
+      @attributes = [] unless ::Array === @attributes
+      @attributes.concat hash_or_array
+    else
+      @attributes.update hash_or_array
+    end
+  end
+
   # Encodes the current builder as JSON.
   def target!
     ::MultiJson.dump(@attributes)
@@ -310,15 +320,6 @@ class Jbuilder < JbuilderProxy
       @attributes
     ensure
       @attributes, @key_formatter = parent_attributes, parent_formatter
-    end
-
-    def _merge(hash_or_array)
-      if ::Array === hash_or_array
-        @attributes = [] unless ::Array === @attributes
-        @attributes.concat hash_or_array
-      else
-        @attributes.update hash_or_array
-      end
     end
 
     def _mapable_arguments?(value, *args)

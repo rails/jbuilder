@@ -54,7 +54,7 @@ class JbuilderTemplate < Jbuilder
         _scope { yield self }
       end
 
-      _merge(value)
+      merge! value
     else
       yield
     end
