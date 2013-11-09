@@ -204,4 +204,4 @@ Libraries similar to this in some form or another include:
 * JsonBuilder: https://github.com/nov/jsonbuilder
 * JSON Builder: https://github.com/dewski/json_builder
 * Jsonify: https://github.com/bsiggelkow/jsonify
-* RepresentationView: https://github.com/mdub/representative_view
+* Representative View: https://github.com/mdub/representative_view
