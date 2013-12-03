@@ -24,6 +24,10 @@ module Rails
 
 
       protected
+        def attributes_names
+          [:id] + super
+        end
+
         def filename_with_extensions(name)
           [name, :json, :jbuilder] * '.'
         end
