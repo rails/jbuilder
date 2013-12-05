@@ -197,7 +197,8 @@ You can set this globally with the class method `key_format` (from inside your e
 Jbuilder.key_format camelize: :lower
 ```
 
-== Faster JSON backends
+Faster JSON backends
+--------------------
 
 Jbuilder uses MultiJson, which by default will use the JSON gem. That's a Ruby JSON implementation that isn't exactly the fastest in the world. For faster Jbuilder rendering, you can specify something like the Yajl JSON generator instead. You'll need to include the yajl-ruby gem in your Gemfile and then set the following configuration for MultiJson:
 
