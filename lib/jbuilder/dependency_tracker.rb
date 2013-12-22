@@ -1,9 +1,21 @@
 require 'jbuilder'
-require 'action_view'
-require 'action_view/dependency_tracker'
 
-class Jbuilder
-  class DependencyTracker < ::ActionView::DependencyTracker::ERBTracker
+dependency_tracker = false
+
+begin
+  require 'action_view'
+  require 'action_view/dependency_tracker'
+  dependency_tracker = ::ActionView::DependencyTracker
+rescue LoadError
+  begin
+    require 'cache_digests'
+    dependency_tracker = ::CacheDigests::DependencyTracker
+  rescue LoadError
+  end
+end
+
+if dependency_tracker
+  dependency_tracking_module = Module.new do
     # Matches:
     #   json.partial! "messages/message"
     #   json.partial!('messages/message')
@@ -40,11 +52,8 @@ class Jbuilder
       source.scan(INDIRECT_RENDERS).map(&:second)
     end
   end
-end
 
-
-ActiveSupport.on_load :action_view do
-  ActiveSupport.on_load :after_initialize do
-    ActionView::DependencyTracker.register_tracker :jbuilder, Jbuilder::DependencyTracker
-  end
+  ::Jbuilder::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
+  ::Jbuilder::DependencyTracker.send :include, dependency_tracking_module
+  dependency_tracker.register_tracker :jbuilder, ::Jbuilder::DependencyTracker
 end
