@@ -9,6 +9,7 @@ gem 'mocha', require: false
 
 platforms :rbx do
   gem 'rubysl', '~> 2.0'
+  gem 'rubysl-json', '~> 2.0'
   gem 'rubysl-test-unit'
   gem 'rubinius-developer_tools'
 end
