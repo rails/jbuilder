@@ -5,3 +5,9 @@ gemspec
 gem 'rake'
 gem 'mocha', :require => false
 gem 'actionpack', '~> 3.0'
+
+platforms :rbx do
+  gem 'rubysl', '~> 2.0'
+  gem 'rubysl-test-unit'
+  gem 'rubinius-developer_tools'
+end
