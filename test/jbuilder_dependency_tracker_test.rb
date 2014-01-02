@@ -23,7 +23,7 @@ class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
 
     test 'detects dependency via direct partial! call' do
       dependencies = track_dependencies <<-RUBY
-        json.partial! 'path/to/partial'
+        json.partial! 'path/to/partial', local: 'blah'
       RUBY
 
       assert_equal %w[path/to/partial], dependencies
