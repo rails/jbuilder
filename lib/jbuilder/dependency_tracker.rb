@@ -23,7 +23,7 @@ if dependency_tracker
     DIRECT_RENDERS = /
       \w+\.partial!     # json.partial!
       \(?\s*            # optional parenthesis
-      (['"])([^""]+)\1  # quoted value
+      (['"])([^'"]+)\1  # quoted value
     /x
 
     # Matches:
