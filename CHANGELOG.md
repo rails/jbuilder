@@ -13,6 +13,7 @@
 -----
 * [Respond to PUT/PATCH API request with :ok](https://github.com/rails/jbuilder/commit/9dbce9c12181e89f8f472ac23c764ffe8438040a)
 * [Remove Ruby 1.8 support](https://github.com/rails/jbuilder/commit/d53fff42d91f33d662eafc2561c4236687ecf6c9)
+* [Remove deprecated two argument block call](https://github.com/rails/jbuilder/commit/07a35ee7e79ae4b06dba9dbff5c4e07c1e627218)
 * [Make Jbuilder object initialize with single hash](https://github.com/rails/jbuilder/commit/38bf551db0189327aaa90b9be010c0d1b792c007)
 * [Track template dependencies](https://github.com/rails/jbuilder/commit/8e73cea39f60da1384afd687cc8e5e399630d8cc)
 * [Expose merge! method](https://github.com/rails/jbuilder/commit/0e2eb47f6f3c01add06a1a59b37cdda8baf24f29)
