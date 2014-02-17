@@ -1,5 +1,9 @@
 # Changelog
 
+2.0.3
+-----
+* [Pass options when calling cache_fragment_name](https://github.com/rails/jbuilder/commit/07c2cc7486fe9ef423d7bc821b83f6d485f330e0)
+
 2.0.2
 -----
 * [Fix Dependency Tracking fail to detect single-quoted partial correctly](https://github.com/rails/jbuilder/commit/448679a6d3098eb34d137f782a05f1767711991a)
