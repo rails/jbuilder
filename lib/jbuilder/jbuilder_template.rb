@@ -50,7 +50,7 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={}, &block)
     if @context.controller.perform_caching
-      value = ::Rails.cache.fetch(_cache_key(key), options) do
+      value = ::Rails.cache.fetch(_cache_key(key, options), options) do
         _scope { yield self }
       end
 
@@ -83,11 +83,11 @@ class JbuilderTemplate < Jbuilder
       @context.render options
     end
 
-    def _cache_key(key)
+    def _cache_key(key, options)
       if @context.respond_to?(:cache_fragment_name)
         # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
         # should be used instead.
-        @context.cache_fragment_name(key)
+        @context.cache_fragment_name(key, options)
       elsif @context.respond_to?(:fragment_name_with_digest)
         # Backwards compatibility for period of time when fragment_name_with_digest was made public.
         @context.fragment_name_with_digest(key)
