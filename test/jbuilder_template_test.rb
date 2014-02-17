@@ -228,6 +228,18 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
+  test 'current cache digest option accepts options' do
+    undef_context_methods :fragment_name_with_digest
+
+    @context.expects(:cache_fragment_name).with('cachekey', skip_digest: true)
+
+    render_jbuilder <<-JBUILDER
+      json.cache! 'cachekey', skip_digest: true do
+        json.name 'Cache'
+      end
+    JBUILDER
+  end
+
   test 'does not perform caching when controller.perform_caching is false' do
     controller.perform_caching = false
     render_jbuilder <<-JBUILDER
