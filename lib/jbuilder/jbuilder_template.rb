@@ -60,6 +60,19 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
+  # Conditionally catches the json depending in the condition given as first parameter. Has the same
+  # signature as the `cache` helper method in `ActionView::Helpers::CacheHelper` and so can be used in
+  # the same way.
+  #
+  # Example:
+  #
+  #   json.cache_if! !admin?, @person, expires_in: 10.minutes do
+  #     json.extract! @person, :name, :age
+  #   end
+  def cache_if!(condition, *args, &block)
+    condition ? cache!(*args, &block) : yield
+  end
+
   protected
     def _handle_partial_options(options)
       options.reverse_merge! locals: {}

@@ -182,6 +182,14 @@ json.cache! ['v1', @person], expires_in: 10.minutes do
 end
 ```
 
+You can also conditionally cache a block by using `cache_if!` like this:
+
+```ruby
+json.cache_if! !admin?, ['v1', @person], expires_in: 10.minutes do
+  json.extract! @person, :name, :age
+end
+```
+
 Keys can be auto formatted using `key_format!`, this can be used to convert keynames from the standard ruby_format to CamelCase:
 
 ``` ruby
