@@ -1,5 +1,9 @@
 # Changelog
 
+2.0.4
+-----
+* [Add cache_if! to conditionally cache JSON fragments](https://github.com/rails/jbuilder/commit/commit/14a5afd8a2c939a6fd710d355a194c114db96eb2)
+
 2.0.3
 -----
 * [Pass options when calling cache_fragment_name](https://github.com/rails/jbuilder/commit/07c2cc7486fe9ef423d7bc821b83f6d485f330e0)
