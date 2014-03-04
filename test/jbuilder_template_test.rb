@@ -185,6 +185,32 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal 'Cache', parsed['name']
   end
 
+  test 'conditionally fragment caching a JSON object' do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    render_jbuilder <<-JBUILDER
+      json.cache_if! true, 'cachekey' do
+        json.test1 'Cache'
+      end
+      json.cache_if! false, 'cachekey' do
+        json.test2 'Cache'
+      end
+    JBUILDER
+
+    json = render_jbuilder <<-JBUILDER
+      json.cache_if! true, 'cachekey' do
+        json.test1 'Miss'
+      end
+      json.cache_if! false, 'cachekey' do
+        json.test2 'Miss'
+      end
+    JBUILDER
+
+    parsed = MultiJson.load(json)
+    assert_equal 'Cache', parsed['test1']
+    assert_equal 'Miss', parsed['test2']
+  end
+
   test 'fragment caching deserializes an array' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
