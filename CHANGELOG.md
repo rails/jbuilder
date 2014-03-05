@@ -2,7 +2,7 @@
 
 2.0.4
 -----
-* [Add cache_if! to conditionally cache JSON fragments](https://github.com/rails/jbuilder/commit/commit/14a5afd8a2c939a6fd710d355a194c114db96eb2)
+* [Add cache_if! to conditionally cache JSON fragments](https://github.com/rails/jbuilder/commit/14a5afd8a2c939a6fd710d355a194c114db96eb2)
 
 2.0.3
 -----
