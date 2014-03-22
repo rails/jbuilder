@@ -1,5 +1,9 @@
 # Changelog
 
+2.0.5
+-----
+* [Fix edgecase when json is defined as a method](https://github.com/rails/jbuilder/commit/ca711a0c0a5760e26258ce2d93c14bef8fff0ead)
+
 2.0.4
 -----
 * [Add cache_if! to conditionally cache JSON fragments](https://github.com/rails/jbuilder/commit/14a5afd8a2c939a6fd710d355a194c114db96eb2)
