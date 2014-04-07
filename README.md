@@ -3,6 +3,7 @@
 [![Build Status](http://img.shields.io/travis/rails/jbuilder.svg)][travis]
 [![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)][gem]
 [![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)][codeclimate]
+[![Dependency Status](https://www.versioneye.com/ruby/jbuilder/badge.png)](https://www.versioneye.com/ruby/jbuilder)
 
 [travis]: https://travis-ci.org/rails/jbuilder
 [gem]: https://rubygems.org/gems/jbuilder
