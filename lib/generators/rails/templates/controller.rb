@@ -34,9 +34,9 @@ class <%= controller_class_name %>Controller < ApplicationController
     respond_to do |format|
       if @<%= orm_instance.save %>
         format.html { redirect_to @<%= singular_table_name %>, notice: <%= "'#{human_name} was successfully created.'" %> }
-        format.json { render action: 'show', status: :created, location: <%= "@#{singular_table_name}" %> }
+        format.json { render :show, status: :created, location: <%= "@#{singular_table_name}" %> }
       else
-        format.html { render action: 'new' }
+        format.html { render :new }
         format.json { render json: <%= "@#{orm_instance.errors}" %>, status: :unprocessable_entity }
       end
     end
@@ -48,9 +48,9 @@ class <%= controller_class_name %>Controller < ApplicationController
     respond_to do |format|
       if @<%= orm_instance.update("#{singular_table_name}_params") %>
         format.html { redirect_to @<%= singular_table_name %>, notice: <%= "'#{human_name} was successfully updated.'" %> }
-        format.json { render action: 'show', status: :ok, location: <%= "@#{singular_table_name}" %> }
+        format.json { render :show, status: :ok, location: <%= "@#{singular_table_name}" %> }
       else
-        format.html { render action: 'edit' }
+        format.html { render :edit }
         format.json { render json: <%= "@#{orm_instance.errors}" %>, status: :unprocessable_entity }
       end
     end

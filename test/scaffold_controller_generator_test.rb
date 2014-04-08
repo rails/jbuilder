@@ -31,15 +31,15 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
         assert_match /@post = Post\.new\(post_params\)/, m
         assert_match /@post\.save/, m
         assert_match /format\.html \{ redirect_to @post, notice: 'Post was successfully created\.' \}/, m
-        assert_match /format\.json \{ render action: 'show', status: :created, location: @post \}/, m
-        assert_match /format\.html \{ render action: 'new' \}/, m
+        assert_match /format\.json \{ render :show, status: :created, location: @post \}/, m
+        assert_match /format\.html \{ render :new \}/, m
         assert_match /format\.json \{ render json: @post\.errors, status: :unprocessable_entity \}/, m
       end
 
       assert_instance_method :update, content do |m|
         assert_match /format\.html \{ redirect_to @post, notice: 'Post was successfully updated\.' \}/, m
-        assert_match /format\.json \{ render action: 'show', status: :ok, location: @post \}/, m
-        assert_match /format\.html \{ render action: 'edit' \}/, m
+        assert_match /format\.json \{ render :show, status: :ok, location: @post \}/, m
+        assert_match /format\.html \{ render :edit \}/, m
         assert_match /format\.json \{ render json: @post.errors, status: :unprocessable_entity \}/, m
       end
 
