@@ -3,10 +3,12 @@
 [![Build Status](http://img.shields.io/travis/rails/jbuilder.svg)][travis]
 [![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)][gem]
 [![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)][codeclimate]
+[![Dependencies Status](http://img.shields.io/gemnasium/rails/jbuilder.svg)][gemnasium]
 
 [travis]: https://travis-ci.org/rails/jbuilder
 [gem]: https://rubygems.org/gems/jbuilder
 [codeclimate]: https://codeclimate.com/github/rails/jbuilder
+[gemnasium]: https://gemnasium.com/rails/jbuilder
 
 Jbuilder gives you a simple DSL for declaring JSON structures that beats massaging giant hash structures. This is particularly helpful when the generation process is fraught with conditionals and loops. Here's a simple example:
 
