@@ -1,5 +1,9 @@
 # Changelog
 
+2.0.6
+-----
+* [Use render short form in controller generator](https://github.com/rails/jbuilder/commit/acf37320a7cea7fcc70c791bc94bd5f46b8349ff)
+
 2.0.5
 -----
 * [Fix edgecase when json is defined as a method](https://github.com/rails/jbuilder/commit/ca711a0c0a5760e26258ce2d93c14bef8fff0ead)
