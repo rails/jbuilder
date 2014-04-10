@@ -41,7 +41,13 @@ class JbuilderTemplateTest < ActionView::TestCase
   def render_jbuilder(source)
     @rendered = []
     lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.jbuilder' => source))]
-    ActionView::Template.new(source, 'test', JbuilderHandler, :virtual_path => 'test').render(self, {}).strip
+    ActionView::Template.new(source, 'test', JbuilderHandler, :virtual_path => 'test').render(self, {}).to_s.strip
+  end
+
+  def render_jbuilder_with_layout(source,layout_source = nil)
+    lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.jbuilder' => source))]
+    lookup_context.view_paths += [ActionView::FixtureResolver.new(partials.merge('layout.json.jbuilder' => layout_source))] if layout_source
+    ActionView::TemplateRenderer.new(lookup_context).render(view, {:template => 'test',:layout => 'layout'}).to_s.strip
   end
 
   def undef_context_methods(*names)
@@ -61,6 +67,21 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal 'post body 5',        result[4]['body']
     assert_equal 'Heinemeier Hansson', result[2]['author']['last_name']
     assert_equal 'Pavel',              result[5]['author']['first_name']
+  end
+
+  test 'rendering with layout' do
+
+    source  =<<-JBUILDER
+      json.content 'hello'
+    JBUILDER
+    layout_source =<<-JBUILDER
+      json = yield
+      json.layout 'world'
+    JBUILDER
+    json = render_jbuilder_with_layout(source,layout_source)
+    assert_equal 'hello', MultiJson.load(json)['content']
+    assert_equal 'world', MultiJson.load(json)['layout']
+
   end
 
   test 'rendering' do

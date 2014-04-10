@@ -13,6 +13,17 @@ class JbuilderTemplate < Jbuilder
     @context = context
     super(*args, &block)
   end
+  def each
+    yield to_s
+  end
+
+  def to_s
+    target!
+  end
+
+  def html_safe
+    self
+  end
 
   def partial!(name_or_options, locals = {})
     case name_or_options
@@ -124,8 +135,8 @@ class JbuilderHandler
 
   def self.call(template)
     # this juggling is required to keep line numbers right in the error
-    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{template.source}
-      json.target! unless (__already_defined && __already_defined != "method")}
+    %{json||=JbuilderTemplate.new(self); #{template.source}
+      json}
   end
 end
 
