@@ -312,6 +312,22 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', parsed.second['content']
   end
 
+  test 'top-level array merging with jbuilders' do
+    comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
+
+    json = Jbuilder.encode do |json|
+      json.array!(comments) do |comment|
+        json.merge!(Jbuilder.new do |json|
+          json.(comment, :content)
+        end)
+      end
+    end
+
+    parsed = MultiJson.load(json)
+    assert_equal 'hello', parsed.first['content']
+    assert_equal 'world', parsed.second['content']
+  end
+
   test 'extract attributes directly from array' do
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
