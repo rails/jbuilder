@@ -1,3 +1,4 @@
+require 'test_helper'
 require 'rails/generators/test_case'
 require 'generators/rails/jbuilder_generator'
 

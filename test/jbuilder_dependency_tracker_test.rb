@@ -1,5 +1,4 @@
-require 'test/unit'
-require 'active_support/test_case'
+require 'test_helper'
 require 'jbuilder/dependency_tracker'
 
 

@@ -1,4 +1,4 @@
-require 'test/unit'
+require 'test_helper'
 require 'mocha/setup'
 require 'action_view'
 require 'action_view/testing/resolvers'
