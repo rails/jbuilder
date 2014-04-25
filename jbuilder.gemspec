@@ -1,6 +1,8 @@
+require_relative "./lib/jbuilder/version.rb"
+
 Gem::Specification.new do |s|
   s.name     = 'jbuilder'
-  s.version  = '2.0.6'
+  s.version  = Jbuilder::VERSION
   s.authors  = ['David Heinemeier Hansson', 'Pavel Pravosud']
   s.email    = ['david@37signals.com', 'pavel@pravosud.com']
   s.summary  = 'Create JSON structures via a Builder-style DSL'
