@@ -10,7 +10,10 @@
 [codeclimate]: https://codeclimate.com/github/rails/jbuilder
 [gemnasium]: https://gemnasium.com/rails/jbuilder
 
-Jbuilder gives you a simple DSL for declaring JSON structures that beats massaging giant hash structures. This is particularly helpful when the generation process is fraught with conditionals and loops. Here's a simple example:
+Jbuilder gives you a simple DSL for declaring JSON structures that beats
+massaging giant hash structures. This is particularly helpful when the
+generation process is fraught with conditionals and loops. Here's a simple
+example:
 
 ``` ruby
 Jbuilder.encode do |json|
@@ -123,7 +126,9 @@ company.to_builder.target!
 # => {"name":"Doodle Corp","president":{"name":"John Stobs","age":58}}
 ```
 
-You can either use Jbuilder stand-alone or directly as an ActionView template language. When required in Rails, you can create views ala show.json.jbuilder (the json is already yielded):
+You can either use Jbuilder stand-alone or directly as an ActionView template
+language. When required in Rails, you can create views ala show.json.jbuilder
+(the json is already yielded):
 
 ``` ruby
 # Any helpers available to views are available to the builder
@@ -183,7 +188,8 @@ json.author do
 end
 ```
 
-Fragment caching is supported, it uses `Rails.cache` and works like caching in HTML templates:
+Fragment caching is supported, it uses `Rails.cache` and works like caching in
+HTML templates:
 
 ```ruby
 json.cache! ['v1', @person], expires_in: 10.minutes do
@@ -199,7 +205,8 @@ json.cache_if! !admin?, ['v1', @person], expires_in: 10.minutes do
 end
 ```
 
-Keys can be auto formatted using `key_format!`, this can be used to convert keynames from the standard ruby_format to CamelCase:
+Keys can be auto formatted using `key_format!`, this can be used to convert
+keynames from the standard ruby_format to camelCase:
 
 ``` ruby
 json.key_format! camelize: :lower
@@ -208,7 +215,8 @@ json.first_name 'David'
 # => { "firstName": "David" }
 ```
 
-You can set this globally with the class method `key_format` (from inside your environment.rb for example):
+You can set this globally with the class method `key_format` (from inside your
+environment.rb for example):
 
 ``` ruby
 Jbuilder.key_format camelize: :lower
@@ -217,7 +225,12 @@ Jbuilder.key_format camelize: :lower
 Faster JSON backends
 --------------------
 
-Jbuilder uses MultiJson, which by default will use the JSON gem. That gem is currently tangled with ActiveSupport's all-Ruby #to_json implementation, which is slow (work is being done to correct this for a future version of Rails). For faster Jbuilder rendering, you can specify something like the Yajl JSON generator instead. You'll need to include the yajl-ruby gem in your Gemfile and then set the following configuration for MultiJson:
+Jbuilder uses MultiJson, which by default will use the JSON gem. That gem is
+currently tangled with ActiveSupport's all-Ruby `#to_json` implementation,
+which is slow (fixed in Rails >= 4.1). For faster Jbuilder rendering, you can
+specify something like the Yajl JSON generator instead. You'll need to include
+the `yajl-ruby` gem in your Gemfile and then set the following configuration
+for MultiJson:
 
 ``` ruby
 require 'multi_json'
