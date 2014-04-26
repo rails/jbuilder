@@ -89,6 +89,17 @@ end
 # => [ { "name": "David", "age": 32 }, { "name": "Jamie", "age": 31 } ]
 ```
 
+You can merge Jbuilder objects within the array block
+
+``` ruby
+# @people = People.all
+json.array! @people do |person|
+  json.merge! people.to_builder
+end
+
+# => [ { "name": "David", "age": 32 }, { "name": "Jamie", "age": 31 } ]
+```
+
 You can also extract attributes from array directly.
 
 ``` ruby

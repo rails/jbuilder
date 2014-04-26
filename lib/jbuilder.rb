@@ -275,7 +275,9 @@ class Jbuilder < JbuilderProxy
 
   # Merges hash or array into current builder.
   def merge!(hash_or_array)
-    if ::Array === hash_or_array
+    if ::Jbuilder === hash_or_array
+      merge!(hash_or_array.attributes!)
+    elsif ::Array === hash_or_array
       @attributes = [] unless ::Array === @attributes
       @attributes.concat hash_or_array
     else
