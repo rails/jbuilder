@@ -46,7 +46,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
 
       assert_instance_method :destroy, content do |m|
         assert_match /@post\.destroy/, m
-        assert_match /format\.html { redirect_to posts_url \}/, m
+        assert_match /format\.html \{ redirect_to posts_url, notice: 'Post was successfully destroyed\.' \}/, m
         assert_match /format\.json \{ head :no_content \}/, m
       end
 
