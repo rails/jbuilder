@@ -1,5 +1,9 @@
 # Changelog
 
+2.0.7
+-----
+* [Add destroy notice to scaffold generator](https://github.com/rails/jbuilder/commit/8448e86f8cdfa0f517bd59576947875775a1d43c)
+
 2.0.6
 -----
 * [Use render short form in controller generator](https://github.com/rails/jbuilder/commit/acf37320a7cea7fcc70c791bc94bd5f46b8349ff)
