@@ -1,6 +1,6 @@
 # Jbuilder
 
-[![Build Status](http://img.shields.io/travis/rails/jbuilder.svg)][travis]
+[![Build Status](https://api.travis-ci.org/rails/jbuilder.svg)][travis]
 [![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)][gem]
 [![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)][codeclimate]
 [![Dependencies Status](http://img.shields.io/gemnasium/rails/jbuilder.svg)][gemnasium]
