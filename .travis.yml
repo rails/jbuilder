@@ -18,6 +18,7 @@ matrix:
   allow_failures:
     - rvm: jruby-19mode
     - rvm: rbx
+  fast_finish: true
 
 notifications:
   email: false
