@@ -1,3 +1,4 @@
 tmp
+gemfiles/*.lock
 Gemfile.lock
 .ruby-version
