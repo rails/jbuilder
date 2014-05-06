@@ -72,6 +72,34 @@ class JbuilderTemplate < Jbuilder
   def cache_if!(condition, *args, &block)
     condition ? cache!(*args, &block) : yield
   end
+  
+  # Caches a collection of objects using fetch_multi, if supported.
+  # Requires a block for each item in the array. Accepts optional 'key' value.
+  #
+  # Example:
+  #
+  # json.cache_collection! @people, expires_in: 10.minutes do |person|
+  #   json.partial! 'person', :person => person
+  # end
+  def cache_collection!(collection, options = {}, &block)    
+    if @context.controller.perform_caching
+      keys_to_collection_map = _keys_to_collection_map(collection, options)  
+
+      if ::Rails.cache.respond_to?(:fetch_multi)
+        values = ::Rails.cache.fetch_multi(*keys_to_collection_map.keys, options) do |key|
+          _scope { yield keys_to_collection_map[key] }
+        end
+        merge! values
+      else
+        values = keys_to_collection_map.map do |key, item|
+          ::Rails.cache.fetch(key, options) { _scope { yield item } }
+        end
+        merge! values
+      end
+    else
+      array! collection, options, &block
+    end
+  end
 
   protected
     def _handle_partial_options(options)
@@ -106,6 +134,15 @@ class JbuilderTemplate < Jbuilder
         @context.fragment_name_with_digest(key)
       else
         ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
+      end
+    end
+    
+    def _keys_to_collection_map(collection, options)
+      key = options.delete(:key)
+      collection.inject({}) do |result, item|
+        item = [key, item].flatten if key
+        result[_cache_key(item, options)] = item
+        result
       end
     end
 
