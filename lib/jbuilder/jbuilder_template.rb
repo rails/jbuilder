@@ -125,7 +125,7 @@ class JbuilderTemplate < Jbuilder
     end
 
     def _cache_key(key, options)
-      if @context.respond_to?(:cache_fragment_name)
+      result = if @context.respond_to?(:cache_fragment_name)
         # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
         # should be used instead.
         @context.cache_fragment_name(key, options)
@@ -134,14 +134,15 @@ class JbuilderTemplate < Jbuilder
         @context.fragment_name_with_digest(key)
       else
         ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
-      end
+      end      
     end
     
     def _keys_to_collection_map(collection, options)
       key = options.delete(:key)
+
       collection.inject({}) do |result, item|
-        item = [key, item].flatten if key
-        result[_cache_key(item, options)] = item
+        cache_key = key ? [key, item] : item
+        result[_cache_key(cache_key, options)] = item
         result
       end
     end
