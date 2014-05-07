@@ -74,7 +74,7 @@ class JbuilderTemplate < Jbuilder
   end
   
   # Caches a collection of objects using fetch_multi, if supported.
-  # Requires a block for each item in the array. Accepts optional 'key' value.
+  # Requires a block for each item in the array. Accepts optional 'key' attribute in options (e.g. key: 'v1').
   #
   # Example:
   #
@@ -86,16 +86,16 @@ class JbuilderTemplate < Jbuilder
       keys_to_collection_map = _keys_to_collection_map(collection, options)  
 
       if ::Rails.cache.respond_to?(:fetch_multi)
-        values = ::Rails.cache.fetch_multi(*keys_to_collection_map.keys, options) do |key|
+        results = ::Rails.cache.fetch_multi(*keys_to_collection_map.keys, options) do |key|
           _scope { yield keys_to_collection_map[key] }
-        end
-        merge! values
+        end        
       else
-        values = keys_to_collection_map.map do |key, item|
+        results = keys_to_collection_map.map do |key, item|
           ::Rails.cache.fetch(key, options) { _scope { yield item } }
         end
-        merge! values
       end
+      
+      _process_collection_results(results)
     else
       array! collection, options, &block
     end
@@ -144,6 +144,15 @@ class JbuilderTemplate < Jbuilder
         result[_cache_key(item, options)] = item
         result
       end
+    end
+    
+    def _process_collection_results(results)
+      case results
+      when ::Hash
+        merge! results.values
+      else
+        merge! results
+      end  
     end
 
   private
