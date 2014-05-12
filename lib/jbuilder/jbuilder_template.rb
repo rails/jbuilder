@@ -72,6 +72,34 @@ class JbuilderTemplate < Jbuilder
   def cache_if!(condition, *args, &block)
     condition ? cache!(*args, &block) : yield
   end
+  
+  # Caches a collection of objects using fetch_multi, if supported.
+  # Requires a block for each item in the array. Accepts optional 'key' attribute in options (e.g. key: 'v1').
+  #
+  # Example:
+  #
+  # json.cache_collection! @people, expires_in: 10.minutes do |person|
+  #   json.partial! 'person', :person => person
+  # end
+  def cache_collection!(collection, options = {}, &block)    
+    if @context.controller.perform_caching
+      keys_to_collection_map = _keys_to_collection_map(collection, options)  
+
+      if ::Rails.cache.respond_to?(:fetch_multi)
+        results = ::Rails.cache.fetch_multi(*keys_to_collection_map.keys, options) do |key|
+          _scope { yield keys_to_collection_map[key] }
+        end        
+      else
+        results = keys_to_collection_map.map do |key, item|
+          ::Rails.cache.fetch(key, options) { _scope { yield item } }
+        end
+      end
+      
+      _process_collection_results(results)
+    else
+      array! collection, options, &block
+    end
+  end
 
   protected
     def _handle_partial_options(options)
@@ -97,7 +125,7 @@ class JbuilderTemplate < Jbuilder
     end
 
     def _cache_key(key, options)
-      if @context.respond_to?(:cache_fragment_name)
+      result = if @context.respond_to?(:cache_fragment_name)
         # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
         # should be used instead.
         @context.cache_fragment_name(key, options)
@@ -106,7 +134,26 @@ class JbuilderTemplate < Jbuilder
         @context.fragment_name_with_digest(key)
       else
         ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
+      end      
+    end
+    
+    def _keys_to_collection_map(collection, options)
+      key = options.delete(:key)
+
+      collection.inject({}) do |result, item|
+        cache_key = key ? [key, item] : item
+        result[_cache_key(cache_key, options)] = item
+        result
       end
+    end
+    
+    def _process_collection_results(results)
+      case results
+      when ::Hash
+        merge! results.values
+      else
+        merge! results
+      end  
     end
 
   private

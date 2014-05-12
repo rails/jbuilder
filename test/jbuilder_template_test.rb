@@ -288,5 +288,42 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
   end
+  
+  test 'renders cached array of block partials' do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+  
+    json = render_jbuilder <<-JBUILDER
+      json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
+        json.partial! 'blog_post', :blog_post => blog_post
+      end
+    JBUILDER
+        
+    assert_collection_rendered json
+  end
+  
+  test 'reverts to cache! if cache does not support fetch_multi' do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+    ActiveSupport::Cache::Store.send(:undef_method, :fetch_multi) if ActiveSupport::Cache::Store.method_defined?(:fetch_multi)
+     
+    json = render_jbuilder <<-JBUILDER
+      json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
+        json.partial! 'blog_post', :blog_post => blog_post
+      end
+    JBUILDER
+    
+    assert_collection_rendered json
+  end
+  
+  test 'reverts to array! when controller.perform_caching is false' do
+    controller.perform_caching = false
+    
+    json = render_jbuilder <<-JBUILDER
+      json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
+        json.partial! 'blog_post', :blog_post => blog_post
+      end
+    JBUILDER
+    
+    assert_collection_rendered json
+  end
 
 end
