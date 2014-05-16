@@ -222,6 +222,10 @@ environment.rb for example):
 Jbuilder.key_format camelize: :lower
 ```
 
+If you are rendering fragments for a collection of objects, have a look at
+`jbuilder_cache_multi` gem. It uses fetch_multi (>= Rails 4.1) to fetch mutliple 
+keys at once.
+
 Faster JSON backends
 --------------------
 
