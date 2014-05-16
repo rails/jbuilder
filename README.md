@@ -205,6 +205,10 @@ json.cache_if! !admin?, ['v1', @person], expires_in: 10.minutes do
 end
 ```
 
+If you are rendering fragments for a collection of objects, have a look at
+`jbuilder_cache_multi` gem. It uses fetch_multi (>= Rails 4.1) to fetch
+mutliple keys at once.
+
 Keys can be auto formatted using `key_format!`, this can be used to convert
 keynames from the standard ruby_format to camelCase:
 
@@ -221,10 +225,6 @@ environment.rb for example):
 ``` ruby
 Jbuilder.key_format camelize: :lower
 ```
-
-If you are rendering fragments for a collection of objects, have a look at
-`jbuilder_cache_multi` gem. It uses fetch_multi (>= Rails 4.1) to fetch mutliple 
-keys at once.
 
 Faster JSON backends
 --------------------
