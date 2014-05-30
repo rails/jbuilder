@@ -1,17 +1,11 @@
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
+require 'jbuilder/jbuilder'
 require 'multi_json'
 
-begin
-  require 'active_support/proxy_object'
-  JbuilderProxy = ActiveSupport::ProxyObject
-rescue LoadError
-  require 'active_support/basic_object'
-  JbuilderProxy = ActiveSupport::BasicObject
-end
 
-class Jbuilder < JbuilderProxy
+class Jbuilder
   class NullError < ::NoMethodError
     def initialize(key)
       super "Failed to add #{key.to_s.inspect} property to null object"
