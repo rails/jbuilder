@@ -2,16 +2,10 @@ require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
 require 'jbuilder/jbuilder'
+require 'jbuilder/errors'
 require 'multi_json'
 
-
 class Jbuilder
-  class NullError < ::NoMethodError
-    def initialize(key)
-      super "Failed to add #{key.to_s.inspect} property to null object"
-    end
-  end
-
   class KeyFormatter
     def initialize(*args)
       @format = {}
@@ -293,7 +287,8 @@ class Jbuilder
     end
 
     def _set_value(key, value)
-      raise NullError, key if @attributes.nil?
+      raise NullError.build(key) if @attributes.nil?
+
       unless @ignore_nil && value.nil?
         @attributes[@key_formatter.format(key)] = value
       end
