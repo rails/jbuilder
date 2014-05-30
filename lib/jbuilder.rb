@@ -4,11 +4,6 @@ require 'jbuilder/errors'
 require 'multi_json'
 
 class Jbuilder
-  # Yields a builder and automatically turns the result into a JSON string
-  def self.encode(*args, &block)
-    new(*args, &block).target!
-  end
-
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
 
@@ -17,13 +12,18 @@ class Jbuilder
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
+
     yield self if block
+  end
+
+  # Yields a builder and automatically turns the result into a JSON string
+  def self.encode(*args, &block)
+    new(*args, &block).target!
   end
 
   BLANK = ::Object.new
 
   def set!(key, value = BLANK, *args, &block)
-
     result = if block
       if BLANK != value
         # json.comments @post.comments { |comment| ... }
@@ -32,7 +32,7 @@ class Jbuilder
       else
         # json.comments { ... }
         # { "comments": ... }
-        _scope { yield self }
+        _scope{ yield self }
       end
     elsif args.empty?
       if ::Jbuilder === value
@@ -52,7 +52,7 @@ class Jbuilder
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _scope { extract! value, *args }
+      _scope{ extract! value, *args }
     end
 
     _set_value key, result
@@ -60,7 +60,6 @@ class Jbuilder
 
   alias_method :method_missing, :set!
   private :method_missing
-
 
   # Specifies formatting to be applied to the key. Passing in a name of a function
   # will cause that function to be called on the key.  So :upcase will upper case
@@ -141,7 +140,7 @@ class Jbuilder
   #   end
   def child!
     @attributes = [] unless ::Array === @attributes
-    @attributes << _scope { yield self }
+    @attributes << _scope{ yield self }
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as
@@ -246,42 +245,42 @@ class Jbuilder
 
   private
 
-    def _extract_hash_values(object, *attributes)
-      attributes.each{ |key| _set_value key, object.fetch(key) }
+  def _extract_hash_values(object, *attributes)
+    attributes.each{ |key| _set_value key, object.fetch(key) }
+  end
+
+  def _extract_method_values(object, *attributes)
+    attributes.each{ |key| _set_value key, object.public_send(key) }
+  end
+
+  def _set_value(key, value)
+    raise NullError.build(key) if @attributes.nil?
+    return if @ignore_nil && value.nil?
+
+    key = @key_formatter.format(key)
+    @attributes[key] = value
+  end
+
+  def _map_collection(collection)
+    return [] if collection.nil?
+
+    collection.map do |element|
+      _scope{ yield element }
     end
+  end
 
-    def _extract_method_values(object, *attributes)
-      attributes.each{ |key| _set_value key, object.public_send(key) }
-    end
+  def _scope
+    parent_attributes, parent_formatter = @attributes, @key_formatter
+    @attributes = {}
+    yield
+    @attributes
+  ensure
+    @attributes, @key_formatter = parent_attributes, parent_formatter
+  end
 
-    def _set_value(key, value)
-      raise NullError.build(key) if @attributes.nil?
-
-      unless @ignore_nil && value.nil?
-        @attributes[@key_formatter.format(key)] = value
-      end
-    end
-
-    def _map_collection(collection)
-      return [] if collection.nil?
-
-      collection.map do |element|
-        _scope { yield element }
-      end
-    end
-
-    def _scope
-      parent_attributes, parent_formatter = @attributes, @key_formatter
-      @attributes = {}
-      yield
-      @attributes
-    ensure
-      @attributes, @key_formatter = parent_attributes, parent_formatter
-    end
-
-    def _mapable_arguments?(value, *args)
-      value.respond_to?(:map)
-    end
+  def _mapable_arguments?(value, *args)
+    value.respond_to?(:map)
+  end
 end
 
 require 'jbuilder/jbuilder_template' if defined?(ActionView::Template)
