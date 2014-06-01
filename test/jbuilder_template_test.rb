@@ -216,18 +216,18 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
-        json.array! %w(a b c)
+        json.array! %w[a b c]
       end
     JBUILDER
 
     json = render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
-        json.array! %w(1 2 3)
+        json.array! %w[1 2 3]
       end
     JBUILDER
 
     parsed = MultiJson.load(json)
-    assert_equal %w(a b c), parsed
+    assert_equal %w[a b c], parsed
   end
 
   test 'fragment caching works with previous version of cache digests' do
