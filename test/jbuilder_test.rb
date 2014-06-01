@@ -308,7 +308,7 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     result = jbuild do |json|
-      json.array!(comments) do |comment|
+      json.array! comments do |comment|
         json.content comment.content
       end
     end
