@@ -251,13 +251,14 @@ class Jbuilder
   end
 
   def _merge_block(key, &block)
-    current_value = _read(key) || {}
+    current_value = _read(key, {})
+    raise NullError.build(key) if current_value.nil?
     value = _scope{ yield self }
-    _merge_values(current_value, value)
+    value.nil? ? value : _merge_values(current_value, value)
   end
 
-  def _read(key)
-    @attributes[_key(key)]
+  def _read(key, default = nil)
+    @attributes.fetch(_key(key)){ default }
   end
 
   def _write(key, value)

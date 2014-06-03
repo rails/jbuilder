@@ -567,9 +567,40 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_nil result
   end
 
-  test 'throws meaningfull error when on trying to add properties to null' do
+  test 'null! in a block' do
+    result = jbuild do |json|
+      json.author do
+        json.name 'David'
+      end
+
+      json.author do
+        json.null!
+      end
+    end
+
+    assert result.key?('author')
+    assert_nil result['author']
+  end
+
+  test 'throws NullError when trying to add properties to null' do
     json = Jbuilder.new
     json.null!
-    assert_raise(Jbuilder::NullError) { json.foo 'bar' }
+    assert_raise Jbuilder::NullError do
+      json.foo 'bar'
+    end
+  end
+
+  test 'throws NullError when trying to add properties to null using block syntax' do
+    assert_raise Jbuilder::NullError do
+      jbuild do |json|
+        json.author do
+          json.null!
+        end
+
+        json.author do
+          json.name "Pavel"
+        end
+      end
+    end
   end
 end
