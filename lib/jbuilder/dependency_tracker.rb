@@ -1,5 +1,3 @@
-require 'jbuilder'
-
 dependency_tracker = false
 
 begin
