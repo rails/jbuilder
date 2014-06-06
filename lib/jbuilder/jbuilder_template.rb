@@ -1,4 +1,4 @@
-require 'jbuilder'
+require 'jbuilder/jbuilder'
 require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 

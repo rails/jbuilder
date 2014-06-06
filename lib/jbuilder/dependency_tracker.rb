@@ -1,4 +1,4 @@
-require 'jbuilder'
+require 'jbuilder/jbuilder'
 
 dependency_tracker = false
 
