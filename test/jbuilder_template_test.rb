@@ -246,6 +246,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     undef_context_methods :fragment_name_with_digest
 
     @context.expects :cache_fragment_name
+    ActiveSupport::Cache.expects :expand_cache_key
 
     render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
@@ -258,6 +259,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     undef_context_methods :fragment_name_with_digest
 
     @context.expects(:cache_fragment_name).with('cachekey', skip_digest: true)
+    ActiveSupport::Cache.expects :expand_cache_key
 
     render_jbuilder <<-JBUILDER
       json.cache! 'cachekey', skip_digest: true do
@@ -275,18 +277,6 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
 
     assert_equal Rails.cache.inspect[/entries=(\d+)/, 1], '0'
-  end
-
-  test 'fragment caching falls back on ActiveSupport::Cache.expand_cache_key' do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    ActiveSupport::Cache.expects :expand_cache_key
-
-    render_jbuilder <<-JBUILDER
-      json.cache! 'cachekey' do
-        json.name 'Cache'
-      end
-    JBUILDER
   end
 
 end
