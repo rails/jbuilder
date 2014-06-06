@@ -98,13 +98,14 @@ class JbuilderTemplate < Jbuilder
   end
 
   def _cache_key(key, options)
-    key = fragment_name_with_digest(key, options)
-    ::ActiveSupport::Cache.expand_cache_key(key.is_a?(::Hash) ? url_for(key).split('://').last : key, :jbuilder)
+    key = _fragment_name_with_digest(key, options)
+    key = url_for(key).split('://', 2).last if ::Hash === key
+    ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
   end
 
   private
 
-  def fragment_name_with_digest(key, options)
+  def _fragment_name_with_digest(key, options)
     if @context.respond_to?(:cache_fragment_name)
       # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
       # should be used instead.
