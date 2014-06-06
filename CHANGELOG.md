@@ -1,5 +1,13 @@
 # Changelog
 
+2.0.8
+-----
+* [Eliminate circular dependencies](https://github.com/rails/jbuilder/commit/0879484dc74e7be93b695f66e3708ba48cdb1be3)
+* [Support cache key generation for complex objects](https://github.com/rails/jbuilder/commit/ca9622cca30c1112dd4408fcb2e658849abe1dd5)
+* [Remove JbuilderProxy class](https://github.com/rails/jbuilder/commit/5877482fc7da3224e42d4f72a1386f7a3a08173b)
+* [Move KeyFormatter into a separate file](https://github.com/rails/jbuilder/commit/13fee8464ff53ce853030114283c03c135c052b6)
+* [Move NullError into a separate file](https://github.com/rails/jbuilder/commit/13fee8464ff53ce853030114283c03c135c052b6)
+
 2.0.7
 -----
 * [Add destroy notice to scaffold generator](https://github.com/rails/jbuilder/commit/8448e86f8cdfa0f517bd59576947875775a1d43c)
