@@ -1,5 +1,9 @@
 # Changelog
 
+2.1.0
+-----
+* [Blocks and their extract! shortcuts are additive by default](https://github.com/rails/jbuilder/commit/a49390736c5f6e2d7a31111df6531bc28dba9fb1)
+
 2.0.8
 -----
 * [Eliminate circular dependencies](https://github.com/rails/jbuilder/commit/0879484dc74e7be93b695f66e3708ba48cdb1be3)
