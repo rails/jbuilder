@@ -32,7 +32,7 @@ class Jbuilder
       else
         # json.comments { ... }
         # { "comments": ... }
-        _scope{ yield self }
+        _merge_block(key){ yield self }
       end
     elsif args.empty?
       if ::Jbuilder === value
@@ -52,7 +52,7 @@ class Jbuilder
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _scope{ extract! value, *args }
+      _merge_block(key){ extract! value, *args }
     end
 
     _set_value key, result
@@ -174,13 +174,15 @@ class Jbuilder
   #
   #   [1,2,3]
   def array!(collection = [], *attributes, &block)
-    @attributes = if block
+    array = if block
       _map_collection(collection, &block)
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
       collection
     end
+
+    merge! array
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -230,12 +232,7 @@ class Jbuilder
 
   # Merges hash or array into current builder.
   def merge!(hash_or_array)
-    if ::Array === hash_or_array
-      @attributes = [] unless ::Array === @attributes
-      @attributes.concat hash_or_array
-    else
-      @attributes.update hash_or_array
-    end
+    @attributes = _merge_values(@attributes, hash_or_array)
   end
 
   # Encodes the current builder as JSON.
@@ -253,12 +250,29 @@ class Jbuilder
     attributes.each{ |key| _set_value key, object.public_send(key) }
   end
 
+  def _merge_block(key, &block)
+    current_value = _read(key, {})
+    raise NullError.build(key) if current_value.nil?
+    value = _scope{ yield self }
+    value.nil? ? value : _merge_values(current_value, value)
+  end
+
+  def _read(key, default = nil)
+    @attributes.fetch(_key(key)){ default }
+  end
+
+  def _write(key, value)
+    @attributes[_key(key)] = value
+  end
+
+  def _key(key)
+    @key_formatter.format(key)
+  end
+
   def _set_value(key, value)
     raise NullError.build(key) if @attributes.nil?
     return if @ignore_nil && value.nil?
-
-    key = @key_formatter.format(key)
-    @attributes[key] = value
+    _write key, value
   end
 
   def _map_collection(collection)
@@ -280,6 +294,19 @@ class Jbuilder
 
   def _mapable_arguments?(value, *args)
     value.respond_to?(:map)
+  end
+
+  def _merge_values(attributes, hash_or_array)
+    attributes = attributes.dup
+
+    if ::Array === hash_or_array
+      attributes = [] unless ::Array === attributes
+      attributes.concat hash_or_array
+    else
+      attributes.update hash_or_array
+    end
+
+    attributes
   end
 end
 

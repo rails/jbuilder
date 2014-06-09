@@ -121,6 +121,42 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['author']['age']
   end
 
+  test 'blocks are additive' do
+    result = jbuild do |json|
+      json.author do
+        json.name 'David'
+      end
+
+      json.author do
+        json.age  32
+      end
+    end
+
+    assert_equal 'David', result['author']['name']
+    assert_equal 32, result['author']['age']
+  end
+
+  test 'blocks are additive via extract syntax' do
+    person = Person.new('Pavel', 27)
+
+    result = jbuild do |json|
+      json.author person, :age
+      json.author person, :name
+    end
+
+    assert_equal 'Pavel', result['author']['name']
+    assert_equal 27, result['author']['age']
+  end
+
+  test 'arrays are additive' do
+    result = jbuild do |json|
+      json.array! %w[foo]
+      json.array! %w[bar]
+    end
+
+    assert_equal %w[foo bar], result
+  end
+
   test 'nesting multiple children with block' do
     result = jbuild do |json|
       json.comments do
@@ -531,9 +567,40 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_nil result
   end
 
-  test 'throws meaningfull error when on trying to add properties to null' do
+  test 'null! in a block' do
+    result = jbuild do |json|
+      json.author do
+        json.name 'David'
+      end
+
+      json.author do
+        json.null!
+      end
+    end
+
+    assert result.key?('author')
+    assert_nil result['author']
+  end
+
+  test 'throws NullError when trying to add properties to null' do
     json = Jbuilder.new
     json.null!
-    assert_raise(Jbuilder::NullError) { json.foo 'bar' }
+    assert_raise Jbuilder::NullError do
+      json.foo 'bar'
+    end
+  end
+
+  test 'throws NullError when trying to add properties to null using block syntax' do
+    assert_raise Jbuilder::NullError do
+      jbuild do |json|
+        json.author do
+          json.null!
+        end
+
+        json.author do
+          json.name "Pavel"
+        end
+      end
+    end
   end
 end
