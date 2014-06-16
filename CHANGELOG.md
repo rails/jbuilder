@@ -1,5 +1,9 @@
 # Changelog
 
+2.1.1
+-----
+* [Remove unused file](https://github.com/rails/jbuilder/commit/e49e1047976fac93b8242ab212c7b1a463b70809)
+
 2.1.0
 -----
 * [Blocks and their extract! shortcuts are additive by default](https://github.com/rails/jbuilder/commit/a49390736c5f6e2d7a31111df6531bc28dba9fb1)
