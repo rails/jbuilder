@@ -18,6 +18,16 @@ class NonEnumerable
   end
 end
 
+class VeryBasicWrapper < BasicObject
+  def initialize(thing)
+    @thing = thing
+  end
+
+  def method_missing(name, *args, &block)
+    @thing.send name, *args, &block
+  end
+end
+
 # This is not Struct, because structs are Enumerable
 class Person
   attr_reader :name, :age
@@ -252,6 +262,16 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ['content'], result['comments'].first.keys
     assert_equal 'hello', result['comments'].first['content']
     assert_equal 'world', result['comments'].second['content']
+  end
+
+  test 'array! casts array-like objects to array before merging' do
+    wrapped_array = VeryBasicWrapper.new(%w[foo bar])
+
+    result = jbuild do |json|
+      json.array! wrapped_array
+    end
+
+    assert_equal %w[foo bar], result
   end
 
   test 'nesting multiple children from array with inline loop on root' do

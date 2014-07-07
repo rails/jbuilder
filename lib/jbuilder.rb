@@ -174,12 +174,14 @@ class Jbuilder
   #
   #   [1,2,3]
   def array!(collection = [], *attributes, &block)
-    array = if block
+    array = if collection.nil?
+      []
+    elsif block
       _map_collection(collection, &block)
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
-      collection
+      collection.to_a
     end
 
     merge! array
@@ -276,8 +278,6 @@ class Jbuilder
   end
 
   def _map_collection(collection)
-    return [] if collection.nil?
-
     collection.map do |element|
       _scope{ yield element }
     end
