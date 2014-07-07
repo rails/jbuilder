@@ -1,5 +1,9 @@
 # Changelog
 
+2.1.2
+-----
+* [Cast array-like objects to array before merging](https://github.com/rails/jbuilder/commit/7b8c8a1cb09b7f3dd26e5643ebbd6b2ec67185db)
+
 2.1.1
 -----
 * [Remove unused file](https://github.com/rails/jbuilder/commit/e49e1047976fac93b8242ab212c7b1a463b70809)
