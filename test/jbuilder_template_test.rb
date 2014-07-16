@@ -15,9 +15,15 @@ BLOG_POST_PARTIAL = <<-JBUILDER
   end
 JBUILDER
 
+COLLECTION_PARTIAL = <<-JBUILDER
+  json.extract! collection, :id, :name
+JBUILDER
+
 BlogPost = Struct.new(:id, :body, :author_name)
+Collection = Struct.new(:id, :name)
 blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
 BLOG_POST_COLLECTION = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
+COLLECTION_COLLECTION = 5.times.map{ |i| Collection.new(i+1, "collection #{i+1}") }
 
 module Rails
   def self.cache
@@ -34,7 +40,8 @@ class JbuilderTemplateTest < ActionView::TestCase
   def partials
     {
       '_partial.json.jbuilder'  => 'json.content "hello"',
-      '_blog_post.json.jbuilder' => BLOG_POST_PARTIAL
+      '_blog_post.json.jbuilder' => BLOG_POST_PARTIAL,
+      '_collection.json.jbuilder' => COLLECTION_PARTIAL
     }
   end
 
@@ -47,7 +54,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   def undef_context_methods(*names)
     self.class_eval do
       names.each do |name|
-        undef_method name.to_sym if self.method_defined?(name.to_sym)
+        undef_method name.to_sym if method_defined?(name.to_sym)
       end
     end
   end
@@ -108,6 +115,12 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
 
     assert_collection_rendered json
+  end
+
+  test 'partial! renders collections as collections' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! 'collection', collection: COLLECTION_COLLECTION, as: :collection
+    JBUILDER
   end
 
   test 'partial! renders as empty array for nil-collection' do

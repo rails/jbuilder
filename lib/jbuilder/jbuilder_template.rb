@@ -27,7 +27,7 @@ class JbuilderTemplate < Jbuilder
       options[:collection] = locals[:collection] if locals.key?(:collection)
     end
 
-    _handle_partial_options options
+    _render_partial_with_options options
   end
 
   def array!(collection = [], *attributes, &block)
@@ -75,17 +75,19 @@ class JbuilderTemplate < Jbuilder
 
   protected
 
-  def _handle_partial_options(options)
+  def _render_partial_with_options(options)
     options.reverse_merge! locals: {}
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
     if as && options.key?(:collection)
-      collection = options.delete(:collection) || []
-      array!(collection) do |member|
-        options[:locals].merge! as => member
-        options[:locals].merge! collection: collection
-        _render_partial options
+      collection = options.delete(:collection)
+      locals = options.delete(:locals)
+      array! collection do |member|
+        member_locals = locals.clone
+        member_locals.merge! collection: collection
+        member_locals.merge! as => member
+        _render_partial options.merge(locals: member_locals)
       end
     else
       _render_partial options
