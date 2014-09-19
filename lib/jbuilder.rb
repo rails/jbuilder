@@ -260,10 +260,11 @@ class Jbuilder
   end
 
   def _read(key, default = nil)
-    @attributes.fetch(_key(key)){ default }
+    _blank? ? default : @attributes.fetch(_key(key)){ default }
   end
 
   def _write(key, value)
+    @attributes = {} if _blank?
     @attributes[_key(key)] = value
   end
 
@@ -280,12 +281,12 @@ class Jbuilder
   def _map_collection(collection)
     collection.map do |element|
       _scope{ yield element }
-    end
+    end - [BLANK]
   end
 
   def _scope
     parent_attributes, parent_formatter = @attributes, @key_formatter
-    @attributes = {}
+    @attributes = BLANK
     yield
     @attributes
   ensure
@@ -307,6 +308,10 @@ class Jbuilder
     end
 
     attributes
+  end
+
+  def _blank?
+    BLANK == @attributes
   end
 end
 
