@@ -80,19 +80,26 @@ end
 Top level arrays can be handled directly.  Useful for index and other collection actions.
 
 ``` ruby
-# @people = People.all
-json.array! @people do |person|
-  json.name person.name
-  json.age calculate_age(person.birthday)
+# @comments = @post.comments
+
+json.array! @comments do |comment|
+  next if comment.marked_as_spam_by?(current_user)
+
+  json.body comment.body
+  json.author do
+    json.first_name comment.author.first_name
+    json.last_name comment.author.last_name
+  end
 end
 
-# => [ { "name": "David", "age": 32 }, { "name": "Jamie", "age": 31 } ]
+# => [ { "body": "great post...", "author": { "first_name": "Joe", "last_name": "Bloe" }} ]
 ```
 
 You can also extract attributes from array directly.
 
 ``` ruby
 # @people = People.all
+
 json.array! @people, :id, :name
 
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]

@@ -373,6 +373,20 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', result.second['content']
   end
 
+  test 'it allows using next in array block to skip value' do
+    comments = [ Comment.new('hello', 1), Comment.new('skip', 2), Comment.new('world', 3) ]
+    result = jbuild do |json|
+      json.array! comments do |comment|
+        next if comment.id == 2
+        json.content comment.content
+      end
+    end
+
+    assert_equal 2, result.length
+    assert_equal 'hello', result.first['content']
+    assert_equal 'world', result.second['content']
+  end
+
   test 'extract attributes directly from array' do
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
