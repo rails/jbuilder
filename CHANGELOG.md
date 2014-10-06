@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.0
+-----
+* [Allow to skip `array!` iterations by calling `next`](https://github.com/rails/jbuilder/commit/81a63308fb9d5002519dd871f829ccc58067251a)
+
 2.1.2
 -----
 * [Cast array-like objects to array before merging](https://github.com/rails/jbuilder/commit/7b8c8a1cb09b7f3dd26e5643ebbd6b2ec67185db)
