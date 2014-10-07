@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.1
+-----
+* [Fix empty block handling](https://github.com/rails/jbuilder/commit/972a11141403269e9b17b45b0c95f8a9788245ee)
+
 2.2.0
 -----
 * [Allow to skip `array!` iterations by calling `next`](https://github.com/rails/jbuilder/commit/81a63308fb9d5002519dd871f829ccc58067251a)
