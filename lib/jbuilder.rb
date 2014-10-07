@@ -25,7 +25,7 @@ class Jbuilder
 
   def set!(key, value = BLANK, *args, &block)
     result = if block
-      if BLANK != value
+      if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
         _scope{ array! value, &block }
@@ -253,14 +253,18 @@ class Jbuilder
   end
 
   def _merge_block(key, &block)
-    current_value = _read(key, {})
+    current_value = _blank? ? BLANK : @attributes.fetch(_key(key), BLANK)
     raise NullError.build(key) if current_value.nil?
-    value = _scope{ yield self }
-    value.nil? ? value : _merge_values(current_value, value)
-  end
 
-  def _read(key, default = nil)
-    _blank? ? default : @attributes.fetch(_key(key)){ default }
+    value = _scope{ yield self }
+
+    if _blank?(value)
+      current_value
+    elsif _blank?(current_value) || value.nil?
+      value
+    else
+      _merge_values(current_value, value)
+    end
   end
 
   def _write(key, value)
@@ -275,6 +279,7 @@ class Jbuilder
   def _set_value(key, value)
     raise NullError.build(key) if @attributes.nil?
     return if @ignore_nil && value.nil?
+    return if _blank?(value)
     _write key, value
   end
 
@@ -310,8 +315,8 @@ class Jbuilder
     attributes
   end
 
-  def _blank?
-    BLANK == @attributes
+  def _blank?(value=@attributes)
+    BLANK == value
   end
 end
 

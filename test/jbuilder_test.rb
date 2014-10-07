@@ -131,6 +131,17 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['author']['age']
   end
 
+  test 'empty block handling' do
+    result = jbuild do |json|
+      json.foo 'bar'
+      json.author do
+      end
+    end
+
+    assert_equal 'bar', result['foo']
+    assert !result.key?('author')
+  end
+
   test 'blocks are additive' do
     result = jbuild do |json|
       json.author do
