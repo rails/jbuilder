@@ -1,9 +1,11 @@
 language: ruby
 
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.1
+  - 1.9
+  - 2.0
+  - 2.1
+  - 2.2
+  - ruby-head
   - jruby-19mode
   - rbx
 
@@ -16,8 +18,10 @@ gemfile:
 
 matrix:
   allow_failures:
+    - rvm: 2.2
     - rvm: jruby-19mode
     - rvm: rbx
+    - rvm: ruby-head
   fast_finish: true
 
 notifications:
