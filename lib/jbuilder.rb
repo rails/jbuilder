@@ -255,17 +255,24 @@ class Jbuilder
   def _merge_block(key, &block)
     current_value = _blank? ? BLANK : @attributes.fetch(_key(key), BLANK)
     raise NullError.build(key) if current_value.nil?
+    new_value = _scope{ yield self }
+    _merge_values(current_value, new_value)
+  end
 
-    value = _scope{ yield self }
-
-    if _blank?(value)
+  def _merge_values(current_value, updates)
+    if _blank?(updates)
       current_value
-    elsif _blank?(current_value) || value.nil?
-      value
+    elsif _blank?(current_value) || updates.nil?
+      updates
+    elsif ::Array === updates
+      current_value = ::Array === current_value ? current_value.dup : []
+      current_value.concat updates
     else
-      _merge_values(current_value, value)
+      current_value = current_value.dup
+      current_value.update updates
     end
   end
+
 
   def _write(key, value)
     @attributes = {} if _blank?
@@ -300,19 +307,6 @@ class Jbuilder
 
   def _mapable_arguments?(value, *args)
     value.respond_to?(:map)
-  end
-
-  def _merge_values(attributes, hash_or_array)
-    attributes = attributes.dup
-
-    if ::Array === hash_or_array
-      attributes = [] unless ::Array === attributes
-      attributes.concat hash_or_array
-    else
-      attributes.update hash_or_array
-    end
-
-    attributes
   end
 
   def _blank?(value=@attributes)
