@@ -21,7 +21,7 @@ class Jbuilder
     new(*args, &block).target!
   end
 
-  BLANK = ::Object.new
+  BLANK = ::Hash.new
 
   def set!(key, value = BLANK, *args, &block)
     result = if block
