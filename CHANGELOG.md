@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.2
+-----
+* [Fix `Jbuilder#merge!` inside block](https://github.com/rails/jbuilder/commit/a7b328552eb0d36315f75bff813bea7eecf8c1d7)
+
 2.2.1
 -----
 * [Fix empty block handling](https://github.com/rails/jbuilder/commit/972a11141403269e9b17b45b0c95f8a9788245ee)
