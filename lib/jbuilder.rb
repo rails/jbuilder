@@ -7,13 +7,13 @@ class Jbuilder
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
 
-  def initialize(options = {}, &block)
+  def initialize(options = {})
     @attributes = {}
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
 
-    yield self if block
+    yield self if ::Kernel.block_given?
   end
 
   # Yields a builder and automatically turns the result into a JSON string
@@ -252,7 +252,7 @@ class Jbuilder
     attributes.each{ |key| _set_value key, object.public_send(key) }
   end
 
-  def _merge_block(key, &block)
+  def _merge_block(key)
     current_value = _blank? ? BLANK : @attributes.fetch(_key(key), BLANK)
     raise NullError.build(key) if current_value.nil?
     new_value = _scope{ yield self }

@@ -30,7 +30,7 @@ class JbuilderTemplate < Jbuilder
     _render_partial_with_options options
   end
 
-  def array!(collection = [], *attributes, &block)
+  def array!(collection = [], *attributes)
     options = attributes.extract_options!
 
     if options.key?(:partial)
@@ -48,7 +48,7 @@ class JbuilderTemplate < Jbuilder
   #   json.cache! ['v1', @person], expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache!(key=nil, options={}, &block)
+  def cache!(key=nil, options={})
     if @context.controller.perform_caching
       value = ::Rails.cache.fetch(_cache_key(key, options), options) do
         _scope { yield self }
