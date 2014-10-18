@@ -5,7 +5,6 @@ require 'action_view/testing/resolvers'
 require 'active_support/cache'
 require 'jbuilder/jbuilder_template'
 
-
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.extract! blog_post, :id, :body
   json.author do
@@ -24,6 +23,8 @@ Collection = Struct.new(:id, :name)
 blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
 BLOG_POST_COLLECTION = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 COLLECTION_COLLECTION = 5.times.map{ |i| Collection.new(i+1, "collection #{i+1}") }
+
+ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
 
 module Rails
   def self.cache

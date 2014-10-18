@@ -137,5 +137,3 @@ class JbuilderHandler
       json.target! unless (__already_defined && __already_defined != "method")}
   end
 end
-
-ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
