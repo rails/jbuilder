@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.3
+-----
+* [Move template handler registration into railtie](https://github.com/rails/jbuilder/commit/c8acc5cea6da2a79b7b345adc301cb5ff2517647)
+* [Do not capture the block where it is possible](https://github.com/rails/jbuilder/commit/973b382c3924cb59fc0e4e25266b18e74d41d646)
+
 2.2.2
 -----
 * [Fix `Jbuilder#merge!` inside block](https://github.com/rails/jbuilder/commit/a7b328552eb0d36315f75bff813bea7eecf8c1d7)
