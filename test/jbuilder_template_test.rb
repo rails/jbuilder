@@ -122,6 +122,8 @@ class JbuilderTemplateTest < ActionView::TestCase
     json = render_jbuilder <<-JBUILDER
       json.partial! 'collection', collection: COLLECTION_COLLECTION, as: :collection
     JBUILDER
+
+    assert_equal 5, MultiJson.load(json).length
   end
 
   test 'partial! renders as empty array for nil-collection' do
