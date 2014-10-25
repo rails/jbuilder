@@ -81,6 +81,7 @@ class JbuilderTemplate < Jbuilder
     as = options[:as]
 
     if as && options.key?(:collection)
+      as = as.to_sym
       collection = options.delete(:collection)
       locals = options.delete(:locals)
       array! collection do |member|

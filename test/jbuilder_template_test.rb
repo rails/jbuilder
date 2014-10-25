@@ -118,6 +118,14 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_collection_rendered json
   end
 
+  test 'partial! renders collections when as argument is a string' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! 'blog_post', collection: BLOG_POST_COLLECTION, as: "blog_post"
+    JBUILDER
+
+    assert_collection_rendered json
+  end
+
   test 'partial! renders collections as collections' do
     json = render_jbuilder <<-JBUILDER
       json.partial! 'collection', collection: COLLECTION_COLLECTION, as: :collection
