@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.4
+-----
+* [Typecast locals hash key during collection render](https://github.com/rails/jbuilder/commit/a6b0c8651a08e01cb53eee38e211c65423f275f7)
+
 2.2.3
 -----
 * [Move template handler registration into railtie](https://github.com/rails/jbuilder/commit/c8acc5cea6da2a79b7b345adc301cb5ff2517647)
