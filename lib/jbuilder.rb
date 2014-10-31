@@ -265,14 +265,13 @@ class Jbuilder
     elsif _blank?(current_value) || updates.nil?
       updates
     elsif ::Array === updates
-      current_value = ::Array === current_value ? current_value.dup : []
-      current_value.concat updates
+      ::Array === current_value ? current_value + updates : updates
+    elsif ::Hash === current_value
+      current_value.merge(updates)
     else
-      current_value = current_value.dup
-      current_value.update updates
+      raise "Can't merge #{updates.inspect} with #{current_value.inspect}"
     end
   end
-
 
   def _write(key, value)
     @attributes = {} if _blank?
