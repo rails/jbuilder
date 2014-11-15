@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.5
+-----
+* [Refactor merge block behavior to raise error for unexpected values](https://github.com/rails/jbuilder/commit/4503162fb26f53f613fc83ac081fd244748b6fe9)
+
 2.2.4
 -----
 * [Typecast locals hash key during collection render](https://github.com/rails/jbuilder/commit/a6b0c8651a08e01cb53eee38e211c65423f275f7)
