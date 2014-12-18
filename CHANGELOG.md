@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.6
+-----
+* [Make sure dependency tracker loads after template handler](https://github.com/rails/jbuilder/commit/3ba404b1207b557e14771c90b8832bc01ae67a42)
+
 2.2.5
 -----
 * [Refactor merge block behavior to raise error for unexpected values](https://github.com/rails/jbuilder/commit/4503162fb26f53f613fc83ac081fd244748b6fe9)
