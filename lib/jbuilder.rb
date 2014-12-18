@@ -313,5 +313,4 @@ class Jbuilder
   end
 end
 
-require 'jbuilder/dependency_tracker'
 require 'jbuilder/railtie' if defined?(Rails)
