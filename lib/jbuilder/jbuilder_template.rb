@@ -62,6 +62,45 @@ class JbuilderTemplate < Jbuilder
       yield
     end
   end
+  
+  # Caches a collection of objects using fetch_multi, if supported.
+  # Requires a block for each item in the array. Accepts optional 'key' attribute
+  # in options (e.g. key: 'v1').
+  #
+  # Example:
+  #
+  # json.cache_collection! @people, expires_in: 10.minutes do |person|
+  #   json.partial! 'person', :person => person
+  # end
+  def cache_collection!(collection, options = {}, &block)    
+    if @context.controller.perform_caching
+      _possibly_write_key
+      _open_array
+      
+      keys_to_collection_map = _keys_to_collection_map(collection, options)  
+
+      if ::Rails.cache.respond_to?(:fetch_multi)
+        results = ::Rails.cache.fetch_multi(*keys_to_collection_map.keys, options) do |key|
+          capture = _capture { _with_possible_map { _scope { yield keys_to_collection_map[key] } } }
+          capture[0].sub(/\A,/, '')
+        end
+      else
+        results = keys_to_collection_map.map do |key, item|
+          ::Rails.cache.fetch(key, options) do
+            capture = _capture { _with_possible_map { _scope { yield item }; } }
+            capture[0].sub(/\A,/, '')
+          end
+        end
+      end
+    
+      results = results.class == ::Hash ? results.values : results
+      @output << results.join(',')
+      
+      _close_array
+    else
+      array! collection, options, &block
+    end
+  end
 
   # Conditionally catches the json depending in the condition given as first parameter. Has the same
   # signature as the `cache` helper method in `ActionView::Helpers::CacheHelper` and so can be used in
@@ -109,6 +148,17 @@ class JbuilderTemplate < Jbuilder
     ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
   end
 
+  def _keys_to_collection_map(collection, options)
+    key = options.delete(:key)
+
+    collection.inject({}) do |result, item|
+      key = key.respond_to?(:call) ? key.call(item) : key
+      cache_key = key ? [key, item] : item
+      result[_cache_key(cache_key, options)] = item
+      result
+    end
+  end
+    
   private
 
   def _fragment_name_with_digest(key, options)
