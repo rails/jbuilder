@@ -61,7 +61,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   def assert_collection_rendered(json, context = nil)
-    result = MultiJson.load(json)
+    result = Wankel.load(json)
     result = result.fetch(context) if context
 
     assert_equal 10, result.length
@@ -76,7 +76,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.content 'hello'
     JBUILDER
 
-    assert_equal 'hello', MultiJson.load(json)['content']
+    assert_equal 'hello', Wankel.load(json)['content']
   end
 
   test 'key_format! with parameter' do
@@ -85,7 +85,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.camel_style 'for JS'
     JBUILDER
 
-    assert_equal ['camelStyle'], MultiJson.load(json).keys
+    assert_equal ['camelStyle'], Wankel.load(json).keys
   end
 
   test 'key_format! propagates to child elements' do
@@ -97,7 +97,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    result = MultiJson.load(json)
+    result = Wankel.load(json)
     assert_equal 'one', result['LEVEL1']
     assert_equal 'two', result['LEVEL2']['VALUE']
   end
@@ -107,7 +107,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.partial! 'partial'
     JBUILDER
 
-    assert_equal 'hello', MultiJson.load(json)['content']
+    assert_equal 'hello', Wankel.load(json)['content']
   end
 
   test 'partial! renders collections' do
@@ -131,7 +131,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.partial! 'collection', collection: COLLECTION_COLLECTION, as: :collection
     JBUILDER
 
-    assert_equal 5, MultiJson.load(json).length
+    assert_equal 5, Wankel.load(json).length
   end
 
   test 'partial! renders as empty array for nil-collection' do
@@ -205,7 +205,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    parsed = MultiJson.load(json)
+    parsed = Wankel.load(json)
     assert_equal 'Cache', parsed['name']
   end
 
@@ -230,7 +230,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    parsed = MultiJson.load(json)
+    parsed = Wankel.load(json)
     assert_equal 'Cache', parsed['test1']
     assert_equal 'Miss', parsed['test2']
   end
@@ -238,20 +238,23 @@ class JbuilderTemplateTest < ActionView::TestCase
   test 'fragment caching deserializes an array' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
-    render_jbuilder <<-JBUILDER
+    json = render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
         json.array! %w[a b c]
       end
     JBUILDER
 
+    # cache miss output correct
+    assert_equal %w[a b c], Wankel.load(json)
+    
     json = render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
         json.array! %w[1 2 3]
       end
     JBUILDER
 
-    parsed = MultiJson.load(json)
-    assert_equal %w[a b c], parsed
+    # cache hit output correct
+    assert_equal %w[a b c], Wankel.load(json)
   end
 
   test 'fragment caching works with previous version of cache digests' do

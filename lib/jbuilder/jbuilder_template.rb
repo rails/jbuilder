@@ -1,4 +1,5 @@
-require 'jbuilder/jbuilder'
+require 'jbuilder'
+require 'stringio'
 require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
@@ -50,11 +51,13 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={})
     if @context.controller.perform_caching
+      hit = true
       value = ::Rails.cache.fetch(_cache_key(key, options), options) do
-        _scope { yield self }
+        hit = false
+        _capture { _scope { yield self }; }
       end
 
-      merge! value
+      hit ? merge!(*value) : @output << value.first
     else
       yield
     end
@@ -121,7 +124,7 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
-  def _mapable_arguments?(value, *args)
+  def _eachable_arguments?(value, *args)
     return true if super
     options = args.last
     ::Hash === options && options.key?(:as)

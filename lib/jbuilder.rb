@@ -1,14 +1,19 @@
 require 'jbuilder/jbuilder'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
-require 'multi_json'
+require 'wankel'
+require 'stringio'
 
 class Jbuilder
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
-
+  attr_accessor :encoder, :output, :stack
   def initialize(options = {})
-    @attributes = {}
+    @flag_depth = 0
+    @stack = []
+    @possible_key_stack = []
+    @output = ::StringIO.new
+    @encoder = ::Wankel::StreamEncoder.new(@output)
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
@@ -24,38 +29,64 @@ class Jbuilder
   BLANK = ::Object.new
 
   def set!(key, value = BLANK, *args, &block)
-    result = if block
+    
+    if block
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
+        
+        _flag_key_for_possible_write(key)
         _scope{ array! value, &block }
       else
         # json.comments { ... }
         # { "comments": ... }
-        _merge_block(key){ yield self }
+        # _merge_block(key){ yield self }
+
+        _flag_key_for_possible_write(key)
+        _with_possible_map { _scope{ yield self } }
       end
     elsif args.empty?
       if ::Jbuilder === value
         # json.age 32
         # json.person another_jbuilder
         # { "age": 32, "person": { ...  }
-        value.attributes!
+        
+        _open_map_if_flagged
+        @encoder.string(_key(key))
+        @encoder.flush
+        @output << ":" << value.target!
       else
         # json.age 32
         # { "age": 32 }
-        value
+
+        _possibly_write_key
+        _open_map_if_flagged
+        _set_value(key, value)
       end
-    elsif _mapable_arguments?(value, *args)
+    elsif _eachable_arguments?(value, *args) #TODO change to iteratable argument
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
+      
+      _open_map if !_in_map?
+      @encoder.string(_key(key))
       _scope{ array! value, *args }
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _merge_block(key){ extract! value, *args }
+      # _merge_block(key){ extract! value, *args }
+      currently_in_array = _in_array?
+      
+      _open_map_if_flagged
+      _possibly_write_key
+
+      _open_map if !currently_in_array
+      @encoder.string(_key(key))
+      _flag_map_open_needed
+      _scope{ extract! value, *args }
+      _close_map
+      _close_map if !currently_in_array
     end
 
-    _set_value key, result
   end
 
   alias_method :method_missing, :set!
@@ -139,8 +170,11 @@ class Jbuilder
   #     json.content comment.formatted_content
   #   end
   def child!
-    @attributes = [] unless ::Array === @attributes
-    @attributes << _scope{ yield self }
+    _possibly_write_key
+    _open_array if !_in_array?
+    _unflag_map_open_needed
+    _scope{ yield self }
+    _close
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as
@@ -174,17 +208,22 @@ class Jbuilder
   #
   #   [1,2,3]
   def array!(collection = [], *attributes, &block)
-    array = if collection.nil?
-      []
+    _possibly_write_key
+    _open_array
+    
+    if collection.nil?
+      # noop
     elsif block
-      _map_collection(collection, &block)
+      _each_collection(collection, &block)
     elsif attributes.any?
-      _map_collection(collection) { |element| extract! element, *attributes }
+      _each_collection(collection) { |element|
+        extract!(element, *attributes)
+      }
     else
-      collection.to_a
+      collection.each { |element| @encoder.value(element) }
     end
 
-    merge! array
+    _close_array
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -205,6 +244,7 @@ class Jbuilder
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
+    _open_map_if_flagged
     if ::Hash === object
       _extract_hash_values(object, *attributes)
     else
@@ -222,28 +262,94 @@ class Jbuilder
 
   # Returns the nil JSON.
   def nil!
-    @attributes = nil
+    _possibly_write_key
+    @encoder.null
   end
 
   alias_method :null!, :nil!
 
-  # Returns the attributes of the current builder.
-  def attributes!
-    @attributes
-  end
-
-  # Merges hash or array into current builder.
-  def merge!(hash_or_array)
-    @attributes = _merge_values(@attributes, hash_or_array)
+  # Merges stack and data into the current builder.
+  def merge!(json_text, state={})
+    @encoder.output = ::StringIO.new
+    
+    if state[:stack]
+      state[:stack].each {|m| self.__send__("_open_#{m}") } 
+    end
+    @encoder.string("")
+    @encoder.string("")
+    @output << json_text
+    @encoder.output = @output
   end
 
   # Encodes the current builder as JSON.
   def target!
-    ::MultiJson.dump(@attributes)
+    _open_map if @stack.size == 0
+    _close_stack
+    @encoder.flush
+    @output.string
   end
 
   private
+  
+  def _flag_map_open_needed
+    @flag_depth += 1
+  end
+  
+  def _unflag_map_open_needed
+    @flag_depth -= 1 if @flag_depth > 0
+  end
+  
+  def _open_map_if_flagged
+    if @flag_depth > 0
+      _open_map
+      _unflag_map_open_needed
+    end
+  end
 
+  def _open_map
+    @encoder.map_open
+    @stack.push(:map)
+  end
+  
+  def _close_map
+    @encoder.map_close
+    @stack.pop
+  end
+  
+  def _in_map?
+    @stack.last == :map
+  end
+  
+  def _open_array
+    @encoder.array_open
+    @stack.push(:array)
+  end
+  
+  def _close_array
+    @encoder.array_close
+    @stack.pop
+  end
+  
+  def _in_array?
+    @stack.last == :array
+  end
+  
+  def _close
+    return if @stack.size == 0
+    
+    if @stack.last == :array
+      _close_array
+    else
+      _close_map
+    end
+  end
+  
+  def _close_stack
+    while @stack.size > 0
+      _close
+    end
+  end
+  
   def _extract_hash_values(object, *attributes)
     attributes.each{ |key| _set_value key, object.fetch(key) }
   end
@@ -253,10 +359,6 @@ class Jbuilder
   end
 
   def _merge_block(key)
-    current_value = _blank? ? BLANK : @attributes.fetch(_key(key), BLANK)
-    raise NullError.build(key) if current_value.nil?
-    new_value = _scope{ yield self }
-    _merge_values(current_value, new_value)
   end
 
   def _merge_values(current_value, updates)
@@ -274,8 +376,11 @@ class Jbuilder
   end
 
   def _write(key, value)
-    @attributes = {} if _blank?
-    @attributes[_key(key)] = value
+    if !_in_map?
+      _open_map 
+    end
+    @encoder.string(_key(key))
+    @encoder.value(value)
   end
 
   def _key(key)
@@ -283,29 +388,56 @@ class Jbuilder
   end
 
   def _set_value(key, value)
-    raise NullError.build(key) if @attributes.nil?
     return if @ignore_nil && value.nil?
     return if _blank?(value)
     _write key, value
   end
 
-  def _map_collection(collection)
-    collection.map do |element|
-      _scope{ yield element }
-    end - [BLANK]
+  def _each_collection(collection)
+    collection.each do |element|
+      _with_possible_map { _scope{ yield element; } }
+    end
+  end
+  
+  def _with_possible_map
+    depth = _flag_map_open_needed
+    yield
+    if @flag_depth <= depth
+      _close_map if @stack.last == :map
+      _unflag_map_open_needed if @flag_depth <= depth
+    end
+  end
+  
+  def _flag_key_for_possible_write(key)
+    @possible_key_stack << _key(key)
+  end
+  
+  def _possibly_write_key
+    return if @possible_key_stack.size == 0
+    _open_map if !_in_map?
+    @encoder.string(@possible_key_stack.pop)
   end
 
+  def _capture
+    to = ::StringIO.new
+    @encoder.output = to
+    
+    yield
+    
+    [to.string, {:stack => @stack}]
+  ensure
+    @encoder.output = @output
+  end
+  
   def _scope
     parent_attributes, parent_formatter = @attributes, @key_formatter
-    @attributes = BLANK
     yield
-    @attributes
   ensure
     @attributes, @key_formatter = parent_attributes, parent_formatter
   end
 
-  def _mapable_arguments?(value, *args)
-    value.respond_to?(:map)
+  def _eachable_arguments?(value, *args)
+    value.respond_to?(:each)
   end
 
   def _blank?(value=@attributes)

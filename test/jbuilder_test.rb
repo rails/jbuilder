@@ -3,7 +3,7 @@ require 'active_support/inflector'
 require 'jbuilder'
 
 def jbuild(*args, &block)
-  Jbuilder.new(*args, &block).attributes!
+  ::Wankel.parse(Jbuilder.new(*args, &block).target!)
 end
 
 Comment = Struct.new(:content, :id)
@@ -13,8 +13,8 @@ class NonEnumerable
     @collection = collection
   end
 
-  def map(&block)
-    @collection.map(&block)
+  def each(&block)
+    @collection.each(&block)
   end
 end
 
@@ -142,24 +142,17 @@ class JbuilderTest < ActiveSupport::TestCase
     assert !result.key?('author')
   end
 
-  test 'blocks are additive' do
-    result = jbuild do |json|
-      json.author do
-        json.name 'David'
-      end
-
-      json.author do
-        json.age  32
-      end
-    end
-
-    assert_equal 'David', result['author']['name']
-    assert_equal 32, result['author']['age']
-  end
-
   test 'support merge! method' do
     result = jbuild do |json|
-      json.merge! 'foo' => 'bar'
+      json.merge! '{"foo":"bar"}'
+    end
+
+    assert_equal 'bar', result['foo']
+  end
+  
+  test 'support merge! method with a stack' do
+    result = jbuild do |json|
+      json.merge! '{"foo":"bar"', :stack => [:map]
     end
 
     assert_equal 'bar', result['foo']
@@ -168,49 +161,16 @@ class JbuilderTest < ActiveSupport::TestCase
   test 'support merge! method in a block' do
     result = jbuild do |json|
       json.author do
-        json.merge! 'name' => 'Pavel'
+        json.merge! '{"author":{"name":"Pavel"}', :stack => [:map]
       end
     end
 
     assert_equal 'Pavel', result['author']['name']
   end
-
-  test 'blocks are additive via extract syntax' do
-    person = Person.new('Pavel', 27)
-
-    result = jbuild do |json|
-      json.author person, :age
-      json.author person, :name
-    end
-
-    assert_equal 'Pavel', result['author']['name']
-    assert_equal 27, result['author']['age']
-  end
-
-  test 'arrays are additive' do
-    result = jbuild do |json|
-      json.array! %w[foo]
-      json.array! %w[bar]
-    end
-
-    assert_equal %w[foo bar], result
-  end
-
-  test 'nesting multiple children with block' do
-    result = jbuild do |json|
-      json.comments do
-        json.child! { json.content 'hello' }
-        json.child! { json.content 'world' }
-      end
-    end
-
-    assert_equal 'hello', result['comments'].first['content']
-    assert_equal 'world', result['comments'].second['content']
-  end
-
+  
   test 'nesting single child with inline extract' do
     person = Person.new('David', 32)
-
+    
     result = jbuild do |json|
       json.author person, :name, :age
     end
@@ -267,7 +227,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal [], result['comments']
   end
 
-  test 'nesting multiple children from a non-Enumerable that responds to #map' do
+  test 'nesting multiple children from a non-Enumerable that responds to #each' do
     comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     result = jbuild do |json|
@@ -279,7 +239,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', result['comments'].second['content']
   end
 
-  test 'nesting multiple chilren from a non-Enumerable that responds to #map with inline loop' do
+  test 'nesting multiple chilren from a non-Enumerable that responds to #each with inline loop' do
     comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     result = jbuild do |json|
@@ -612,23 +572,23 @@ class JbuilderTest < ActiveSupport::TestCase
     Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
   end
 
-  test 'nil!' do
-    result = jbuild do |json|
-      json.key 'value'
-      json.nil!
-    end
+  # test 'nil!' do
+  #   result = jbuild do |json|
+  #     json.key 'value'
+  #     json.nil!
+  #   end
+  #
+  #   assert_nil result
+  # end
 
-    assert_nil result
-  end
-
-  test 'null!' do
-    result = jbuild do |json|
-      json.key 'value'
-      json.null!
-    end
-
-    assert_nil result
-  end
+  # test 'null!' do
+  #   result = jbuild do |json|
+  #     json.key 'value'
+  #     json.null!
+  #   end
+  #
+  #   assert_nil result
+  # end
 
   test 'null! in a block' do
     result = jbuild do |json|
@@ -644,26 +604,43 @@ class JbuilderTest < ActiveSupport::TestCase
     assert result.key?('author')
     assert_nil result['author']
   end
+  
+  test 'collection' do
+    BlogPost = Struct.new(:id, :body, :author_name)
+    blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
+    blog_posts = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 
-  test 'throws NullError when trying to add properties to null' do
-    json = Jbuilder.new
-    json.null!
-    assert_raise Jbuilder::NullError do
-      json.foo 'bar'
-    end
-  end
-
-  test 'throws NullError when trying to add properties to null using block syntax' do
-    assert_raise Jbuilder::NullError do
-      jbuild do |json|
+    result = jbuild do |json|
+      json.posts blog_posts do |blog_post|
+        json.extract! blog_post, :id, :body
         json.author do
-          json.null!
-        end
-
-        json.author do
-          json.name "Pavel"
+          name = blog_post.author_name.split(nil, 2)
+          json.first_name name[0]
+          json.last_name  name[1]
         end
       end
     end
   end
+  
+  test "_capture" do
+    old_buf_size = Wankel::DEFAULTS[:write_buffer_size]
+    builder = Jbuilder.new
+    capture = nil
+    
+    begin
+      Wankel::DEFAULTS[:write_buffer_size]  = 1_000_000
+
+      builder.key1 'value1'
+      capture = builder.__send__(:_capture) do
+        builder.key2 'value2'
+      end
+      builder.key3 'value3'
+    ensure
+      Wankel::DEFAULTS[:write_buffer_size] = old_buf_size
+    end
+
+    assert_equal [',"key2":"value2"', {:stack => [:map]}], capture
+    assert_equal '{"key1":"value1","key3":"value3"}', builder.target!
+  end
+  
 end
