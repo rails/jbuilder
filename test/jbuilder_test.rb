@@ -149,7 +149,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal 'bar', result['foo']
   end
-  
+
   test 'support merge! method with a stack' do
     result = jbuild do |json|
       json.merge! '{"foo":"bar"', :stack => [:map]
@@ -157,20 +157,32 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal 'bar', result['foo']
   end
+  
+  test 'support merge! method with a stack with 2 maps' do
+    result = jbuild do |json|
+      json.array! [1] do |obj|
+        json.key do
+          json.merge! '{"foo":"bar"', :stack => [:map]
+        end
+      end
+    end
+
+    assert_equal 'bar', result[0]['key']['foo']
+  end
 
   test 'support merge! method in a block' do
     result = jbuild do |json|
       json.author do
-        json.merge! '{"author":{"name":"Pavel"}', :stack => [:map]
+        json.merge! '{"name":"Pavel"}', :stack => []
       end
     end
 
     assert_equal 'Pavel', result['author']['name']
   end
-  
+
   test 'nesting single child with inline extract' do
     person = Person.new('David', 32)
-    
+
     result = jbuild do |json|
       json.author person, :name, :age
     end
@@ -604,7 +616,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert result.key?('author')
     assert_nil result['author']
   end
-  
+
   test 'collection' do
     BlogPost = Struct.new(:id, :body, :author_name)
     blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
@@ -621,12 +633,12 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
   end
-  
+
   test "_capture" do
     old_buf_size = Wankel::DEFAULTS[:write_buffer_size]
     builder = Jbuilder.new
     capture = nil
-    
+
     begin
       Wankel::DEFAULTS[:write_buffer_size]  = 1_000_000
 
@@ -641,6 +653,37 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal [',"key2":"value2"', {:stack => [:map]}], capture
     assert_equal '{"key1":"value1","key3":"value3"}', builder.target!
+  end
+  
+  test 'hash nested inside array nested inside hash' do
+    result = jbuild do |json|
+      json.author do
+        json.name do
+          json.comments do
+            json.child! { json.content 'hello' }
+            json.child! do
+              json.id 42
+              json.content 'world'
+            end
+          end
+          json.other_comments do
+            json.array! [1,2,3]
+          end
+          json.other_other_comments do
+            json.array! [1,2,3] do |c|
+              json.id c
+              json.name nil
+            end
+          end
+        end
+      end
+    end
+
+    assert_equal 'hello', result['author']['name']['comments'].first['content']
+    assert_equal 42, result['author']['name']['comments'].second['id']
+    assert_equal 'world', result['author']['name']['comments'].second['content']
+    assert_equal [1,2,3], result['author']['name']['other_comments']
+    assert_equal [{'id' => 1, 'name' => nil},{'id' => 2, 'name' => nil},{'id' => 3, 'name' => nil}], result['author']['name']['other_other_comments']
   end
   
 end

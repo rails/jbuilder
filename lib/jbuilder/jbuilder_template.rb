@@ -56,7 +56,6 @@ class JbuilderTemplate < Jbuilder
         hit = false
         _capture { _scope { yield self }; }
       end
-
       hit ? merge!(*value) : @output << value.first
     else
       yield

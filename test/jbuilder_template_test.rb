@@ -316,7 +316,7 @@ class JbuilderTemplateTest < ActionView::TestCase
         json.partial! 'blog_post', :blog_post => blog_post
       end
     JBUILDER
-      
+    
     assert_collection_rendered json
   end
 

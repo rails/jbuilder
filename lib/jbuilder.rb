@@ -7,7 +7,7 @@ require 'stringio'
 class Jbuilder
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
-  attr_accessor :encoder, :output, :stack
+  attr_accessor :encoder, :output, :stack, :possible_key_stack, :flag_depth
   def initialize(options = {})
     @flag_depth = 0
     @stack = []
@@ -29,7 +29,6 @@ class Jbuilder
   BLANK = ::Object.new
 
   def set!(key, value = BLANK, *args, &block)
-    
     if block
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
@@ -44,6 +43,7 @@ class Jbuilder
 
         _flag_key_for_possible_write(key)
         _with_possible_map { _scope{ yield self } }
+        _close_array if _in_array?
       end
     elsif args.empty?
       if ::Jbuilder === value
@@ -63,7 +63,7 @@ class Jbuilder
         _open_map_if_flagged
         _set_value(key, value)
       end
-    elsif _eachable_arguments?(value, *args) #TODO change to iteratable argument
+    elsif _eachable_arguments?(value, *args)
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       
@@ -81,9 +81,7 @@ class Jbuilder
 
       _open_map if !currently_in_array
       @encoder.string(_key(key))
-      _flag_map_open_needed
-      _scope{ extract! value, *args }
-      _close_map
+      _with_possible_map { _scope{ extract! value, *args } }
       _close_map if !currently_in_array
     end
 
@@ -222,7 +220,8 @@ class Jbuilder
     else
       collection.each { |element| @encoder.value(element) }
     end
-
+    
+    _close_map if _in_map?
     _close_array
   end
 
@@ -270,15 +269,26 @@ class Jbuilder
 
   # Merges stack and data into the current builder.
   def merge!(json_text, state={})
+    _possibly_write_key
+    pre_in_map = _in_map?
     @encoder.output = ::StringIO.new
-    
+
     if state[:stack]
-      state[:stack].each {|m| self.__send__("_open_#{m}") } 
+      state[:stack].each do |m|
+        self.__send__("_open_#{m}")
+        @encoder.string("") if m == :map
+      end
     end
+
     @encoder.string("")
-    @encoder.string("")
+    @output << ":" if _in_map? && (@stack.size > 1 || state[:stack].size == 0)
     @output << json_text
     @encoder.output = @output
+    if state[:stack]
+      state[:stack].reverse.each do |m|
+        self.__send__("_close_#{m}")
+      end
+    end
   end
 
   # Encodes the current builder as JSON.
@@ -395,17 +405,18 @@ class Jbuilder
 
   def _each_collection(collection)
     collection.each do |element|
+      old_depth = @flag_depth
+      @flag_depth = 0
       _with_possible_map { _scope{ yield element; } }
+      @flag_depth = old_depth
     end
   end
   
   def _with_possible_map
     depth = _flag_map_open_needed
     yield
-    if @flag_depth <= depth
-      _close_map if @stack.last == :map
-      _unflag_map_open_needed if @flag_depth <= depth
-    end
+    _close_map if @stack.last == :map && @flag_depth < depth
+    _unflag_map_open_needed
   end
   
   def _flag_key_for_possible_write(key)
@@ -413,9 +424,11 @@ class Jbuilder
   end
   
   def _possibly_write_key
-    return if @possible_key_stack.size == 0
-    _open_map if !_in_map?
-    @encoder.string(@possible_key_stack.pop)
+    while key = @possible_key_stack.shift
+      _open_map if !_in_map?
+      @encoder.string(key)
+      _open_map_if_flagged if @possible_key_stack.size > 0
+    end
   end
 
   def _capture
