@@ -10,12 +10,11 @@ class Jbuilder
       end
     end
 
-    if Rails::VERSION::MAJOR == 4
-      generators do |app|
-        Rails::Generators.configure! app.config.generators
-        Rails::Generators.hidden_namespaces.uniq!
-        require 'generators/rails/scaffold_controller_generator'
-      end
+    generators do |app|
+      Rails::Generators.configure! app.config.generators
+      Rails::Generators.hidden_namespaces.uniq!
+      require 'generators/rails/scaffold_controller_generator'
     end
+
   end
 end
