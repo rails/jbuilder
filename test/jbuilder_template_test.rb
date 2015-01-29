@@ -6,16 +6,20 @@ require 'active_support/cache'
 require 'jbuilder/jbuilder_template'
 
 BLOG_POST_PARTIAL = <<-JBUILDER
-  json.extract! blog_post, :id, :body
-  json.author do
-    name = blog_post.author_name.split(nil, 2)
-    json.first_name name[0]
-    json.last_name  name[1]
+  json.object! do
+    json.extract! blog_post, :id, :body
+    json.author do
+      name = blog_post.author_name.split(nil, 2)
+      json.first_name name[0]
+      json.last_name  name[1]
+    end
   end
 JBUILDER
 
 COLLECTION_PARTIAL = <<-JBUILDER
-  json.extract! collection, :id, :name
+  json.object! do
+    json.extract! collection, :id, :name
+  end
 JBUILDER
 
 CACHE_KEY_PROC = Proc.new { |blog_post| true }
@@ -42,7 +46,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   def partials
     {
-      '_partial.json.jbuilder'  => 'json.content "hello"',
+      '_partial.json.jbuilder'  => 'json.object! { json.content "hello" }',
       '_blog_post.json.jbuilder' => BLOG_POST_PARTIAL,
       '_collection.json.jbuilder' => COLLECTION_PARTIAL
     }
@@ -75,7 +79,9 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'rendering' do
     json = render_jbuilder <<-JBUILDER
-      json.content 'hello'
+      json.object! do
+        json.content 'hello'
+      end
     JBUILDER
 
     assert_equal 'hello', Wankel.load(json)['content']
@@ -83,8 +89,10 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'key_format! with parameter' do
     json = render_jbuilder <<-JBUILDER
-      json.key_format! :camelize => [:lower]
-      json.camel_style 'for JS'
+      json.object! do
+        json.key_format! :camelize => [:lower]
+        json.camel_style 'for JS'
+      end
     JBUILDER
 
     assert_equal ['camelStyle'], Wankel.load(json).keys
@@ -92,10 +100,12 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'key_format! propagates to child elements' do
     json = render_jbuilder <<-JBUILDER
-      json.key_format! :upcase
-      json.level1 'one'
-      json.level2 do
-        json.value 'two'
+      json.object! do
+        json.key_format! :upcase
+        json.level1 'one'
+        json.level2 do
+          json.value 'two'
+        end
       end
     JBUILDER
 
@@ -178,7 +188,9 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'render array if partials as a value' do
     json = render_jbuilder <<-JBUILDER
-      json.posts BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
+      json.object! do
+        json.posts BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
+      end
     JBUILDER
 
     assert_collection_rendered json, 'posts'
@@ -186,7 +198,9 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'render as empty array if partials as a nil value' do
     json = render_jbuilder <<-JBUILDER
-      json.posts nil, :partial => 'blog_post', :as => :blog_post
+      json.object! do
+        json.posts nil, :partial => 'blog_post', :as => :blog_post
+      end
     JBUILDER
 
     assert_equal '{"posts":[]}', json
@@ -196,14 +210,18 @@ class JbuilderTemplateTest < ActionView::TestCase
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
     render_jbuilder <<-JBUILDER
-      json.cache! 'cachekey' do
-        json.name 'Cache'
+      json.object! do
+        json.cache! 'cachekey' do
+          json.name 'Cache'
+        end
       end
     JBUILDER
 
     json = render_jbuilder <<-JBUILDER
-      json.cache! 'cachekey' do
-        json.name 'Miss'
+      json.object! do
+        json.cache! 'cachekey' do
+          json.name 'Miss'
+        end
       end
     JBUILDER
 
@@ -215,20 +233,24 @@ class JbuilderTemplateTest < ActionView::TestCase
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
     render_jbuilder <<-JBUILDER
-      json.cache_if! true, 'cachekey' do
-        json.test1 'Cache'
-      end
-      json.cache_if! false, 'cachekey' do
-        json.test2 'Cache'
+      json.object! do
+        json.cache_if! true, 'cachekey' do
+          json.test1 'Cache'
+        end
+        json.cache_if! false, 'cachekey' do
+          json.test2 'Cache'
+        end
       end
     JBUILDER
 
     json = render_jbuilder <<-JBUILDER
-      json.cache_if! true, 'cachekey' do
-        json.test1 'Miss'
-      end
-      json.cache_if! false, 'cachekey' do
-        json.test2 'Miss'
+      json.object! do
+        json.cache_if! true, 'cachekey' do
+          json.test1 'Miss'
+        end
+        json.cache_if! false, 'cachekey' do
+          json.test2 'Miss'
+        end
       end
     JBUILDER
 
@@ -248,7 +270,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     # cache miss output correct
     assert_equal %w[a b c], Wankel.load(json)
-    
+
     json = render_jbuilder <<-JBUILDER
       json.cache! 'cachekey' do
         json.array! %w[1 2 3]
@@ -307,7 +329,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     assert_equal Rails.cache.inspect[/entries=(\d+)/, 1], '0'
   end
-  
+
   test 'renders cached array of block partials' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
@@ -316,7 +338,7 @@ class JbuilderTemplateTest < ActionView::TestCase
         json.partial! 'blog_post', :blog_post => blog_post
       end
     JBUILDER
-    
+
     assert_collection_rendered json
   end
 
@@ -332,29 +354,29 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     assert_collection_rendered json
   end
-  
+
   test 'reverts to cache! if cache does not support fetch_multi' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
     ActiveSupport::Cache::Store.send(:undef_method, :fetch_multi) if ActiveSupport::Cache::Store.method_defined?(:fetch_multi)
-   
+
     json = render_jbuilder <<-JBUILDER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
     JBUILDER
-  
+
     assert_collection_rendered json
   end
 
   test 'reverts to array! when controller.perform_caching is false' do
     controller.perform_caching = false
-  
+
     json = render_jbuilder <<-JBUILDER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
     JBUILDER
-  
+
     assert_collection_rendered json
   end
   

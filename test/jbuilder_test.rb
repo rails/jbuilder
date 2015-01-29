@@ -51,9 +51,12 @@ end
 
 
 class JbuilderTest < ActiveSupport::TestCase
+  
   test 'single key' do
     result = jbuild do |json|
-      json.content 'hello'
+      json.object! do
+        json.content 'hello'
+      end
     end
 
     assert_equal 'hello', result['content']
@@ -61,7 +64,9 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'single key with false value' do
     result = jbuild do |json|
-      json.content false
+      json.object! do
+        json.content false
+      end
     end
 
     assert_equal false, result['content']
@@ -69,7 +74,9 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'single key with nil value' do
     result = jbuild do |json|
-      json.content nil
+      json.object! do
+        json.content nil
+      end
     end
 
     assert result.has_key?('content')
@@ -78,8 +85,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'multiple keys' do
     result = jbuild do |json|
-      json.title 'hello'
-      json.content 'world'
+      json.object! do
+        json.title 'hello'
+        json.content 'world'
+      end
     end
 
     assert_equal 'hello', result['title']
@@ -90,18 +99,9 @@ class JbuilderTest < ActiveSupport::TestCase
     person = Struct.new(:name, :age).new('David', 32)
 
     result = jbuild do |json|
-      json.extract! person, :name, :age
-    end
-
-    assert_equal 'David', result['name']
-    assert_equal 32, result['age']
-  end
-
-  test 'extracting from object using call style for 1.9' do
-    person = Struct.new(:name, :age).new('David', 32)
-
-    result = jbuild do |json|
-      json.(person, :name, :age)
+      json.object! do
+        json.extract! person, :name, :age
+      end
     end
 
     assert_equal 'David', result['name']
@@ -112,7 +112,9 @@ class JbuilderTest < ActiveSupport::TestCase
     person = {:name => 'Jim', :age => 34}
 
     result = jbuild do |json|
-      json.extract! person, :name, :age
+      json.object! do
+        json.extract! person, :name, :age
+      end
     end
 
     assert_equal 'Jim', result['name']
@@ -121,9 +123,11 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'nesting single child with block' do
     result = jbuild do |json|
-      json.author do
-        json.name 'David'
-        json.age  32
+      json.object! do
+        json.author do
+          json.name 'David'
+          json.age  32
+        end
       end
     end
 
@@ -133,13 +137,15 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'empty block handling' do
     result = jbuild do |json|
-      json.foo 'bar'
-      json.author do
+      json.object! do
+        json.foo 'bar'
+        json.author do
+        end
       end
     end
 
     assert_equal 'bar', result['foo']
-    assert !result.key?('author')
+    assert_equal({}, result['author'])
   end
 
   test 'support merge! method' do
@@ -150,30 +156,12 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'bar', result['foo']
   end
 
-  test 'support merge! method with a stack' do
-    result = jbuild do |json|
-      json.merge! '{"foo":"bar"', :stack => [:map]
-    end
-
-    assert_equal 'bar', result['foo']
-  end
-  
-  test 'support merge! method with a stack with 2 maps' do
-    result = jbuild do |json|
-      json.array! [1] do |obj|
-        json.key do
-          json.merge! '{"foo":"bar"', :stack => [:map]
-        end
-      end
-    end
-
-    assert_equal 'bar', result[0]['key']['foo']
-  end
-
   test 'support merge! method in a block' do
     result = jbuild do |json|
-      json.author do
-        json.merge! '{"name":"Pavel"}', :stack => []
+      json.object! do
+        json.author do
+          json.merge! '"name":"Pavel"'
+        end
       end
     end
 
@@ -184,7 +172,9 @@ class JbuilderTest < ActiveSupport::TestCase
     person = Person.new('David', 32)
 
     result = jbuild do |json|
-      json.author person, :name, :age
+      json.object! do
+        json.author person, :name, :age
+      end
     end
 
     assert_equal 'David', result['author']['name']
@@ -195,7 +185,9 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     result = jbuild do |json|
-      json.comments comments, :content
+      json.object! do
+        json.comments comments, :content
+      end
     end
 
     assert_equal ['content'], result['comments'].first.keys
@@ -207,8 +199,10 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = []
 
     result = jbuild do |json|
-      json.name 'Parent'
-      json.comments comments, :content
+      json.object! do
+        json.name 'Parent'
+        json.comments comments, :content
+      end
     end
 
     assert_equal 'Parent', result['name']
@@ -219,8 +213,10 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     result = jbuild do |json|
-      json.comments comments do |comment|
-        json.content comment.content
+      json.object! do
+        json.comments comments do |comment|
+          json.object! { json.content comment.content }
+        end
       end
     end
 
@@ -231,8 +227,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'handles nil-collections as empty arrays' do
     result = jbuild do |json|
-      json.comments nil do |comment|
-        json.content comment.content
+      json.object! do
+        json.comments nil do |comment|
+          json.content comment.content
+        end
       end
     end
 
@@ -243,7 +241,9 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     result = jbuild do |json|
-      json.comments comments, :content
+      json.object! do
+        json.comments comments, :content
+      end
     end
 
     assert_equal ['content'], result['comments'].first.keys
@@ -255,8 +255,10 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     result = jbuild do |json|
-      json.comments comments do |comment|
-        json.content comment.content
+      json.object! do
+        json.comments comments do |comment|
+          json.object! { json.content comment.content }
+        end
       end
     end
 
@@ -279,8 +281,8 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     result = jbuild do |json|
-      json.call(comments) do |comment|
-        json.content comment.content
+      json.array! comments do |comment|
+        json.object! { json.content comment.content }
       end
     end
 
@@ -290,13 +292,15 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'array nested inside nested hash' do
     result = jbuild do |json|
-      json.author do
-        json.name 'David'
-        json.age  32
+      json.object! do
+        json.author do
+          json.name 'David'
+          json.age  32
 
-        json.comments do
-          json.child! { json.content 'hello' }
-          json.child! { json.content 'world' }
+          json.comments :emit => :array do
+            json.child! { json.content 'hello' }
+            json.child! { json.content 'world' }
+          end
         end
       end
     end
@@ -307,11 +311,13 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'array nested inside array' do
     result = jbuild do |json|
-      json.comments do
-        json.child! do
-          json.authors do
-            json.child! do
-              json.name 'david'
+      json.object! do
+        json.comments :emit => :array do
+          json.child! do
+            json.authors :emit => :array do
+              json.child! do
+                json.name 'david'
+              end
             end
           end
         end
@@ -326,23 +332,27 @@ class JbuilderTest < ActiveSupport::TestCase
 
     result = jbuild do |json|
       json.array! data do |object|
-        json.department object[:department]
-        json.names do
-          json.array! object[:names]
+        json.object! do
+          json.department object[:department]
+          json.names :emit => :array do
+            object[:names].each { |e| json.child! e }
+          end
         end
       end
     end
-
+    
     assert_equal 'David', result[0]['names'].last
     assert !result[0].key?('not_in_json')
   end
 
   test 'nested jbuilder objects' do
-    to_nest = Jbuilder.new{ |json| json.nested_value 'Nested Test' }
+    to_nest = Jbuilder.new{ |json| json.object! { json.nested_value 'Nested Test' } }
 
     result = jbuild do |json|
-      json.value 'Test'
-      json.nested to_nest
+      json.object! do
+        json.value 'Test'
+        json.nested to_nest
+      end
     end
 
     expected = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
@@ -350,11 +360,13 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'nested jbuilder object via set!' do
-    to_nest = Jbuilder.new{ |json| json.nested_value 'Nested Test' }
+    to_nest = Jbuilder.new{ |json| json.object! { json.nested_value 'Nested Test' } }
 
     result = jbuild do |json|
-      json.value 'Test'
-      json.set! :nested, to_nest
+      json.object! do
+        json.value 'Test'
+        json.set! :nested, to_nest
+      end
     end
 
     expected = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
@@ -366,7 +378,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
     result = jbuild do |json|
       json.array! comments do |comment|
-        json.content comment.content
+        json.object! { json.content comment.content }
       end
     end
 
@@ -379,7 +391,8 @@ class JbuilderTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.array! comments do |comment|
         next if comment.id == 2
-        json.content comment.content
+        
+        json.object! { json.content comment.content }
       end
     end
 
@@ -415,7 +428,9 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'dynamically set a key/value' do
     result = jbuild do |json|
-      json.set! :each, 'stuff'
+      json.object! do
+        json.set! :each, 'stuff'
+      end
     end
 
     assert_equal 'stuff', result['each']
@@ -423,9 +438,11 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'dynamically set a key/nested child with block' do
     result = jbuild do |json|
-      json.set! :author do
-        json.name 'David'
-        json.age 32
+      json.object! do
+        json.set! :author do
+          json.name 'David'
+          json.age 32
+        end
       end
     end
 
@@ -437,7 +454,9 @@ class JbuilderTest < ActiveSupport::TestCase
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
     result = jbuild do |json|
-      json.set! :comments, comments, :content
+      json.object! do
+        json.set! :comments, comments, :content
+      end
     end
 
     assert_equal ['content'], result['comments'].first.keys
@@ -447,7 +466,9 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'query like object' do
     result = jbuild do |json|
-      json.relations RelationMock.new, :name, :age
+      json.object! do
+        json.relations RelationMock.new, :name, :age
+      end
     end
 
     assert_equal 2, result['relations'].length
@@ -463,8 +484,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! with parameter' do
     result = jbuild do |json|
-      json.key_format! camelize: [:lower]
-      json.camel_style 'for JS'
+      json.object! do
+        json.key_format! camelize: [:lower]
+        json.camel_style 'for JS'
+      end
     end
 
     assert_equal ['camelStyle'], result.keys
@@ -472,8 +495,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! with parameter not as an array' do
     result = jbuild do |json|
-      json.key_format! :camelize => :lower
-      json.camel_style 'for JS'
+      json.object! do
+        json.key_format! :camelize => :lower
+        json.camel_style 'for JS'
+      end
     end
 
     assert_equal ['camelStyle'], result.keys
@@ -481,10 +506,12 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! propagates to child elements' do
     result = jbuild do |json|
-      json.key_format! :upcase
-      json.level1 'one'
-      json.level2 do
-        json.value 'two'
+      json.object! do
+        json.key_format! :upcase
+        json.level1 'one'
+        json.level2 do
+          json.value 'two'
+        end
       end
     end
 
@@ -494,11 +521,13 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! resets after child element' do
     result = jbuild do |json|
-      json.level2 do
-        json.key_format! :upcase
-        json.value 'two'
+      json.object! do
+        json.level2 do
+          json.key_format! :upcase
+          json.value 'two'
+        end
+        json.level1 'one'
       end
-      json.level1 'one'
     end
 
     assert_equal 'two', result['level2']['VALUE']
@@ -507,8 +536,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! with no parameter' do
     result = jbuild do |json|
-      json.key_format! :upcase
-      json.lower 'Value'
+      json.object! do
+        json.key_format! :upcase
+        json.lower 'Value'
+      end
     end
 
     assert_equal ['LOWER'], result.keys
@@ -516,8 +547,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! with multiple steps' do
     result = jbuild do |json|
-      json.key_format! :upcase, :pluralize
-      json.pill 'foo'
+      json.object! do
+        json.key_format! :upcase, :pluralize
+        json.pill 'foo'
+      end
     end
 
     assert_equal ['PILLs'], result.keys
@@ -525,8 +558,10 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'key_format! with lambda/proc' do
     result = jbuild do |json|
-      json.key_format! ->(key){ key + ' and friends' }
-      json.oats 'foo'
+      json.object! do
+        json.key_format! ->(key){ key + ' and friends' }
+        json.oats 'foo'
+      end
     end
 
     assert_equal ['oats and friends'], result.keys
@@ -534,21 +569,23 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'default key_format!' do
     Jbuilder.key_format camelize: :lower
-    result = jbuild{ |json| json.camel_style 'for JS' }
+    result = jbuild{ |json| json.object! { json.camel_style 'for JS' } }
     assert_equal ['camelStyle'], result.keys
     Jbuilder.send :class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new
   end
 
   test 'do not use default key formatter directly' do
-    jbuild{ |json| json.key 'value' }
+    jbuild{ |json| json.object! { json.key 'value' } }
     cache = Jbuilder.send(:class_variable_get, '@@key_formatter').instance_variable_get('@cache')
     assert_empty cache
   end
 
   test 'ignore_nil! without a parameter' do
     result = jbuild do |json|
-      json.ignore_nil!
-      json.test nil
+      json.object! do
+        json.ignore_nil!
+        json.test nil
+      end
     end
 
     assert_empty result.keys
@@ -556,17 +593,21 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test 'ignore_nil! with parameter' do
     result = jbuild do |json|
-      json.ignore_nil! true
-      json.name 'Bob'
-      json.dne nil
+      json.object! do
+        json.ignore_nil! true
+        json.name 'Bob'
+        json.dne nil
+      end
     end
 
     assert_equal ['name'], result.keys
 
     result = jbuild do |json|
-      json.ignore_nil! false
-      json.name 'Bob'
-      json.dne nil
+      json.object! do
+        json.ignore_nil! false
+        json.name 'Bob'
+        json.dne nil
+      end
     end
 
     assert_equal ['name', 'dne'], result.keys
@@ -576,45 +617,14 @@ class JbuilderTest < ActiveSupport::TestCase
     Jbuilder.ignore_nil
 
     result = jbuild do |json|
-      json.name 'Bob'
-      json.dne nil
+      json.object! do
+        json.name 'Bob'
+        json.dne nil
+      end
     end
 
     assert_equal ['name'], result.keys
     Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
-  end
-
-  # test 'nil!' do
-  #   result = jbuild do |json|
-  #     json.key 'value'
-  #     json.nil!
-  #   end
-  #
-  #   assert_nil result
-  # end
-
-  # test 'null!' do
-  #   result = jbuild do |json|
-  #     json.key 'value'
-  #     json.null!
-  #   end
-  #
-  #   assert_nil result
-  # end
-
-  test 'null! in a block' do
-    result = jbuild do |json|
-      json.author do
-        json.name 'David'
-      end
-
-      json.author do
-        json.null!
-      end
-    end
-
-    assert result.key?('author')
-    assert_nil result['author']
   end
 
   test 'collection' do
@@ -623,12 +633,14 @@ class JbuilderTest < ActiveSupport::TestCase
     blog_posts = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 
     result = jbuild do |json|
-      json.posts blog_posts do |blog_post|
-        json.extract! blog_post, :id, :body
-        json.author do
-          name = blog_post.author_name.split(nil, 2)
-          json.first_name name[0]
-          json.last_name  name[1]
+      json.object! do
+        json.posts blog_posts do |blog_post|
+          json.extract! blog_post, :id, :body
+          json.author do
+            name = blog_post.author_name.split(nil, 2)
+            json.first_name name[0]
+            json.last_name  name[1]
+          end
         end
       end
     end
@@ -642,37 +654,39 @@ class JbuilderTest < ActiveSupport::TestCase
     begin
       Wankel::DEFAULTS[:write_buffer_size]  = 1_000_000
 
-      builder.key1 'value1'
-      capture = builder.__send__(:_capture) do
-        builder.key2 'value2'
+      builder.object! do
+        builder.key1 'value1'
+        capture = builder.__send__(:_capture) do
+          builder.key2 'value2'
+        end
+        builder.key3 'value3'
       end
-      builder.key3 'value3'
     ensure
       Wankel::DEFAULTS[:write_buffer_size] = old_buf_size
     end
 
-    assert_equal [',"key2":"value2"', {:stack => [:map]}], capture
+    assert_equal ',"key2":"value2"', capture
     assert_equal '{"key1":"value1","key3":"value3"}', builder.target!
   end
-  
+
   test 'hash nested inside array nested inside hash' do
     result = jbuild do |json|
-      json.author do
-        json.name do
-          json.comments do
-            json.child! { json.content 'hello' }
-            json.child! do
-              json.id 42
-              json.content 'world'
+      json.object! do
+        json.author do
+          json.name do
+            json.comments :emit => :array do
+              json.child! { json.content 'hello' }
+              json.child! do
+                json.id 42
+                json.content 'world'
+              end
             end
-          end
-          json.other_comments do
-            json.array! [1,2,3]
-          end
-          json.other_other_comments do
-            json.array! [1,2,3] do |c|
-              json.id c
-              json.name nil
+            json.other_comments [1,2,3]
+            json.other_other_comments [1,2,3] do |c|
+              json.object! do
+                json.id c
+                json.name nil
+              end
             end
           end
         end
@@ -685,5 +699,5 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal [1,2,3], result['author']['name']['other_comments']
     assert_equal [{'id' => 1, 'name' => nil},{'id' => 2, 'name' => nil},{'id' => 3, 'name' => nil}], result['author']['name']['other_other_comments']
   end
-  
+
 end

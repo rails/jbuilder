@@ -8,3 +8,6 @@ else
 end
 
 require "active_support/test_case"
+
+require 'minitest/reporters'
+Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new(:only_failures => false)

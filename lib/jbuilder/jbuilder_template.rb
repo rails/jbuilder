@@ -31,7 +31,7 @@ class JbuilderTemplate < Jbuilder
     _render_partial_with_options options
   end
 
-  def array!(collection = [], *attributes)
+  def array!(collection = BLANK, *attributes, &block)
     options = attributes.extract_options!
 
     if options.key?(:partial)
@@ -51,12 +51,10 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={})
     if @context.controller.perform_caching
-      hit = true
       value = ::Rails.cache.fetch(_cache_key(key, options), options) do
-        hit = false
         _capture { _scope { yield self }; }
       end
-      hit ? merge!(*value) : @output << value.first
+      merge!(value)
     else
       yield
     end
@@ -71,31 +69,22 @@ class JbuilderTemplate < Jbuilder
   # json.cache_collection! @people, expires_in: 10.minutes do |person|
   #   json.partial! 'person', :person => person
   # end
-  def cache_collection!(collection, options = {}, &block)    
+  def cache_collection!(collection, options = {}, &block)
     if @context.controller.perform_caching
-      _possibly_write_key
-      _open_array
-      
       keys_to_collection_map = _keys_to_collection_map(collection, options)  
-
-      if ::Rails.cache.respond_to?(:fetch_multi)
-        results = ::Rails.cache.fetch_multi(*keys_to_collection_map.keys, options) do |key|
-          capture = _capture { _with_possible_map { _scope { yield keys_to_collection_map[key] } } }
-          capture[0].sub(/\A,/, '')
-        end
-      else
-        results = keys_to_collection_map.map do |key, item|
-          ::Rails.cache.fetch(key, options) do
-            capture = _capture { _with_possible_map { _scope { yield item }; } }
-            capture[0].sub(/\A,/, '')
+      results = ::Rails.cache.read_multi(*keys_to_collection_map.keys, options)
+      
+      array! do
+        keys_to_collection_map.keys.each do |key|
+          if results[key]
+            merge!(results[key])
+          else
+            value = _capture { _scope { yield keys_to_collection_map[key] } }
+            ::Rails.cache.write(key, value, options)
+            merge!(value)
           end
         end
       end
-    
-      results = results.class == ::Hash ? results.values : results
-      @output << results.join(',')
-      
-      _close_array
     else
       array! collection, options, &block
     end
