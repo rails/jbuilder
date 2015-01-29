@@ -7,5 +7,7 @@ gem "mocha", :require => false
 gem "appraisal"
 gem "railties", "~> 4.1.0"
 gem "actionpack", "~> 4.1.0"
+gem "minitest"
+gem "minitest-reporters", :require => "minitest/reporters", :github => "waratuman/minitest-reporters"
 
 gemspec :path => "../"

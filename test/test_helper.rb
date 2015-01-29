@@ -9,5 +9,8 @@ end
 
 require "active_support/test_case"
 
-require 'minitest/reporters'
-Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new(:only_failures => false)
+if Rails::VERSION::STRING > "4.0"
+  require 'minitest/reporters'
+  Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new(:only_failures => false)
+end
+
