@@ -1,4 +1,5 @@
-# Jstreamer
+Jstreamer
+=========
 
 [![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)][travis]
 [![Gem Version](http://img.shields.io/gem/v/jstreamer.svg)][gem]
@@ -245,8 +246,27 @@ environment.rb for example):
 Jstreamer.key_format camelize: :lower
 ```
 
+Syntax Differences from Jbuilder
+--------------------------------
+
+- You must open JSON object or array if you want an object or array.
+- You can directly output a value with `json.value! value`, this will
+  allow you to put a number, string, or other JSON value if you wish
+  to not have an object or array.
+- The call syntax has been removed (eg. `json.(@person, :name, :age)`)
+
 JSON backends
 -------------
 
 Currently Jstreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
 which supports streaming parsing and encoding.
+
+Special Thanks & Contributors
+-----------------------------
+
+Jstreamer is a fork of [Jbuilder](https://github.com/rails/jbuilder), built of
+what they have accopmlished and with out Jbuilder Jstreamer would not be here today.
+Thanks to everyone who's been a part of Jbuilder!
+
+* David Heinemeier Hansson - http://david.heinemeierhansson.com/ - for writing Jbuidler!!
+* Pavel Pravosud - http://pavel.pravosud.com/ - for maintaing and pushing Jbuilder forward
