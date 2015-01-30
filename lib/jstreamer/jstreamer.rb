@@ -1,4 +1,4 @@
-Jbuilder = Class.new(begin
+Jstreamer = Class.new(begin
   require 'active_support/proxy_object'
   ActiveSupport::ProxyObject
 rescue LoadError

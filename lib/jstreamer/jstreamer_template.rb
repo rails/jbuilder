@@ -1,14 +1,14 @@
-require 'jbuilder'
+require 'jstreamer'
 require 'stringio'
 require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
-class JbuilderTemplate < Jbuilder
+class JstreamerTemplate < Jstreamer
   class << self
     attr_accessor :template_lookup_options
   end
 
-  self.template_lookup_options = { handlers: [:jbuilder] }
+  self.template_lookup_options = { handlers: [:jstreamer] }
 
   def initialize(context, *args, &block)
     @context = context
@@ -107,7 +107,7 @@ class JbuilderTemplate < Jbuilder
 
   def _render_partial_with_options(options)
     options.reverse_merge! locals: {}
-    options.reverse_merge! ::JbuilderTemplate.template_lookup_options
+    options.reverse_merge! ::JstreamerTemplate.template_lookup_options
     as = options[:as]
 
     if as && options.key?(:collection)
@@ -133,7 +133,7 @@ class JbuilderTemplate < Jbuilder
   def _cache_key(key, options)
     key = _fragment_name_with_digest(key, options)
     key = url_for(key).split('://', 2).last if ::Hash === key
-    ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
+    ::ActiveSupport::Cache.expand_cache_key(key, :jstreamer)
   end
 
   def _keys_to_collection_map(collection, options)
@@ -169,13 +169,13 @@ class JbuilderTemplate < Jbuilder
   end
 end
 
-class JbuilderHandler
+class JstreamerHandler
   cattr_accessor :default_format
   self.default_format = Mime::JSON
 
   def self.call(template)
     # this juggling is required to keep line numbers right in the error
-    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{template.source}
+    %{__already_defined = defined?(json); json||=JstreamerTemplate.new(self); #{template.source}
       json.target! unless (__already_defined && __already_defined != "method")}
   end
 end

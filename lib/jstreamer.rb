@@ -1,10 +1,9 @@
-require 'jbuilder/jbuilder'
-require 'jbuilder/key_formatter'
-require 'jbuilder/errors'
+require 'jstreamer/jstreamer'
+require 'jstreamer/key_formatter'
 require 'wankel'
 require 'stringio'
 
-class Jbuilder
+class Jstreamer
   
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
@@ -46,9 +45,9 @@ class Jbuilder
         object!(&block)
       end
     elsif args.empty?
-      if ::Jbuilder === value
+      if ::Jstreamer === value
         # json.age 32
-        # json.person another_jbuilder
+        # json.person another_jstreamer
         # { "age": 32, "person": { ...  }
         
         @encoder.string(_key(key))
@@ -175,7 +174,7 @@ class Jbuilder
         object!(&block)
       end
     elsif args.empty?
-      if ::Jbuilder === value
+      if ::Jstreamer === value
       else
         @encoder.value(value)
       end
@@ -196,10 +195,6 @@ class Jbuilder
   #   end
   #
   #   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
-  #
-  # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
-  #
-  #   json.(@people) { |person| ... }
   #
   # It's generally only needed to use this method for top-level arrays. If you have named arrays, you can do:
   #
@@ -264,10 +259,6 @@ class Jbuilder
   #   json.extract! @person, :name, :age
   #
   #   { "name": David", "age": 32 }, { "name": Jamie", "age": 31 }
-  #
-  # You can also use the call syntax instead of an explicit extract! call:
-  #
-  #   json.(@person, :name, :age)
   def extract!(object, *attributes)
     if ::Hash === object
       attributes.each{ |key| _set_value key, object.fetch(key) }
@@ -340,4 +331,4 @@ class Jbuilder
   end
 end
 
-require 'jbuilder/railtie' if defined?(Rails)
+require 'jstreamer/railtie' if defined?(Rails)

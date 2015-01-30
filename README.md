@@ -1,41 +1,43 @@
-# Jbuilder
+# Jstreamer
 
-[![Build Status](https://api.travis-ci.org/rails/jbuilder.svg)][travis]
-[![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)][gem]
-[![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)][codeclimate]
-[![Dependencies Status](http://img.shields.io/gemnasium/rails/jbuilder.svg)][gemnasium]
+[![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)][travis]
+[![Gem Version](http://img.shields.io/gem/v/jstreamer.svg)][gem]
+[![Code Climate](http://img.shields.io/codeclimate/github/malomalo/jstreamer.svg)][codeclimate]
+[![Dependencies Status](http://img.shields.io/gemnasium/malomalo/jstreamer.svg)][gemnasium]
 
-[travis]: https://travis-ci.org/rails/jbuilder
-[gem]: https://rubygems.org/gems/jbuilder
-[codeclimate]: https://codeclimate.com/github/rails/jbuilder
-[gemnasium]: https://gemnasium.com/rails/jbuilder
+[travis]: https://travis-ci.org/malomalo/jstreamer
+[gem]: https://rubygems.org/gems/jstreamer
+[codeclimate]: https://codeclimate.com/github/rails/jstreamer
+[gemnasium]: https://gemnasium.com/malomalo/jstreamer
 
-Jbuilder gives you a simple DSL for declaring JSON structures that beats
+Jstreamer gives you a simple DSL for declaring JSON structures that beats
 massaging giant hash structures. This is particularly helpful when the
 generation process is fraught with conditionals and loops. Here's a simple
 example:
 
 ``` ruby
-# app/views/message/show.json.jbuilder
+# app/views/message/show.json.jstreamer
 
-json.content format_content(@message.content)
-json.(@message, :created_at, :updated_at)
+json.object! do
+  json.content format_content(@message.content)
+  json.extract! @message, :created_at, :updated_at
 
-json.author do
-  json.name @message.creator.name.familiar
-  json.email_address @message.creator.email_address_with_name
-  json.url url_for(@message.creator, format: :json)
-end
+  json.author do
+    json.name @message.creator.name.familiar
+    json.email_address @message.creator.email_address_with_name
+    json.url url_for(@message.creator, format: :json)
+  end
 
-if current_user.admin?
-  json.visitors calculate_visitors(@message)
-end
+  if current_user.admin?
+    json.visitors calculate_visitors(@message)
+  end
 
-json.comments @message.comments, :content, :created_at
+  json.comments @message.comments, :content, :created_at
 
-json.attachments @message.attachments do |attachment|
-  json.filename attachment.filename
-  json.url url_for(attachment)
+  json.attachments @message.attachments do |attachment|
+    json.filename attachment.filename
+    json.url url_for(attachment)
+  end
 end
 ```
 
@@ -70,8 +72,10 @@ This will build the following structure:
 To define attribute and structure names dynamically, use the `set!` method:
 
 ``` ruby
-json.set! :author do
-  json.set! :name, 'David'
+json.object! do
+  json.set! :author do
+    json.set! :name, 'David'
+  end
 end
 
 # => "author": { "name": "David" }
@@ -105,14 +109,14 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
-Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
+Jstreamer objects can be directly nested inside each other.  Useful for composing objects.
 
 ``` ruby
 class Person
   # ... Class Definition ... #
   def to_builder
-    Jbuilder.new do |person|
-      person.(self, :name, :age)
+    Jstreamer.new do |person|
+      person.extract! self, :name, :age
     end
   end
 end
@@ -120,9 +124,11 @@ end
 class Company
   # ... Class Definition ... #
   def to_builder
-    Jbuilder.new do |company|
-      company.name name
-      company.president president.to_builder
+    Jstreamer.new do |company|
+      company.object! do
+        company.name name
+        company.president president.to_builder
+      end
     end
   end
 end
@@ -133,29 +139,31 @@ company.to_builder.target!
 # => {"name":"Doodle Corp","president":{"name":"John Stobs","age":58}}
 ```
 
-You can either use Jbuilder stand-alone or directly as an ActionView template
-language. When required in Rails, you can create views ala show.json.jbuilder
+You can either use Jstreamer stand-alone or directly as an ActionView template
+language. When required in Rails, you can create views ala show.json.jstreamer
 (the json is already yielded):
 
 ``` ruby
 # Any helpers available to views are available to the builder
-json.content format_content(@message.content)
-json.(@message, :created_at, :updated_at)
+json.object! do
+  json.content format_content(@message.content)
+  json.extract! @message, :created_at, :updated_at
 
-json.author do
-  json.name @message.creator.name.familiar
-  json.email_address @message.creator.email_address_with_name
-  json.url url_for(@message.creator, format: :json)
-end
-
-if current_user.admin?
-  json.visitors calculate_visitors(@message)
+  json.author do
+    json.name @message.creator.name.familiar
+    json.email_address @message.creator.email_address_with_name
+    json.url url_for(@message.creator, format: :json)
+  end
+  
+  if current_user.admin?
+    json.visitors calculate_visitors(@message)
+  end
 end
 ```
 
 
 You can use partials as well. The following will render the file
-`views/comments/_comments.json.jbuilder`, and set a local variable
+`views/comments/_comments.json.jstreamer`, and set a local variable
 `comments` with all this message's comments, which you can use inside
 the partial.
 
@@ -181,7 +189,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 json.comments @post.comments, partial: 'comment/comment', as: :comment
 ```
 
-You can explicitly make Jbuilder object return null if you want:
+You can explicitly make Jstreamer object return null if you want:
 
 ``` ruby
 json.extract! @post, :id, :title, :content, :published_at
@@ -189,8 +197,10 @@ json.author do
   if @post.anonymous?
     json.null! # or json.nil!
   else
-    json.first_name @post.author_first_name
-    json.last_name @post.author_last_name
+    json.object! do
+      json.first_name @post.author_first_name
+      json.last_name @post.author_last_name
+    end
   end
 end
 ```
@@ -199,29 +209,31 @@ Fragment caching is supported, it uses `Rails.cache` and works like caching in
 HTML templates:
 
 ```ruby
-json.cache! ['v1', @person], expires_in: 10.minutes do
-  json.extract! @person, :name, :age
+json.object! do
+  json.cache! ['v1', @person], expires_in: 10.minutes do
+    json.extract! @person, :name, :age
+  end
 end
 ```
 
 You can also conditionally cache a block by using `cache_if!` like this:
 
 ```ruby
-json.cache_if! !admin?, ['v1', @person], expires_in: 10.minutes do
-  json.extract! @person, :name, :age
+json.object! do
+  json.cache_if! !admin?, ['v1', @person], expires_in: 10.minutes do
+    json.extract! @person, :name, :age
+  end
 end
 ```
-
-If you are rendering fragments for a collection of objects, have a look at
-`jbuilder_cache_multi` gem. It uses fetch_multi (>= Rails 4.1) to fetch
-multiple keys at once.
 
 Keys can be auto formatted using `key_format!`, this can be used to convert
 keynames from the standard ruby_format to camelCase:
 
 ``` ruby
 json.key_format! camelize: :lower
-json.first_name 'David'
+json.object! do
+  json.first_name 'David'
+end
 
 # => { "firstName": "David" }
 ```
@@ -230,20 +242,11 @@ You can set this globally with the class method `key_format` (from inside your
 environment.rb for example):
 
 ``` ruby
-Jbuilder.key_format camelize: :lower
+Jstreamer.key_format camelize: :lower
 ```
 
-Faster JSON backends
---------------------
+JSON backends
+-------------
 
-Jbuilder uses MultiJson, which by default will use the JSON gem. That gem is
-currently tangled with ActiveSupport's all-Ruby `#to_json` implementation,
-which is slow (fixed in Rails >= 4.1). For faster Jbuilder rendering, you can
-specify something like the Yajl JSON generator instead. You'll need to include
-the `yajl-ruby` gem in your Gemfile and then set the following configuration
-for MultiJson:
-
-``` ruby
-require 'multi_json'
-MultiJson.use :yajl
- ```
+Currently Jstreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
+which supports streaming parsing and encoding.

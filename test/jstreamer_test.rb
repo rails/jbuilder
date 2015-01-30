@@ -1,9 +1,9 @@
 require 'test_helper'
 require 'active_support/inflector'
-require 'jbuilder'
+require 'jstreamer'
 
 def jbuild(*args, &block)
-  ::Wankel.parse(Jbuilder.new(*args, &block).target!)
+  ::Wankel.parse(Jstreamer.new(*args, &block).target!)
 end
 
 Comment = Struct.new(:content, :id)
@@ -50,7 +50,7 @@ class RelationMock
 end
 
 
-class JbuilderTest < ActiveSupport::TestCase
+class JstreamerTest < ActiveSupport::TestCase
   
   test 'single key' do
     result = jbuild do |json|
@@ -345,8 +345,8 @@ class JbuilderTest < ActiveSupport::TestCase
     assert !result[0].key?('not_in_json')
   end
 
-  test 'nested jbuilder objects' do
-    to_nest = Jbuilder.new{ |json| json.object! { json.nested_value 'Nested Test' } }
+  test 'nested jstreamer objects' do
+    to_nest = Jstreamer.new{ |json| json.object! { json.nested_value 'Nested Test' } }
 
     result = jbuild do |json|
       json.object! do
@@ -359,8 +359,8 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal expected, result
   end
 
-  test 'nested jbuilder object via set!' do
-    to_nest = Jbuilder.new{ |json| json.object! { json.nested_value 'Nested Test' } }
+  test 'nested jstreamer object via set!' do
+    to_nest = Jstreamer.new{ |json| json.object! { json.nested_value 'Nested Test' } }
 
     result = jbuild do |json|
       json.object! do
@@ -477,9 +477,9 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'initialize via options hash' do
-    jbuilder = Jbuilder.new(key_formatter: 1, ignore_nil: 2)
-    assert_equal 1, jbuilder.instance_eval{ @key_formatter }
-    assert_equal 2, jbuilder.instance_eval{ @ignore_nil }
+    jstreamer = Jstreamer.new(key_formatter: 1, ignore_nil: 2)
+    assert_equal 1, jstreamer.instance_eval{ @key_formatter }
+    assert_equal 2, jstreamer.instance_eval{ @ignore_nil }
   end
 
   test 'key_format! with parameter' do
@@ -568,15 +568,15 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'default key_format!' do
-    Jbuilder.key_format camelize: :lower
+    Jstreamer.key_format camelize: :lower
     result = jbuild{ |json| json.object! { json.camel_style 'for JS' } }
     assert_equal ['camelStyle'], result.keys
-    Jbuilder.send :class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new
+    Jstreamer.send :class_variable_set, '@@key_formatter', Jstreamer::KeyFormatter.new
   end
 
   test 'do not use default key formatter directly' do
     jbuild{ |json| json.object! { json.key 'value' } }
-    cache = Jbuilder.send(:class_variable_get, '@@key_formatter').instance_variable_get('@cache')
+    cache = Jstreamer.send(:class_variable_get, '@@key_formatter').instance_variable_get('@cache')
     assert_empty cache
   end
 
@@ -614,7 +614,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'default ignore_nil!' do
-    Jbuilder.ignore_nil
+    Jstreamer.ignore_nil
 
     result = jbuild do |json|
       json.object! do
@@ -624,7 +624,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal ['name'], result.keys
-    Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
+    Jstreamer.send(:class_variable_set, '@@ignore_nil', false)
   end
 
   test 'collection' do
@@ -648,7 +648,7 @@ class JbuilderTest < ActiveSupport::TestCase
 
   test "_capture" do
     old_buf_size = Wankel::DEFAULTS[:write_buffer_size]
-    builder = Jbuilder.new
+    builder = Jstreamer.new
     capture = nil
 
     begin

@@ -1,12 +1,12 @@
 require 'rails/railtie'
-require 'jbuilder/jbuilder_template'
+require 'jstreamer/jstreamer_template'
 
-class Jbuilder
+class Jstreamer
   class Railtie < ::Rails::Railtie
-    initializer :jbuilder do |app|
+    initializer :jstreamer do |app|
       ActiveSupport.on_load :action_view do
-        ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
-        require 'jbuilder/dependency_tracker'
+        ActionView::Template.register_template_handler :jstreamer, JstreamerHandler
+        require 'jstreamer/dependency_tracker'
       end
     end
 

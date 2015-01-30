@@ -3,7 +3,7 @@ require 'rails/generators/resource_helpers'
 
 module Rails
   module Generators
-    class JbuilderGenerator < NamedBase # :nodoc:
+    class JstreamerGenerator < NamedBase # :nodoc:
       include Rails::Generators::ResourceHelpers
 
       source_root File.expand_path('../templates', __FILE__)
@@ -29,7 +29,7 @@ module Rails
         end
 
         def filename_with_extensions(name)
-          [name, :json, :jbuilder] * '.'
+          [name, :json, :jstreamer] * '.'
         end
 
         def attributes_list_with_timestamps

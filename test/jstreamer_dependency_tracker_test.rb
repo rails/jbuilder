@@ -1,23 +1,23 @@
 require 'test_helper'
-require 'jbuilder/dependency_tracker'
+require 'jstreamer/dependency_tracker'
 
 
 class FakeTemplate
     attr_reader :source, :handler
-    def initialize(source, handler = :jbuilder)
+    def initialize(source, handler = :jstreamer)
       @source, @handler = source, handler
     end
 end
 
 
-class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
+class JstreamerDependencyTrackerTest < ActiveSupport::TestCase
     def make_tracker(name, source)
       template = FakeTemplate.new(source)
-      Jbuilder::DependencyTracker.new(name, template)
+      Jstreamer::DependencyTracker.new(name, template)
     end
 
     def track_dependencies(source)
-      make_tracker('jbuilder_template', source).dependencies
+      make_tracker('jstreamer_template', source).dependencies
     end
 
     test 'detects dependency via direct partial! call' do

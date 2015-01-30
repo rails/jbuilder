@@ -1,7 +1,7 @@
-require 'jbuilder/jbuilder'
+require 'jstreamer/jstreamer'
 require 'active_support/core_ext/array'
 
-class Jbuilder
+class Jstreamer
   class KeyFormatter
     def initialize(*args)
       @format = {}

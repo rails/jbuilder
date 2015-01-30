@@ -1,4 +1,4 @@
-require 'jbuilder/jbuilder'
+require 'jstreamer/jstreamer'
 
 dependency_tracker = false
 
@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 if dependency_tracker
-  class Jbuilder
+  class Jstreamer
     module DependencyTrackerMethods
       # Matches:
       #   json.partial! "messages/message"
@@ -55,7 +55,7 @@ if dependency_tracker
     end
   end
 
-  ::Jbuilder::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
-  ::Jbuilder::DependencyTracker.send :include, ::Jbuilder::DependencyTrackerMethods
-  dependency_tracker.register_tracker :jbuilder, ::Jbuilder::DependencyTracker
+  ::Jstreamer::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
+  ::Jstreamer::DependencyTracker.send :include, ::Jstreamer::DependencyTrackerMethods
+  dependency_tracker.register_tracker :jstreamer, ::Jstreamer::DependencyTracker
 end

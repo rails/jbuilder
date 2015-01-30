@@ -3,7 +3,7 @@ require 'mocha/setup'
 require 'action_view'
 require 'action_view/testing/resolvers'
 require 'active_support/cache'
-require 'jbuilder/jbuilder_template'
+require 'jstreamer/jstreamer_template'
 
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.object! do
@@ -30,7 +30,7 @@ blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
 BLOG_POST_COLLECTION = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 COLLECTION_COLLECTION = 5.times.map{ |i| Collection.new(i+1, "collection #{i+1}") }
 
-ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
+ActionView::Template.register_template_handler :jstreamer, JstreamerHandler
 
 module Rails
   def self.cache
@@ -38,7 +38,7 @@ module Rails
   end
 end
 
-class JbuilderTemplateTest < ActionView::TestCase
+class JstreamerTemplateTest < ActionView::TestCase
   setup do
     @context = self
     Rails.cache.clear
@@ -46,16 +46,16 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   def partials
     {
-      '_partial.json.jbuilder'  => 'json.object! { json.content "hello" }',
-      '_blog_post.json.jbuilder' => BLOG_POST_PARTIAL,
-      '_collection.json.jbuilder' => COLLECTION_PARTIAL
+      '_partial.json.jstreamer'  => 'json.object! { json.content "hello" }',
+      '_blog_post.json.jstreamer' => BLOG_POST_PARTIAL,
+      '_collection.json.jstreamer' => COLLECTION_PARTIAL
     }
   end
 
-  def render_jbuilder(source)
+  def render_jstreamer(source)
     @rendered = []
-    lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.jbuilder' => source))]
-    ActionView::Template.new(source, 'test', JbuilderHandler, :virtual_path => 'test').render(self, {}).strip
+    lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.jstreamer' => source))]
+    ActionView::Template.new(source, 'test', JstreamerHandler, :virtual_path => 'test').render(self, {}).strip
   end
 
   def undef_context_methods(*names)
@@ -78,7 +78,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'rendering' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.content 'hello'
       end
@@ -88,7 +88,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'key_format! with parameter' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.key_format! :camelize => [:lower]
         json.camel_style 'for JS'
@@ -99,7 +99,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'key_format! propagates to child elements' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.key_format! :upcase
         json.level1 'one'
@@ -115,7 +115,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders partial' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! 'partial'
     JBUILDER
 
@@ -123,7 +123,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders collections' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
     JBUILDER
 
@@ -131,7 +131,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders collections when as argument is a string' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! 'blog_post', collection: BLOG_POST_COLLECTION, as: "blog_post"
     JBUILDER
 
@@ -139,7 +139,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders collections as collections' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! 'collection', collection: COLLECTION_COLLECTION, as: :collection
     JBUILDER
 
@@ -147,7 +147,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders as empty array for nil-collection' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! 'blog_post', :collection => nil, :as => :blog_post
     JBUILDER
 
@@ -155,7 +155,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders collection (alt. syntax)' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! :partial => 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
     JBUILDER
 
@@ -163,7 +163,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'partial! renders as empty array for nil-collection (alt. syntax)' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.partial! :partial => 'blog_post', :collection => nil, :as => :blog_post
     JBUILDER
 
@@ -171,7 +171,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'render array of partials' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.array! BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
     JBUILDER
 
@@ -179,7 +179,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'render array of partials as empty array with nil-collection' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.array! nil, :partial => 'blog_post', :as => :blog_post
     JBUILDER
 
@@ -187,7 +187,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'render array if partials as a value' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.posts BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
       end
@@ -197,7 +197,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test 'render as empty array if partials as a nil value' do
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.posts nil, :partial => 'blog_post', :as => :blog_post
       end
@@ -209,7 +209,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test 'fragment caching a JSON object' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
-    render_jbuilder <<-JBUILDER
+    render_jstreamer <<-JBUILDER
       json.object! do
         json.cache! 'cachekey' do
           json.name 'Cache'
@@ -217,7 +217,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.cache! 'cachekey' do
           json.name 'Miss'
@@ -232,7 +232,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test 'conditionally fragment caching a JSON object' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
-    render_jbuilder <<-JBUILDER
+    render_jstreamer <<-JBUILDER
       json.object! do
         json.cache_if! true, 'cachekey' do
           json.test1 'Cache'
@@ -243,7 +243,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.object! do
         json.cache_if! true, 'cachekey' do
           json.test1 'Miss'
@@ -262,7 +262,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test 'fragment caching deserializes an array' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.cache! 'cachekey' do
         json.array! %w[a b c]
       end
@@ -271,7 +271,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     # cache miss output correct
     assert_equal %w[a b c], Wankel.load(json)
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.cache! 'cachekey' do
         json.array! %w[1 2 3]
       end
@@ -286,7 +286,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     @context.expects :fragment_name_with_digest
 
-    render_jbuilder <<-JBUILDER
+    render_jstreamer <<-JBUILDER
       json.cache! 'cachekey' do
         json.name 'Cache'
       end
@@ -299,7 +299,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     @context.expects :cache_fragment_name
     ActiveSupport::Cache.expects :expand_cache_key
 
-    render_jbuilder <<-JBUILDER
+    render_jstreamer <<-JBUILDER
       json.cache! 'cachekey' do
         json.name 'Cache'
       end
@@ -312,7 +312,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     @context.expects(:cache_fragment_name).with('cachekey', skip_digest: true)
     ActiveSupport::Cache.expects :expand_cache_key
 
-    render_jbuilder <<-JBUILDER
+    render_jstreamer <<-JBUILDER
       json.cache! 'cachekey', skip_digest: true do
         json.name 'Cache'
       end
@@ -321,7 +321,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'does not perform caching when controller.perform_caching is false' do
     controller.perform_caching = false
-    render_jbuilder <<-JBUILDER
+    render_jstreamer <<-JBUILDER
       json.cache! 'cachekey' do
         json.name 'Cache'
       end
@@ -333,7 +333,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test 'renders cached array of block partials' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
@@ -346,7 +346,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
     CACHE_KEY_PROC.expects(:call)
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.cache_collection! BLOG_POST_COLLECTION, key: CACHE_KEY_PROC do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
@@ -359,7 +359,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
     ActiveSupport::Cache::Store.send(:undef_method, :fetch_multi) if ActiveSupport::Cache::Store.method_defined?(:fetch_multi)
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
@@ -371,7 +371,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test 'reverts to array! when controller.perform_caching is false' do
     controller.perform_caching = false
 
-    json = render_jbuilder <<-JBUILDER
+    json = render_jstreamer <<-JBUILDER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end

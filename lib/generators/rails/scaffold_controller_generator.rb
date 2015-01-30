@@ -6,7 +6,7 @@ module Rails
     class ScaffoldControllerGenerator
       source_root File.expand_path('../templates', __FILE__)
 
-      hook_for :jbuilder, default: true
+      hook_for :jstreamer, default: true
     end
   end
 end
