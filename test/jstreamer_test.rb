@@ -289,6 +289,21 @@ class JstreamerTest < ActiveSupport::TestCase
     assert_equal 'hello', result.first['content']
     assert_equal 'world', result.second['content']
   end
+  
+  test 'key without emitting and array or hash' do
+    result = jbuild do |json|
+      json.object! do
+        json.author :emit => :nothing do
+          json.object! do
+            json.name 'David'
+            json.age  32
+          end
+        end
+      end
+    end
+
+    assert_equal 'David', result['author']['name']
+  end
 
   test 'array nested inside nested hash' do
     result = jbuild do |json|

@@ -33,6 +33,8 @@ class Jstreamer
 
       if value.is_a?(::Hash) && value[:emit] == :array
         _scope{ array! &block }
+      elsif value.is_a?(::Hash) && value[:emit] == :nothing
+        _scope(&block)
       elsif !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
@@ -282,7 +284,6 @@ class Jstreamer
 
   # Encodes the current builder as JSON.
   def target!
-    _close
     @encoder.flush
     @output.string
   end
