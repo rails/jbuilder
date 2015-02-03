@@ -24,9 +24,11 @@ json.object! do
   json.extract! @message, :created_at, :updated_at
 
   json.author do
-    json.name @message.creator.name.familiar
-    json.email_address @message.creator.email_address_with_name
-    json.url url_for(@message.creator, format: :json)
+    json.object! do
+      json.name @message.creator.name.familiar
+      json.email_address @message.creator.email_address_with_name
+      json.url url_for(@message.creator, format: :json)
+    end
   end
 
   if current_user.admin?
@@ -36,8 +38,10 @@ json.object! do
   json.comments @message.comments, :content, :created_at
 
   json.attachments @message.attachments do |attachment|
-    json.filename attachment.filename
-    json.url url_for(attachment)
+    json.object! do
+      json.filename attachment.filename
+      json.url url_for(attachment)
+    end
   end
 end
 ```
@@ -75,7 +79,9 @@ To define attribute and structure names dynamically, use the `set!` method:
 ``` ruby
 json.object! do
   json.set! :author do
-    json.set! :name, 'David'
+    json.object! do
+      json.set! :name, 'David'
+    end
   end
 end
 
@@ -90,10 +96,12 @@ Top level arrays can be handled directly.  Useful for index and other collection
 json.array! @comments do |comment|
   next if comment.marked_as_spam_by?(current_user)
 
-  json.body comment.body
-  json.author do
-    json.first_name comment.author.first_name
-    json.last_name comment.author.last_name
+  json.object! do
+    json.body comment.body
+    json.author do
+      json.first_name comment.author.first_name
+      json.last_name comment.author.last_name
+    end
   end
 end
 
@@ -151,9 +159,11 @@ json.object! do
   json.extract! @message, :created_at, :updated_at
 
   json.author do
-    json.name @message.creator.name.familiar
-    json.email_address @message.creator.email_address_with_name
-    json.url url_for(@message.creator, format: :json)
+    json.object! do
+      json.name @message.creator.name.familiar
+      json.email_address @message.creator.email_address_with_name
+      json.url url_for(@message.creator, format: :json)
+    end
   end
   
   if current_user.admin?

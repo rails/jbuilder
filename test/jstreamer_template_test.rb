@@ -10,8 +10,10 @@ BLOG_POST_PARTIAL = <<-JBUILDER
     json.extract! blog_post, :id, :body
     json.author do
       name = blog_post.author_name.split(nil, 2)
-      json.first_name name[0]
-      json.last_name  name[1]
+      json.object! do
+        json.first_name name[0]
+        json.last_name  name[1]
+      end
     end
   end
 JBUILDER
@@ -104,7 +106,9 @@ class JstreamerTemplateTest < ActionView::TestCase
         json.key_format! :upcase
         json.level1 'one'
         json.level2 do
-          json.value 'two'
+          json.object! do
+            json.value 'two'
+          end
         end
       end
     JBUILDER

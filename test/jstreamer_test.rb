@@ -125,8 +125,10 @@ class JstreamerTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.object! do
         json.author do
-          json.name 'David'
-          json.age  32
+          json.object! do
+            json.name 'David'
+            json.age  32
+          end
         end
       end
     end
@@ -140,6 +142,8 @@ class JstreamerTest < ActiveSupport::TestCase
       json.object! do
         json.foo 'bar'
         json.author do
+          json.object! do
+          end
         end
       end
     end
@@ -160,7 +164,9 @@ class JstreamerTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.object! do
         json.author do
-          json.merge! '"name":"Pavel"'
+          json.object! do
+            json.merge! '"name":"Pavel"'
+          end
         end
       end
     end
@@ -229,7 +235,9 @@ class JstreamerTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.object! do
         json.comments nil do |comment|
-          json.content comment.content
+          json.object! do
+            json.content comment.content
+          end
         end
       end
     end
@@ -290,31 +298,20 @@ class JstreamerTest < ActiveSupport::TestCase
     assert_equal 'world', result.second['content']
   end
   
-  test 'key without emitting and array or hash' do
-    result = jbuild do |json|
-      json.object! do
-        json.author :emit => :nothing do
-          json.object! do
-            json.name 'David'
-            json.age  32
-          end
-        end
-      end
-    end
-
-    assert_equal 'David', result['author']['name']
-  end
-
   test 'array nested inside nested hash' do
     result = jbuild do |json|
       json.object! do
         json.author do
-          json.name 'David'
-          json.age  32
+          json.object! do
+            json.name 'David'
+            json.age  32
 
-          json.comments :emit => :array do
-            json.child! { json.content 'hello' }
-            json.child! { json.content 'world' }
+            json.comments do
+              json.array! do
+                json.child! { json.object! { json.content 'hello' } }
+                json.child! { json.object! { json.content 'world' } }
+              end
+            end
           end
         end
       end
@@ -329,9 +326,13 @@ class JstreamerTest < ActiveSupport::TestCase
       json.object! do
         json.comments :emit => :array do
           json.child! do
-            json.authors :emit => :array do
-              json.child! do
-                json.name 'david'
+            json.object! do
+              json.authors :emit => :array do
+                json.child! do
+                  json.object! do
+                    json.name 'david'
+                  end
+                end
               end
             end
           end
@@ -455,8 +456,10 @@ class JstreamerTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.object! do
         json.set! :author do
-          json.name 'David'
-          json.age 32
+          json.object! do
+            json.name 'David'
+            json.age 32
+          end
         end
       end
     end
@@ -525,11 +528,13 @@ class JstreamerTest < ActiveSupport::TestCase
         json.key_format! :upcase
         json.level1 'one'
         json.level2 do
-          json.value 'two'
+          json.object! do
+            json.value 'two'
+          end
         end
       end
     end
-
+    puts result
     assert_equal 'one', result['LEVEL1']
     assert_equal 'two', result['LEVEL2']['VALUE']
   end
@@ -539,7 +544,7 @@ class JstreamerTest < ActiveSupport::TestCase
       json.object! do
         json.level2 do
           json.key_format! :upcase
-          json.value 'two'
+          json.object! { json.value 'two' }
         end
         json.level1 'one'
       end
@@ -688,19 +693,27 @@ class JstreamerTest < ActiveSupport::TestCase
     result = jbuild do |json|
       json.object! do
         json.author do
-          json.name do
-            json.comments :emit => :array do
-              json.child! { json.content 'hello' }
-              json.child! do
-                json.id 42
-                json.content 'world'
-              end
-            end
-            json.other_comments [1,2,3]
-            json.other_other_comments [1,2,3] do |c|
+          json.object! do
+            json.name do
               json.object! do
-                json.id c
-                json.name nil
+                json.comments do
+                  json.array! do
+                    json.child! { json.object! { json.content 'hello' } }
+                    json.child! do
+                      json.object! do
+                        json.id 42
+                        json.content 'world'
+                      end
+                    end
+                  end
+                end
+                json.other_comments [1,2,3]
+                json.other_other_comments [1,2,3] do |c|
+                  json.object! do
+                    json.id c
+                    json.name nil
+                  end
+                end
               end
             end
           end
@@ -708,6 +721,7 @@ class JstreamerTest < ActiveSupport::TestCase
       end
     end
 
+    puts result
     assert_equal 'hello', result['author']['name']['comments'].first['content']
     assert_equal 42, result['author']['name']['comments'].second['id']
     assert_equal 'world', result['author']['name']['comments'].second['content']

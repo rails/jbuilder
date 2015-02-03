@@ -31,11 +31,7 @@ class Jstreamer
     if block
       @encoder.string(_key(key))
 
-      if value.is_a?(::Hash) && value[:emit] == :array
-        _scope{ array! &block }
-      elsif value.is_a?(::Hash) && value[:emit] == :nothing
-        _scope(&block)
-      elsif !_blank?(value)
+      if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
         _scope{ array! value, &block }
@@ -44,7 +40,7 @@ class Jstreamer
         # { "comments": ... }
         # _merge_block(key){ yield self }
         
-        object!(&block)
+        _scope(&block)
       end
     elsif args.empty?
       if ::Jstreamer === value
@@ -173,7 +169,7 @@ class Jstreamer
       else
         # json.child! { ... }
         # [...]
-        object!(&block)
+        _scope(&block)
       end
     elsif args.empty?
       if ::Jstreamer === value
