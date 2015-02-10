@@ -6,13 +6,15 @@ require 'multi_json'
 class Jbuilder
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
+  @@replace_nil_with_empty_string = false
+
 
   def initialize(options = {})
     @attributes = {}
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
-
+    @replace_nil_with_empty_string = options.fetch(:replace_nil_with_empty_string, @@replace_nil_with_empty_string)
     yield self if ::Kernel.block_given?
   end
 
@@ -120,6 +122,14 @@ class Jbuilder
   # Same as instance method ignore_nil! except sets the default.
   def self.ignore_nil(value = true)
     @@ignore_nil = value
+  end
+
+  def replace_nil_with_empty_string!(value = false)
+    @replace_nil_with_empty_string = value
+  end
+
+  def self.replace_nil_with_empty_string!(value = false)
+    @@replace_nil_with_empty_string = value
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -286,6 +296,7 @@ class Jbuilder
     raise NullError.build(key) if @attributes.nil?
     return if @ignore_nil && value.nil?
     return if _blank?(value)
+    value = "" if @replace_nil_with_empty_string && !@ignore_nil && value.nil?
     _write key, value
   end
 
