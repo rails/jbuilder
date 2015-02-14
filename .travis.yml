@@ -18,8 +18,15 @@ gemfile:
   - gemfiles/rails_4_2.gemfile
 
 matrix:
-  allow_failures:
+  exclude:
     - rvm: 2.2
+      gemfile: gemfiles/rails_3_0.gemfile
+    - rvm: 2.2
+      gemfile: gemfiles/rails_3_1.gemfile
+    - rvm: 2.2
+      gemfile: gemfiles/rails_3_2.gemfile
+
+  allow_failures:
     - rvm: jruby-19mode
     - rvm: rbx
     - rvm: ruby-head
