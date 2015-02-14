@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "active_support"
 require "rails/version"
 
 if Rails::VERSION::STRING > "4.0"
@@ -7,4 +8,7 @@ else
   require "test/unit"
 end
 
-require "active_support/test_case"
+
+if ActiveSupport.respond_to?(:test_order=)
+  ActiveSupport.test_order = :random
+end
