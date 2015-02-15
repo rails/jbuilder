@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.7
+-----
+* [Make Blank object serializable with Marshal](https://github.com/rails/jbuilder/commit/7083f28d8b665aa60d0d1b1927ae88bb5c6290ba)
+
 2.2.6
 -----
 * [Make sure dependency tracker loads after template handler](https://github.com/rails/jbuilder/commit/3ba404b1207b557e14771c90b8832bc01ae67a42)
