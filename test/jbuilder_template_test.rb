@@ -190,6 +190,27 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal '{"posts":[]}', json
   end
 
+  test 'cache an empty block' do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    render_jbuilder <<-JBUILDER
+      json.cache! 'nothing' do
+      end
+    JBUILDER
+
+    json = nil
+
+    assert_nothing_raised do
+      json = render_jbuilder <<-JBUILDER
+        json.foo 'bar'
+        json.cache! 'nothing' do
+        end
+      JBUILDER
+    end
+
+    assert_equal 'bar', MultiJson.load(json)['foo']
+  end
+
   test 'fragment caching a JSON object' do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 

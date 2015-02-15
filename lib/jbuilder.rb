@@ -1,4 +1,5 @@
 require 'jbuilder/jbuilder'
+require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'multi_json'
@@ -21,7 +22,7 @@ class Jbuilder
     new(*args, &block).target!
   end
 
-  BLANK = ::Object.new
+  BLANK = Blank.new
 
   def set!(key, value = BLANK, *args, &block)
     result = if block
