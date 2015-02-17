@@ -40,7 +40,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   def partials
     {
-      '_partial.json.jbuilder'  => 'json.content "hello"',
+      '_partial.json.jbuilder'  => 'foo ||= "hello"; json.content foo',
       '_blog_post.json.jbuilder' => BLOG_POST_PARTIAL,
       '_collection.json.jbuilder' => COLLECTION_PARTIAL
     }
@@ -108,6 +108,14 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
 
     assert_equal 'hello', MultiJson.load(json)['content']
+  end
+
+  test 'partial! + locals without :locals key' do
+    json = render_jbuilder <<-JBUILDER
+      json.partial! 'partial', foo: 'goodbye'
+    JBUILDER
+
+    assert_equal 'goodbye', MultiJson.load(json)['content']
   end
 
   test 'partial! renders collections' do
