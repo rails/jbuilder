@@ -17,7 +17,7 @@ class JbuilderTemplate < Jbuilder
   def partial!(name_or_options, locals = {})
     case name_or_options
     when ::Hash
-      # partial! partial: 'name', locals: { foo: 'bar' }
+      # partial! partial: 'name', foo: 'bar'
       options = name_or_options
     else
       # partial! 'name', foo: 'bar'
