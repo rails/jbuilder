@@ -4,6 +4,7 @@ require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
 class JstreamerTemplate < Jstreamer
+  
   class << self
     attr_accessor :template_lookup_options
   end
@@ -173,9 +174,13 @@ class JstreamerHandler
   cattr_accessor :default_format
   self.default_format = Mime::JSON
 
+  def self.supports_streaming?
+    true
+  end
+  
   def self.call(template)
     # this juggling is required to keep line numbers right in the error
-    %{__already_defined = defined?(json); json||=JstreamerTemplate.new(self); #{template.source}
+    %{__already_defined = defined?(json); json ||= JstreamerTemplate.new(self); json.encoder.output = output_buffer if output_buffer; #{template.source}
       json.target! unless (__already_defined && __already_defined != "method")}
   end
 end

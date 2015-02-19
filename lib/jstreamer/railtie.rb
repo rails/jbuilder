@@ -18,3 +18,9 @@ class Jstreamer
 
   end
 end
+
+module ActionView
+  class StreamingBuffer #:nodoc:
+    alias :write :safe_concat
+  end
+end
