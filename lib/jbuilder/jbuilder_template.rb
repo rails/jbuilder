@@ -20,8 +20,13 @@ class JbuilderTemplate < Jbuilder
       # partial! partial: 'name', foo: 'bar'
       options = name_or_options
     else
+      # partial! 'name', locals: {foo: 'bar'}
+      if locals.one? && (locals.keys.first == :locals)
+        options = locals.merge(partial: name_or_options)
+      else
+        options = { partial: name_or_options, locals: locals }
+      end
       # partial! 'name', foo: 'bar'
-      options = { partial: name_or_options, locals: locals }
       as = locals.delete(:as)
       options[:as] = as if as.present?
       options[:collection] = locals[:collection] if locals.key?(:collection)
