@@ -7,11 +7,10 @@ class Jstreamer
   
   @@key_formatter = KeyFormatter.new
   @@ignore_nil    = false
-  attr_accessor :encoder, :output, :stack, :possible_key_stack, :flag_depth
+  attr_accessor :encoder, :stack, :possible_key_stack, :flag_depth
   def initialize(options = {})
     @stack = []
-    @output = ::StringIO.new
-    @encoder = ::Wankel::StreamEncoder.new(@output)
+    @encoder = ::Wankel::StreamEncoder.new(::StringIO.new)
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
@@ -27,7 +26,6 @@ class Jstreamer
   BLANK = ::Object.new
 
   def set!(key, value = BLANK, *args, &block)
-
     if block
       @encoder.string(_key(key))
 
@@ -239,7 +237,7 @@ class Jstreamer
   def object!(&block)
     @stack << :map
     @encoder.map_open
-    _scope{ yield self }
+    _scope{ block.call(self) }
     @encoder.map_close
     @stack.pop
   end
@@ -267,21 +265,24 @@ class Jstreamer
 
   # Merges stack and data into the current builder.
   def merge!(json_text)
-    @encoder.flush
     if json_text.length > 0
       _capture do
         @encoder.string("")
         @encoder.string("") if @stack.last == :map
       end
-    else
     end
-    @output << json_text
+    @encoder.output.write(json_text)
   end
 
   # Encodes the current builder as JSON.
   def target!
     @encoder.flush
-    @output.string
+    
+    if @encoder.output.equal?(@output)
+      @encoder.output.string
+    else
+      @encoder.output
+    end
   end
 
   private
@@ -302,14 +303,14 @@ class Jstreamer
   end
 
   def _capture
-    to = ::StringIO.new
+    old, to = @encoder.output, ::StringIO.new
     @encoder.output = to
     
     yield
     
     to.string
   ensure
-    @encoder.output = @output
+    @encoder.output = old
   end
   
   def _scope

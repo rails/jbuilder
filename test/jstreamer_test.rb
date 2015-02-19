@@ -534,7 +534,7 @@ class JstreamerTest < ActiveSupport::TestCase
         end
       end
     end
-    puts result
+    
     assert_equal 'one', result['LEVEL1']
     assert_equal 'two', result['LEVEL2']['VALUE']
   end
@@ -721,7 +721,6 @@ class JstreamerTest < ActiveSupport::TestCase
       end
     end
 
-    puts result
     assert_equal 'hello', result['author']['name']['comments'].first['content']
     assert_equal 42, result['author']['name']['comments'].second['id']
     assert_equal 'world', result['author']['name']['comments'].second['content']
