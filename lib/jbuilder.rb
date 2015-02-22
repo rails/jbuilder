@@ -274,11 +274,6 @@ class Jbuilder
     end
   end
 
-  def _write(key, value)
-    @attributes = {} if _blank?
-    @attributes[_key(key)] = value
-  end
-
   def _key(key)
     @key_formatter.format(key)
   end
@@ -286,9 +281,9 @@ class Jbuilder
   def _set_value(key, value)
     raise NullError.build(key) if @attributes.nil?
     raise ArrayError.build(key) if ::Array === @attributes
-    return if @ignore_nil && value.nil?
-    return if _blank?(value)
-    _write key, value
+    return if @ignore_nil && value.nil? or _blank?(value)
+    @attributes = {} if _blank?
+    @attributes[_key(key)] = value
   end
 
   def _map_collection(collection)
