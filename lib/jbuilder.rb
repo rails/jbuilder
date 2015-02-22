@@ -285,6 +285,7 @@ class Jbuilder
 
   def _set_value(key, value)
     raise NullError.build(key) if @attributes.nil?
+    raise ArrayError.build(key) if ::Array === @attributes
     return if @ignore_nil && value.nil?
     return if _blank?(value)
     _write key, value

@@ -645,11 +645,21 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_nil result['author']
   end
 
+  test 'throws ArrayError when trying to add a key to an array' do
+    assert_raise Jbuilder::ArrayError do
+      jbuild do |json|
+        json.array! %w[foo bar]
+        json.fizz "buzz"
+      end
+    end
+  end
+
   test 'throws NullError when trying to add properties to null' do
-    json = Jbuilder.new
-    json.null!
     assert_raise Jbuilder::NullError do
-      json.foo 'bar'
+      jbuild do |json|
+        json.null!
+        json.foo 'bar'
+      end
     end
   end
 
