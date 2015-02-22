@@ -1,5 +1,9 @@
 # Changelog
 
+2.2.8
+-----
+* [Raise ArrayError when trying to add key to an array](https://github.com/rails/jbuilder/commit/869e4be1ad165ce986d8fca78311bdd3ed166087)
+
 2.2.7
 -----
 * [Make Blank object serializable with Marshal](https://github.com/rails/jbuilder/commit/7083f28d8b665aa60d0d1b1927ae88bb5c6290ba)
