@@ -19,6 +19,12 @@ gemfile:
 
 matrix:
   exclude:
+    - rvm: ruby-head
+      gemfile: gemfiles/rails_3_0.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails_3_1.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails_3_2.gemfile
     - rvm: 2.2
       gemfile: gemfiles/rails_3_0.gemfile
     - rvm: 2.2
