@@ -184,7 +184,7 @@ json.comments @post.comments, partial: 'comment/comment', as: :comment
 You can pass any objects into partial templates with or without `:locals` option.
 
 ```ruby
-json.partial! 'sub_template', locals: {user: user}
+json.partial! 'sub_template', locals: { user: user }
 
 # or
 

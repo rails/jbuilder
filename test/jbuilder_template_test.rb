@@ -112,7 +112,7 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test 'partial! + locals via :locals option' do
     json = render_jbuilder <<-JBUILDER
-      json.partial! 'partial', locals: {foo: 'howdy'}
+      json.partial! 'partial', locals: { foo: 'howdy' }
     JBUILDER
 
     assert_equal 'howdy', MultiJson.load(json)['content']
