@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.9
+-----
+
+* Support `partial!` call with `locals` option in `JbuilderTemplate` [#251](https://github.com/rails/jbuilder/pull/251)
+
 2.2.8
 -----
 * [Raise ArrayError when trying to add key to an array](https://github.com/rails/jbuilder/commit/869e4be1ad165ce986d8fca78311bdd3ed166087)
