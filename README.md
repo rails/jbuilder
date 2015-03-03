@@ -181,6 +181,17 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 json.comments @post.comments, partial: 'comment/comment', as: :comment
 ```
 
+You can pass any objects into partial templates with or without `:locals` option.
+
+```ruby
+json.partial! 'sub_template', locals: {user: user}
+
+# or
+
+json.partial! 'sub_template', user: user
+```
+
+
 You can explicitly make Jbuilder object return null if you want:
 
 ``` ruby
