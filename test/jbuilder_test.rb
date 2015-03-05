@@ -208,6 +208,18 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', result['comments'].second['content']
   end
 
+  test 'nesting multiple children with collect block' do
+    result = jbuild do |json|
+      json.collect!(:comments) do
+        json.content 'hello'
+        json.content 'world'
+      end
+    end
+
+    assert_equal 'hello', result['comments'].first['content']
+    assert_equal 'world', result['comments'].second['content']
+  end
+
   test 'nesting single child with inline extract' do
     person = Person.new('David', 32)
 
