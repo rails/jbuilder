@@ -25,38 +25,42 @@ class Jbuilder
   BLANK = Blank.new
 
   def set!(key, value = BLANK, *args, &block)
-    result = if block
-      if !_blank?(value)
-        # json.comments @post.comments { |comment| ... }
-        # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &block }
-      else
-        # json.comments { ... }
-        # { "comments": ... }
-        _merge_block(key){ yield self }
-      end
-    elsif args.empty?
-      if ::Jbuilder === value
-        # json.age 32
-        # json.person another_jbuilder
-        # { "age": 32, "person": { ...  }
-        value.attributes!
-      else
-        # json.age 32
-        # { "age": 32 }
-        value
-      end
-    elsif _mapable_arguments?(value, *args)
-      # json.comments @post.comments, :content, :created_at
-      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      _scope{ array! value, *args }
+    if @collect_results
+      child! { set! key, value, *args, &block }
     else
-      # json.author @post.creator, :name, :email_address
-      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _merge_block(key){ extract! value, *args }
-    end
+      result = if block
+        if !_blank?(value)
+          # json.comments @post.comments { |comment| ... }
+          # { "comments": [ { ... }, { ... } ] }
+          _scope{ array! value, &block }
+        else
+          # json.comments { ... }
+          # { "comments": ... }
+          _merge_block(key){ yield self }
+        end
+      elsif args.empty?
+        if ::Jbuilder === value
+          # json.age 32
+          # json.person another_jbuilder
+          # { "age": 32, "person": { ...  }
+          value.attributes!
+        else
+          # json.age 32
+          # { "age": 32 }
+          value
+        end
+      elsif _mapable_arguments?(value, *args)
+        # json.comments @post.comments, :content, :created_at
+        # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
+        _scope{ array! value, *args }
+      else
+        # json.author @post.creator, :name, :email_address
+        # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
+        _merge_block(key){ extract! value, *args }
+      end
 
-    _set_value key, result
+      _set_value key, result
+    end
   end
 
   alias_method :method_missing, :set!
@@ -142,6 +146,27 @@ class Jbuilder
   def child!
     @attributes = [] unless ::Array === @attributes
     @attributes << _scope{ yield self }
+  end
+
+  # Turns the current element into an array and collects the results of child calls.
+  #
+  # Example:
+  #
+  #   json.collect!(:comments) do
+  #     json.content "hello"
+  #     json.content "world"
+  #   end
+  #
+  #   { "comments": [ { "content": "hello" }, { "content": "world" } ]}
+  def collect!(key)
+    set! key, _scope {
+      @collect_results = true
+      begin
+        yield self
+      ensure
+        @collect_results = false
+      end
+    }
   end
 
   # Turns the current element into an array and iterates over the passed collection, adding each iteration as
@@ -293,12 +318,13 @@ class Jbuilder
   end
 
   def _scope
-    parent_attributes, parent_formatter = @attributes, @key_formatter
+    parent_attributes, parent_formatter, parent_collect = @attributes, @key_formatter, @collect_results
     @attributes = BLANK
+    @collect_results = false
     yield
     @attributes
   ensure
-    @attributes, @key_formatter = parent_attributes, parent_formatter
+    @attributes, @key_formatter, @collect_results = parent_attributes, parent_formatter, parent_collect
   end
 
   def _mapable_arguments?(value, *args)
