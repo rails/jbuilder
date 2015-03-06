@@ -645,27 +645,11 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_nil result['author']
   end
 
-  test 'non-empty attributes' do
-    result = jbuild do |json|
-      json.fizz 'buzz'
-
-      if json.attributes!.empty?
-        json.foo 'bar'
-      end
-    end
-
-    assert !result.key?('foo')
-  end
-
-  test 'empty attributes' do
-    result = jbuild do |json|
-      if json.attributes!.empty?
-        json.foo 'bar'
-      end
-    end
-
-    assert result.key?('foo')
-    assert_equal 'bar', result['foo']
+  test 'empty attributes respond to empty?' do
+    attributes = Jbuilder.new.attributes!
+    assert attributes.empty?
+    assert attributes.blank?
+    assert !attributes.present?
   end
 
   test 'throws ArrayError when trying to add a key to an array' do
