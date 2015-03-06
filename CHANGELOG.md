@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.10
+------
+
+* Add Jbuilder::Blank#empty? to tell if attributes are empty [#257](https://github.com/rails/jbuilder/pull/257) [@a2ikm](https://github.com/a2ikm)
+
 2.2.9
 -----
 
