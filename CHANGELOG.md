@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.11
+------
+
+* Generate the templates for Rails 5+ [#258](https://github.com/rails/jbuilder/pull/258) [@amatsuda](https://github.com/amatsuda)
+
 2.2.10
 ------
 
