@@ -18,18 +18,18 @@ class Jbuilder
   end
 
   # Yields a builder and automatically turns the result into a JSON string
-  def self.encode(*args, &block)
-    new(*args, &block).target!
+  def self.encode(*args)
+    new(*args, &::Proc.new).target!
   end
 
   BLANK = Blank.new
 
-  def set!(key, value = BLANK, *args, &block)
-    result = if block
+  def set!(key, value = BLANK, *args)
+    result = if ::Kernel.block_given?
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &block }
+        _scope{ array! value, &::Proc.new }
       else
         # json.comments { ... }
         # { "comments": ... }
@@ -174,11 +174,11 @@ class Jbuilder
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection = [], *attributes, &block)
+  def array!(collection = [], *attributes)
     array = if collection.nil?
       []
-    elsif block
-      _map_collection(collection, &block)
+    elsif ::Kernel.block_given?
+      _map_collection(collection, &::Proc.new)
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
@@ -213,9 +213,9 @@ class Jbuilder
     end
   end
 
-  def call(object, *attributes, &block)
-    if block
-      array! object, &block
+  def call(object, *attributes)
+    if ::Kernel.block_given?
+      array! object, &::Proc.new
     else
       extract! object, *attributes
     end

@@ -9,9 +9,9 @@ class JbuilderTemplate < Jbuilder
 
   self.template_lookup_options = { handlers: [:jbuilder] }
 
-  def initialize(context, *args, &block)
+  def initialize(context, *args)
     @context = context
-    super(*args, &block)
+    super(*args)
   end
 
   def partial!(name_or_options, locals = {})
@@ -74,8 +74,8 @@ class JbuilderTemplate < Jbuilder
   #   json.cache_if! !admin?, @person, expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache_if!(condition, *args, &block)
-    condition ? cache!(*args, &block) : yield
+  def cache_if!(condition, *args)
+    condition ? cache!(*args, &::Proc.new) : yield
   end
 
   protected
