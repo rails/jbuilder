@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.12
+------
+
+* [Replace explici block calls with yield for performance](https://github.com/rails/jbuilder/commit/3184f941276ad03a071cf977133d1a32302afa47)
+
 2.2.11
 ------
 
