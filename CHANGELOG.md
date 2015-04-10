@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.13
+------
+
+* Several peformance optimizations: [#260](https://github.com/rails/jbuilder/pull/260) & [#261](https://github.com/rails/jbuilder/pull/261)
+
 2.2.12
 ------
 
