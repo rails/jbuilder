@@ -51,6 +51,10 @@ end
 
 
 class JbuilderTest < ActiveSupport::TestCase
+  setup do
+    Jbuilder.send :class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new
+  end
+
   test 'single key' do
     result = jbuild do |json|
       json.content 'hello'
@@ -564,12 +568,12 @@ class JbuilderTest < ActiveSupport::TestCase
     Jbuilder.key_format camelize: :lower
     result = jbuild{ |json| json.camel_style 'for JS' }
     assert_equal ['camelStyle'], result.keys
-    Jbuilder.send :class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new
   end
 
   test 'do not use default key formatter directly' do
     jbuild{ |json| json.key 'value' }
-    cache = Jbuilder.send(:class_variable_get, '@@key_formatter').instance_variable_get('@cache')
+    formatter = Jbuilder.send(:class_variable_get, '@@key_formatter')
+    cache = formatter.instance_variable_get('@cache')
     assert_empty cache
   end
 
