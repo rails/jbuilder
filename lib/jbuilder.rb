@@ -5,13 +5,13 @@ require 'jbuilder/errors'
 require 'multi_json'
 
 class Jbuilder
-  @@key_formatter = KeyFormatter.new
+  @@key_formatter = nil
   @@ignore_nil    = false
 
   def initialize(options = {})
     @attributes = {}
 
-    @key_formatter = options.fetch(:key_formatter){ @@key_formatter.clone }
+    @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
 
     yield self if ::Kernel.block_given?
@@ -275,7 +275,7 @@ class Jbuilder
   end
 
   def _key(key)
-    @key_formatter.format(key)
+    @key_formatter ? @key_formatter.format(key) : key.to_s
   end
 
   def _set_value(key, value)
