@@ -8,6 +8,12 @@ class Jbuilder
         ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
         require 'jbuilder/dependency_tracker'
       end
+
+      if app.config.api_only
+        ActiveSupport.on_load :action_controller do
+          include ActionView::Rendering
+        end
+      end
     end
 
     if Rails::VERSION::MAJOR >= 4
