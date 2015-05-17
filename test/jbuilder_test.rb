@@ -52,7 +52,7 @@ end
 
 class JbuilderTest < ActiveSupport::TestCase
   setup do
-    Jbuilder.send :class_variable_set, '@@key_formatter', Jbuilder::KeyFormatter.new
+    Jbuilder.send :class_variable_set, '@@key_formatter', nil
   end
 
   test 'single key' do
@@ -571,6 +571,7 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'do not use default key formatter directly' do
+    Jbuilder.key_format
     jbuild{ |json| json.key 'value' }
     formatter = Jbuilder.send(:class_variable_get, '@@key_formatter')
     cache = formatter.instance_variable_get('@cache')
