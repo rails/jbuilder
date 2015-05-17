@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.14
+------
+
+* [Make Jbuilder compatible with Rails API](https://github.com/rails/jbuilder/commit/29c0014a9c954c990075d42c45c66075260e924b)
+
 2.2.13
 ------
 
