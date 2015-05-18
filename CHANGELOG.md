@@ -1,5 +1,10 @@
 # Changelog
 
+2.2.15
+------
+
+* [Fix NoMethodError around `api_only` in railtie](https://github.com/rails/jbuilder/commit/705d1d6af3671d0bf0f78e9bb3136e727be1fb63)
+
 2.2.14
 ------
 
