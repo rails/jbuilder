@@ -9,5 +9,6 @@ gem "pry"
 gem "test-unit"
 gem "railties", "~> 3.0.0"
 gem "actionpack", "~> 3.0.0"
+gem "activemodel", "~> 3.0.0"
 
 gemspec :path => "../"

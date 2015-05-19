@@ -11,28 +11,15 @@ class JbuilderTemplate < Jbuilder
 
   def initialize(context, *args)
     @context = context
-    super(*args)
+    super *args
   end
 
-  def partial!(name_or_options, locals = {})
-    case name_or_options
-    when ::Hash
-      # partial! partial: 'name', foo: 'bar'
-      options = name_or_options
+  def partial!(*args)
+    if args.one? && _is_active_model?(args.first)
+      _render_active_model_partial args.first
     else
-      # partial! 'name', locals: {foo: 'bar'}
-      if locals.one? && (locals.keys.first == :locals)
-        options = locals.merge(partial: name_or_options)
-      else
-        options = { partial: name_or_options, locals: locals }
-      end
-      # partial! 'name', foo: 'bar'
-      as = locals.delete(:as)
-      options[:as] = as if as.present?
-      options[:collection] = locals[:collection] if locals.key?(:collection)
+      _render_explicit_partial *args
     end
-
-    _render_partial_with_options options
   end
 
   # Caches the json constructed within the block passed. Has the same signature as the `cache` helper
@@ -81,18 +68,11 @@ class JbuilderTemplate < Jbuilder
   def set!(name, object = BLANK, *args)
     options = args.first
 
-    return super unless args.one? && _partial_options?(options)
-
-    value = if object.nil?
-      []
-    elsif _is_collection?(object)
-      _scope{ _render_partial_with_options options.merge(collection: object) }
+    if args.one? && _partial_options?(options)
+      _set_inline_partial name, object, options
     else
-      locals = ::Hash[options[:as], object]
-      _scope{ _render_partial options.merge(locals: locals) }
+      super
     end
-
-    super name, value
   end
 
   private
@@ -143,6 +123,48 @@ class JbuilderTemplate < Jbuilder
 
   def _partial_options?(options)
     ::Hash === options && options.key?(:as) && options.key?(:partial)
+  end
+
+  def _is_active_model?(object)
+    object.class.respond_to?(:model_name) && object.respond_to?(:to_partial_path)
+  end
+
+  def _set_inline_partial(name, object, options)
+    value = if object.nil?
+      []
+    elsif _is_collection?(object)
+      _scope{ _render_partial_with_options options.merge(collection: object) }
+    else
+      locals = ::Hash[options[:as], object]
+      _scope{ _render_partial options.merge(locals: locals) }
+    end
+
+    set! name, value
+  end
+
+  def _render_explicit_partial(name_or_options, locals = {})
+    case name_or_options
+    when ::Hash
+      # partial! partial: 'name', foo: 'bar'
+      options = name_or_options
+    else
+      # partial! 'name', locals: {foo: 'bar'}
+      if locals.one? && (locals.keys.first == :locals)
+        options = locals.merge(partial: name_or_options)
+      else
+        options = { partial: name_or_options, locals: locals }
+      end
+      # partial! 'name', foo: 'bar'
+      as = locals.delete(:as)
+      options[:as] = as if as.present?
+      options[:collection] = locals[:collection] if locals.key?(:collection)
+    end
+
+    _render_partial_with_options options
+  end
+
+  def _render_active_model_partial(object)
+    @context.render object, json: self
   end
 end
 

@@ -1,5 +1,6 @@
 require "test_helper"
 require "mocha/setup"
+require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
@@ -18,6 +19,22 @@ COLLECTION_PARTIAL = <<-JBUILDER
   json.extract! collection, :id, :name
 JBUILDER
 
+RACER_PARTIAL = <<-JBUILDER
+  json.extract! racer, :id, :name
+JBUILDER
+
+class Racer
+  extend ActiveModel::Naming
+  include ActiveModel::Conversion
+
+  def initialize(id, name)
+    @id, @name = id, name
+  end
+
+  attr_reader :id, :name
+end
+
+
 BlogPost = Struct.new(:id, :body, :author_name)
 Collection = Struct.new(:id, :name)
 blog_authors = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
@@ -29,6 +46,7 @@ ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
 PARTIALS = {
   "_partial.json.jbuilder"  => "foo ||= 'hello'; json.content foo",
   "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL,
+  "racers/_racer.json.jbuilder" => RACER_PARTIAL,
   "_collection.json.jbuilder" => COLLECTION_PARTIAL
 }
 
@@ -349,5 +367,17 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal 1, result["post"]["id"]
     assert_equal "post body 1", result["post"]["body"]
     assert_equal "David", result["post"]["author"]["first_name"]
+  end
+
+  test "invokes templates implicitly for ActiveModel objects" do
+    @racer = Racer.new(123, "Chris Harris")
+
+    result = jbuild(<<-JBUILDER)
+      json.partial! @racer
+    JBUILDER
+
+    assert_equal %w[id name], result.keys
+    assert_equal 123, result["id"]
+    assert_equal "Chris Harris", result["name"]
   end
 end
