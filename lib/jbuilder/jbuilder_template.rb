@@ -68,11 +68,11 @@ class JbuilderTemplate < Jbuilder
     condition ? cache!(*args, &::Proc.new) : yield
   end
 
-  def array!(collection = [], *attributes)
-    options = attributes.extract_options!
+  def array!(collection = [], *args)
+    options = args.first
 
-    if options.key?(:partial)
-      partial! options[:partial], options.merge(collection: collection)
+    if args.one? && _partial_options?(options)
+      partial! options.merge(collection: collection)
     else
       super
     end
@@ -81,7 +81,7 @@ class JbuilderTemplate < Jbuilder
   def set!(name, object = BLANK, *args)
     options = args.first
 
-    return super unless _partial_options?(options)
+    return super unless args.one? && _partial_options?(options)
 
     value = if object.nil?
       []
