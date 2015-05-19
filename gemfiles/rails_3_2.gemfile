@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gem "rake"
 gem "mocha", :require => false
 gem "appraisal"
+gem "pry"
 gem "test-unit"
 gem "railties", "~> 3.2.0"
 gem "actionpack", "~> 3.2.0"
