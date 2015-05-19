@@ -23,6 +23,7 @@ class Jbuilder
   end
 
   BLANK = Blank.new
+  NON_ENUMERABLES = [ ::Struct, ::OpenStruct ].to_set
 
   def set!(key, value = BLANK, *args)
     result = if ::Kernel.block_given?
@@ -46,7 +47,7 @@ class Jbuilder
         # { "age": 32 }
         value
       end
-    elsif _mapable_arguments?(value, *args)
+    elsif _is_collection?(value)
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
       _scope{ array! value, *args }
@@ -59,8 +60,13 @@ class Jbuilder
     _set_value key, result
   end
 
-  alias_method :method_missing, :set!
-  private :method_missing
+  def method_missing(*args)
+    if ::Kernel.block_given?
+      set! *args, &::Proc.new
+    else
+      set! *args
+    end
+  end
 
   # Specifies formatting to be applied to the key. Passing in a name of a function
   # will cause that function to be called on the key.  So :upcase will upper case
@@ -301,12 +307,16 @@ class Jbuilder
     @attributes, @key_formatter = parent_attributes, parent_formatter
   end
 
-  def _mapable_arguments?(value, *args)
-    value.respond_to?(:map)
+  def _is_collection?(object)
+    _object_respond_to?(object, :map, :count) && NON_ENUMERABLES.none?{ |klass| klass === object }
   end
 
   def _blank?(value=@attributes)
     BLANK == value
+  end
+
+  def _object_respond_to?(object, *methods)
+    methods.all?{ |m| object.respond_to?(m) }
   end
 end
 

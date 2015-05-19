@@ -8,9 +8,9 @@ require "jbuilder/jbuilder_template"
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.extract! blog_post, :id, :body
   json.author do
-    name = blog_post.author_name.split(nil, 2)
-    json.first_name name[0]
-    json.last_name  name[1]
+    first_name, last_name = blog_post.author_name.split(nil, 2)
+    json.first_name first_name
+    json.last_name last_name
   end
 JBUILDER
 
@@ -337,5 +337,17 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
 
     assert_equal Rails.cache.inspect[/entries=(\d+)/, 1], "0"
+  end
+
+  test "invokes templates via params via set!" do
+    @post = BLOG_POST_COLLECTION.first
+
+    result = jbuild(<<-JBUILDER)
+      json.post @post, partial: "blog_post", as: :blog_post
+    JBUILDER
+
+    assert_equal 1, result["post"]["id"]
+    assert_equal "post body 1", result["post"]["body"]
+    assert_equal "David", result["post"]["author"]["first_name"]
   end
 end

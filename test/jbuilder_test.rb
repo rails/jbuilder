@@ -13,9 +13,7 @@ class NonEnumerable
     @collection = collection
   end
 
-  def map(&block)
-    @collection.map(&block)
-  end
+  delegate :map, :count, to: :@collection
 end
 
 class VeryBasicWrapper < BasicObject

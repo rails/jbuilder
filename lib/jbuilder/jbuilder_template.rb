@@ -35,16 +35,6 @@ class JbuilderTemplate < Jbuilder
     _render_partial_with_options options
   end
 
-  def array!(collection = [], *attributes)
-    options = attributes.extract_options!
-
-    if options.key?(:partial)
-      partial! options[:partial], options.merge(collection: collection)
-    else
-      super
-    end
-  end
-
   # Caches the json constructed within the block passed. Has the same signature as the `cache` helper
   # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
   #
@@ -78,7 +68,34 @@ class JbuilderTemplate < Jbuilder
     condition ? cache!(*args, &::Proc.new) : yield
   end
 
-  protected
+  def array!(collection = [], *attributes)
+    options = attributes.extract_options!
+
+    if options.key?(:partial)
+      partial! options[:partial], options.merge(collection: collection)
+    else
+      super
+    end
+  end
+
+  def set!(name, object = BLANK, *args)
+    options = args.first
+
+    return super unless _partial_options?(options)
+
+    value = if object.nil?
+      []
+    elsif _is_collection?(object)
+      _scope{ _render_partial_with_options options.merge(collection: object) }
+    else
+      locals = ::Hash[options[:as], object]
+      _scope{ _render_partial options.merge(locals: locals) }
+    end
+
+    super name, value
+  end
+
+  private
 
   def _render_partial_with_options(options)
     options.reverse_merge! locals: {}
@@ -111,8 +128,6 @@ class JbuilderTemplate < Jbuilder
     ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
   end
 
-  private
-
   def _fragment_name_with_digest(key, options)
     if @context.respond_to?(:cache_fragment_name)
       # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
@@ -126,10 +141,8 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
-  def _mapable_arguments?(value, *args)
-    return true if super
-    options = args.last
-    ::Hash === options && options.key?(:as)
+  def _partial_options?(options)
+    ::Hash === options && options.key?(:as) && options.key?(:partial)
   end
 end
 
