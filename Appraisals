@@ -30,3 +30,8 @@ appraise "rails-4-2" do
   gem "railties",   "~> 4.2.0"
   gem "actionpack", "~> 4.2.0"
 end
+
+appraise "rails-edge" do
+  gem "rails", github: "rails/rails"
+  gem "arel", github: "rails/arel"
+end

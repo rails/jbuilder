@@ -13,6 +13,7 @@ class Jbuilder
         ActiveSupport.on_load :action_controller do
           include ActionView::Rendering
           include ActionController::Helpers
+          include ActionController::ImplicitRender
         end
       end
     end
