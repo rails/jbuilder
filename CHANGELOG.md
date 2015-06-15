@@ -1,5 +1,14 @@
 # Changelog
 
+2.3.0
+-----
+
+* [Add new in-place partial invocation support](https://github.com/rails/jbuilder/commit/1feda7ee605c136e59fb4de970f4674de518e6de)
+* [Add implicit partial rendering for AM::Models](https://github.com/rails/jbuilder/commit/4d5bf7d0ea92765adb7be36834e84f9855a061df)
+* [Generate API controller if Rails API option is enabled](https://github.com/rails/jbuilder/commit/db68f6bd327cf42b47ef22d455fb5721a8c2cf5f)
+* [JBuilder's templates have less priority than app templates](https://github.com/rails/jbuilder/commit/7c1a5f25603ec1f4e51fba3dbba9db23726a5d69)
+* [Add AC::Helpers module to jbuilder for api only apps](https://github.com/rails/jbuilder/commit/7cf1d1eb7d125caf38309b5427952030011c1aa0)
+
 2.2.16
 ------
 
