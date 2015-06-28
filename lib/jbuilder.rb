@@ -194,6 +194,25 @@ class Jbuilder
     merge! array
   end
 
+  # Works identically as #array!, but allows you to use index in the block.
+  #
+  # Example:
+  #
+  #   json.array_with_index!(@people) do |person, index|
+  #     json.index index
+  #     json.name person.name
+  #     json.age calculate_age(person.birthday)
+  #   end
+  #
+  #   [ { "index": 0, "name": David", "age": 32 }, { "index": 1, "name": Jamie", "age": 31 } ]
+  def array_with_index!(collection = [], *attributes)
+    if collection && ::Kernel.block_given?
+      merge! _map_collection_with_index(collection, &::Proc.new)
+    else
+      array!(collection, *attributes)
+    end
+  end
+
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
   #
   # Example:
@@ -295,6 +314,13 @@ class Jbuilder
   def _map_collection(collection)
     collection.map do |element|
       _scope{ yield element }
+    end - [BLANK]
+  end
+
+  def _map_collection_with_index(collection)
+    index = -1
+    collection.map do |element|
+      _scope{ yield(element, index += 1) }
     end - [BLANK]
   end
 

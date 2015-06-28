@@ -418,6 +418,20 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', result.second['content']
   end
 
+  test 'it allows using next in array_with_index block to skip value' do
+    comments = [ Comment.new('hello'), Comment.new('skip'), Comment.new('world') ]
+    result = jbuild do |json|
+      json.array_with_index! comments do |comment, index|
+        next if index == 1
+        json.content comment.content
+      end
+    end
+
+    assert_equal 2, result.length
+    assert_equal 'hello', result.first['content']
+    assert_equal 'world', result.second['content']
+  end
+
   test 'extract attributes directly from array' do
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
@@ -441,6 +455,25 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal [], result
+  end
+
+  test 'index available inside #array_with_index! block' do
+    data = [ { :department => 'QA', :names => ['John', 'David'] } ]
+
+    result = jbuild do |json|
+      json.array! data do |object|
+        json.department object[:department]
+        json.names do
+          json.array_with_index! object[:names] do |name, index|
+            json.index index
+            json.name name
+          end
+        end
+      end
+    end
+
+    assert_equal 0, result[0]['names'][0]['index']
+    assert_equal 1, result[0]['names'][1]['index']
   end
 
   test 'dynamically set a key/value' do
