@@ -42,7 +42,7 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
-  # Conditionally catches the json depending in the condition given as first parameter. Has the same
+  # Conditionally caches the json depending in the condition given as first parameter. Has the same
   # signature as the `cache` helper method in `ActionView::Helpers::CacheHelper` and so can be used in
   # the same way.
   #
