@@ -3,6 +3,7 @@ require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'multi_json'
+require 'ostruct'
 
 class Jbuilder
   @@key_formatter = nil
