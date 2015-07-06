@@ -1,5 +1,10 @@
 # Changelog
 
+2.3.1
+-----
+
+* [Explicitly require ostruct to prevent NameError](https://github.com/rails/jbuilder/pull/281)
+
 2.3.0
 -----
 
