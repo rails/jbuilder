@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gem "rake"
 gem "mocha", :require => false
 gem "appraisal"
+gem "pry"
 gem "rails", :github => "rails/rails"
 gem "arel", :github => "rails/arel"
 
