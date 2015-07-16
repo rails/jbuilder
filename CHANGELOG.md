@@ -185,7 +185,7 @@
 
 1.2.1
 -----
-* [Added explicit dependency for MultiJson](https://github.com/rails/jbuilder/commit/4d58eacb6cd613679fb243484ff73a79bbbff2d2
+* [Added explicit dependency for MultiJson](https://github.com/rails/jbuilder/commit/4d58eacb6cd613679fb243484ff73a79bbbff2d2)
 
 1.2.0
 -----
