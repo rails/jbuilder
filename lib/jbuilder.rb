@@ -275,7 +275,9 @@ class Jbuilder
     elsif ::Array === current_value && ::Array === updates
       current_value + updates
     elsif ::Hash === current_value && ::Hash === updates
-      current_value.merge(updates)
+      current_value.merge(updates) do |key, sub_current_value, sub_updates|
+        _merge_values(sub_current_value, sub_updates)
+      end
     else
       raise MergeError.build(current_value, updates)
     end

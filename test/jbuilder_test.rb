@@ -159,6 +159,22 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['author']['age']
   end
 
+  test 'inner blocks merge arrays' do
+    result = jbuild do |json|
+      json.inner { json.foo [1, 2] }
+      json.inner { json.foo [3, 4] }
+    end
+    assert_equal [1, 2, 3, 4], result['inner']['foo']
+  end
+
+  test 'inner blocks merge hashes' do
+    result = jbuild do |json|
+      json.inner { json.foo { json.bar 1 } }
+      json.inner { json.foo { json.baz 2 } }
+    end
+    assert_equal({ 'bar' => 1, 'baz' => 2 }, result['inner']['foo'])
+  end
+
   test 'support merge! method' do
     result = jbuild do |json|
       json.merge! 'foo' => 'bar'
