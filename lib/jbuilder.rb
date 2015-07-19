@@ -63,9 +63,9 @@ class Jbuilder
 
   def method_missing(*args)
     if ::Kernel.block_given?
-      set! *args, &::Proc.new
+      set!(*args, &::Proc.new)
     else
-      set! *args
+      set!(*args)
     end
   end
 

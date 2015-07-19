@@ -11,14 +11,14 @@ class JbuilderTemplate < Jbuilder
 
   def initialize(context, *args)
     @context = context
-    super *args
+    super(*args)
   end
 
   def partial!(*args)
     if args.one? && _is_active_model?(args.first)
       _render_active_model_partial args.first
     else
-      _render_explicit_partial *args
+      _render_explicit_partial(*args)
     end
   end
 
