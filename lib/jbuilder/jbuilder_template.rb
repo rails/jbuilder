@@ -170,7 +170,11 @@ end
 
 class JbuilderHandler
   cattr_accessor :default_format
-  self.default_format = Mime::JSON
+  if Rails::VERSION::MAJOR >= 5
+    self.default_format = Mime::Type[:JSON]
+  else
+     self.default_format = Mime::JSON
+  end
 
   def self.call(template)
     # this juggling is required to keep line numbers right in the error

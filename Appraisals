@@ -38,6 +38,9 @@ appraise "rails-4-2" do
 end
 
 appraise "rails-edge" do
-  gem "rails", github: "rails/rails"
-  gem "arel", github: "rails/arel"
+  gem "rails",            github: "rails/rails"
+  gem "arel",             github: "rails/arel"
+  gem "rack",             github: "rack/rack"
+  gem "sprockets",        github: "rails/sprockets"
+  gem 'sprockets-rails', "3.0.0.beta2"
 end
