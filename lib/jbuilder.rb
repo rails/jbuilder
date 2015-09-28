@@ -220,6 +220,14 @@ class Jbuilder
     end
   end
 
+  def extract_without_nil!(object, *attributes)
+    if ::Hash === object
+      _extract_hash_values(object, attributes, false)
+    else
+      _extract_method_values(object, attributes, false)
+    end
+  end
+
   def call(object, *attributes)
     if ::Kernel.block_given?
       array! object, &::Proc.new
@@ -252,12 +260,12 @@ class Jbuilder
 
   private
 
-  def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.fetch(key) }
+  def _extract_hash_values(object, attributes, set_if_nil = true)
+    attributes.each{ |key| _set_value key, object.fetch(key), set_if_nil }
   end
 
-  def _extract_method_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.public_send(key) }
+  def _extract_method_values(object, attributes, set_if_nil = true)
+    attributes.each{ |key| _set_value key, object.public_send(key), set_if_nil }
   end
 
   def _merge_block(key)
@@ -285,12 +293,12 @@ class Jbuilder
     @key_formatter ? @key_formatter.format(key) : key.to_s
   end
 
-  def _set_value(key, value)
+  def _set_value(key, value, set_if_nil)
     raise NullError.build(key) if @attributes.nil?
     raise ArrayError.build(key) if ::Array === @attributes
     return if @ignore_nil && value.nil? or _blank?(value)
     @attributes = {} if _blank?
-    @attributes[_key(key)] = value
+    @attributes[_key(key)] = value if set_if_nil || value
   end
 
   def _map_collection(collection)
