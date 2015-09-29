@@ -8,5 +8,6 @@ gem "appraisal"
 gem "pry"
 gem "rails", :github => "rails/rails"
 gem "arel", :github => "rails/arel"
+gem "rack", :github => "rack/rack"
 
 gemspec :path => "../"
