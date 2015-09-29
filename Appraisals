@@ -38,6 +38,7 @@ appraise "rails-4-2" do
 end
 
 appraise "rails-edge" do
-  gem "rails", github: "rails/rails"
-  gem "arel", github: "rails/arel"
+  gem "rails",  ">= 5.0.0.alpha", github: "rails/rails"
+  gem "arel",   ">= 7.0.0.alpha", github: "rails/arel"
+  gem "rack",   ">= 2.0.0.alpha", github: "rack/rack"
 end
