@@ -1,5 +1,10 @@
 # Changelog
 
+2.3.2
+-----
+
+* [Remove Mime Types deprecation message](https://github.com/rails/jbuilder/commit/5ba4e4ac654cc8388619538f576fe234659b84ec)
+
 2.3.1
 -----
 
