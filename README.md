@@ -196,6 +196,15 @@ json.author do
 end
 ```
 
+To prevent Jbuilder from including null values in the output, you can use the `ignore_nil!` method:
+
+```ruby
+json.ignore_nil!
+json.foo nil
+json.bar "bar"
+# => { "bar": "bar" }
+```
+
 Fragment caching is supported, it uses `Rails.cache` and works like caching in
 HTML templates:
 
