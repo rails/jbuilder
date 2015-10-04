@@ -81,13 +81,13 @@ end
 To merge existing hash or array to current context:
 
 ``` ruby
-hash = {author: {name: "David"}}
+hash = { author: { name: "David" } }
 json.post do
-  json.tilte "Merge HOWTO"
+  json.title "Merge HOWTO"
   json.merge! hash
 end
 
-# => "post": {title: "Merge HOWTO", "author": { "name": "David" }}
+# => "post": { title: "Merge HOWTO", "author": { "name": "David" } }
 ```
 
 Top level arrays can be handled directly.  Useful for index and other collection actions.
