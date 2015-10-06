@@ -11,6 +11,8 @@ class JbuilderTemplate < Jbuilder
 
   def initialize(context, *args)
     @context = context
+    @deferred_caches = {}
+
     super(*args)
   end
 
@@ -32,11 +34,22 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={})
     if @context.controller.perform_caching
-      value = ::Rails.cache.fetch(_cache_key(key, options), options) do
-        _scope { yield self }
+      token = "jbuilder-#{::SecureRandom.hex(8)}"
+      key   = _cache_key key, options
+
+      # Convert yielded block to a Proc we can call later if needed.
+      not_found = ::Proc.new
+
+      fetcher = ::Proc.new do
+        ::Rails.cache.fetch(key, options) do
+          value = _scope { not_found.call self }
+          ::MultiJson.dump value
+        end
       end
 
-      merge! value
+      @deferred_caches[token] = fetcher
+
+      merge! token => nil
     else
       yield
     end
@@ -73,6 +86,39 @@ class JbuilderTemplate < Jbuilder
     else
       super
     end
+  end
+
+  def target!
+    # Call the superclass implementation to get the output JSON as a string.
+    output = super
+
+    @deferred_caches.each do |token, fetch_block|
+      value  = fetch_block.call
+      search = "\"#{token}\":null"
+
+      if value == "{}".freeze
+        # Special case to handle empty objects: we remove the search key
+        # entirely from the output.
+        search = ::Regexp.new ',?' + ::Regexp.escape(search)
+        value  = "".freeze
+      end
+
+      if value.start_with? "[".freeze
+        # Special case to handle arrays: we actually have to replace the
+        # object with the array.
+        search = "{#{search}}"
+      end
+
+      if value.start_with? "{".freeze
+        # Remove leading and trailing braces so it'll merge seamlessly into
+        # the surrounding object.
+        value = value.slice 1...-1
+      end
+
+      output.sub! search, value
+    end
+
+    output
   end
 
   private
