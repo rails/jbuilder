@@ -391,6 +391,33 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal expected, result
   end
 
+  test 'nested jbuilder object via merge!' do
+    to_nest = Jbuilder.new{ |json| json.nested 'value' }
+
+    result = jbuild do |json|
+      json.merge! to_nest
+    end
+
+    expected = {'nested' => 'value'}
+    assert_equal expected, result
+  end
+
+  test 'nested jbuilder object via merge! in a block' do
+    to_nest = [
+      Jbuilder.new{ |json| json.nested_one '1st' },
+      Jbuilder.new{ |json| json.nested_two '2nd' }
+    ]
+
+    result = jbuild do |json|
+      json.nested to_nest do |builder|
+        json.merge! builder
+      end
+    end
+
+    expected = {'nested' => [{'nested_one' => '1st'}, {'nested_two' => '2nd'}]}
+    assert_equal expected, result
+  end
+
   test 'top-level array' do
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 

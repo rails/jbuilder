@@ -268,7 +268,9 @@ class Jbuilder
   end
 
   def _merge_values(current_value, updates)
-    if _blank?(updates)
+    if ::Jbuilder === updates
+      ::Array === current_value ? current_value + updates.attributes! : updates.attributes!
+    elsif _blank?(updates)
       current_value
     elsif _blank?(current_value) || updates.nil?
       updates
