@@ -418,6 +418,20 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal expected, result
   end
 
+  test 'nested jbuilder object via array!' do
+    to_nest = [
+      Jbuilder.new{ |json| json.nested_one '1st' },
+      Jbuilder.new{ |json| json.nested_two '2nd' }
+    ]
+
+    result = jbuild do |json|
+      json.array! to_nest
+    end
+
+    expected = [{'nested_one' => '1st'}, {'nested_two' => '2nd'}]
+    assert_equal expected, result
+  end
+
   test 'top-level array' do
     comments = [ Comment.new('hello', 1), Comment.new('world', 2) ]
 
