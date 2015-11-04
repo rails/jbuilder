@@ -288,7 +288,7 @@ class Jbuilder
   end
 
   def _extract_method_values_if_present(object, attributes)
-    attributes.each{ |key| _set_value key, object.try(key) }
+    attributes.each{ |key| _set_value key, object.public_send(key) if object.respond_to?(key) }
   end
 
   def _merge_block(key)
