@@ -220,6 +220,29 @@ class Jbuilder
     end
   end
 
+  # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
+  # Return nil rather than raise error if attributes or hash elements are undefined.
+  #
+  # Example:
+  #
+  #   @person = Struct.new(:name, :age).new('David', 32)
+  #
+  #   or you can utilize a Hash
+  #
+  #   @person = { name: 'David', age: 32 }
+  #
+  #   json.soft_extract! @person, :name, :age, :unknown
+  #
+  #   { "name": "David", "age": 32, "unknown": nil }, { "name": "Jamie", "age": 31, "unknown": nil }
+  #
+  def soft_extract!(object, *attributes)
+    if ::Hash === object
+      _extract_hash_values_if_present(object, attributes)
+    else
+      _extract_method_values_if_present(object, attributes)
+    end
+  end
+
   def call(object, *attributes)
     if ::Kernel.block_given?
       array! object, &::Proc.new
@@ -258,6 +281,14 @@ class Jbuilder
 
   def _extract_method_values(object, attributes)
     attributes.each{ |key| _set_value key, object.public_send(key) }
+  end
+
+  def _extract_hash_values_if_present(object, attributes)
+    attributes.each{ |key| _set_value key, object.fetch(key, nil) }
+  end
+
+  def _extract_method_values_if_present(object, attributes)
+    attributes.each{ |key| _set_value key, object.try(key) }
   end
 
   def _merge_block(key)

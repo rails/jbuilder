@@ -99,6 +99,18 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['age']
   end
 
+  test 'soft extraction from object' do
+    person = Struct.new(:name, :age).new('David', 32)
+
+    result = jbuild do |json|
+      json.soft_extract! person, :name, :age, :unknown_method
+    end
+
+    assert_equal 'David', result['name']
+    assert_equal 32, result['age']
+    assert_equal nil, result['unknown_method']
+  end
+
   test 'extracting from object using call style for 1.9' do
     person = Struct.new(:name, :age).new('David', 32)
 
@@ -119,6 +131,18 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal 'Jim', result['name']
     assert_equal 34, result['age']
+  end
+
+  test 'soft extracting from hash' do
+    person = {:name => 'Jim', :age => 34}
+
+    result = jbuild do |json|
+      json.soft_extract! person, :name, :age, :unknown_method
+    end
+
+    assert_equal 'Jim', result['name']
+    assert_equal 34, result['age']
+    assert_equal nil, result['unknown_method']
   end
 
   test 'nesting single child with block' do

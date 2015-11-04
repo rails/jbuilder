@@ -196,6 +196,12 @@ json.author do
 end
 ```
 
+If you are expecting unknown attributes of object return null, use the `soft_extract!` method.
+``` ruby
+json.soft_extract! @post, :id, :title, :unknown_attr
+# => { "id" : 1, "title": "bar", "unknown_attr": null }
+```
+
 To prevent Jbuilder from including null values in the output, you can use the `ignore_nil!` method:
 
 ```ruby
