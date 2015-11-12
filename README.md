@@ -260,7 +260,7 @@ MultiJson.use :yajl
 
 ## Contributing to Jbuilder
 
-Jbuilder is work of many contributors. You're encouraged to submit pull requests, propose
+Jbuilder is the work of many contributors. You're encouraged to submit pull requests, propose
 features and discuss issues.
 
 See [CONTRIBUTING](CONTRIBUTING.md).
