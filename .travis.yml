@@ -3,6 +3,9 @@ language: ruby
 sudo: false
 cache: bundler
 
+before_script:
+  - rvm get master
+
 rvm:
   - 1.9
   - 2.0
