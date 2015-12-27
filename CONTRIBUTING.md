@@ -1,10 +1,15 @@
 Contributing to Jbuilder
 =====================
 
-[![Build Status](https://travis-ci.org/rails/jbuilder.svg?branch=master)]()
-[![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)]()
-[![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)]()
-[![Dependencies Status](http://img.shields.io/gemnasium/rails/jbuilder.svg)]()
+[![Build Status](https://api.travis-ci.org/rails/jbuilder.svg?branch=master)][travis]
+[![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)][gem]
+[![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)][codeclimate]
+[![Dependencies Status](http://img.shields.io/gemnasium/rails/jbuilder.svg)][gemnasium]
+
+[travis]: https://travis-ci.org/rails/jbuilder
+[gem]: https://rubygems.org/gems/jbuilder
+[codeclimate]: https://codeclimate.com/github/rails/jbuilder
+[gemnasium]: https://gemnasium.com/rails/jbuilder
 
 Jbuilder is work of [many contributors](https://github.com/rails/jbuilder/graphs/contributors). You're encouraged to submit [pull requests](https://github.com/rails/jbuilder/pulls), [propose features and discuss issues](https://github.com/rails/jbuilder/issues).
 
