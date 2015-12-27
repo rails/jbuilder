@@ -3,15 +3,12 @@ language: ruby
 sudo: false
 cache: bundler
 
-before_script:
-  - rvm get master
-
 rvm:
   - 1.9
   - 2.0
   - 2.1
-  - 2.2
-  - 2.3
+  - 2.2.4
+  - 2.3.0
   - ruby-head
   - jruby-19mode
   - rbx
@@ -30,7 +27,6 @@ matrix:
     - rvm: jruby-19mode
     - rvm: rbx
     - rvm: ruby-head
-    - rvm: 2.3
   fast_finish: true
   exclude:
     - rvm: 1.9
