@@ -37,8 +37,8 @@ appraise "rails-4-2" do
   gem "activemodel", "~> 4.2.0"
 end
 
-appraise "rails-edge" do
-  gem "rails",  ">= 5.0.0.alpha", github: "rails/rails"
-  gem "arel",   ">= 7.0.0.alpha", github: "rails/arel"
-  gem "rack",   ">= 2.0.0.alpha", github: "rack/rack"
+appraise "rails-5-0" do
+  gem "railties", ">= 5.0.0.beta1", "< 5.1"
+  gem "actionpack", ">= 5.0.0.beta1", "< 5.1"
+  gem "activemodel", ">= 5.0.0.beta1", "< 5.1"
 end
