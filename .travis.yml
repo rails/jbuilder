@@ -27,6 +27,7 @@ matrix:
     - rvm: jruby-19mode
     - rvm: rbx
     - rvm: ruby-head
+    - rvm: 2.3
   fast_finish: true
   exclude:
     - rvm: 1.9
