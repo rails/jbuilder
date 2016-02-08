@@ -75,7 +75,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def <%= "#{singular_table_name}_params" %>
       <%- if attributes_names.empty? -%>
-      params[<%= ":#{singular_table_name}" %>]
+      params.fetch(<%= ":#{singular_table_name}" %>, {})
       <%- else -%>
       params.require(<%= ":#{singular_table_name}" %>).permit(<%= attributes_names.map { |name| ":#{name}" }.join(', ') %>)
       <%- end -%>
