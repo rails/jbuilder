@@ -1,5 +1,10 @@
 # Changelog
 
+2.4.1
+-----
+
+* [Fix controller generators to be Rails 5 compatible](https://github.com/rails/jbuilder/commit/2dc6203c5c4a98701d5b64c2a5200835a48bb533)
+
 2.4.0
 -----
 
