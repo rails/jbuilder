@@ -6,8 +6,8 @@ gem "rake"
 gem "mocha", :require => false
 gem "appraisal"
 gem "pry"
-gem "railties", ">= 5.0.0.beta1", "< 5.1"
-gem "actionpack", ">= 5.0.0.beta1", "< 5.1"
-gem "activemodel", ">= 5.0.0.beta1", "< 5.1"
+gem "railties", ">= 5.0.0.beta2", "< 5.1"
+gem "actionpack", ">= 5.0.0.beta2", "< 5.1"
+gem "activemodel", ">= 5.0.0.beta2", "< 5.1"
 
 gemspec :path => "../"
