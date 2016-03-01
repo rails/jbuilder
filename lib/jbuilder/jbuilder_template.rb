@@ -122,7 +122,8 @@ class JbuilderTemplate < Jbuilder
   end
 
   def _cache_key(key, options)
-    key = _fragment_name_with_digest(key, options)
+    name_options = options.slice(:skip_digest, :virtual_path)
+    key = _fragment_name_with_digest(key, name_options)
 
     if @context.respond_to?(:fragment_cache_key)
       key = @context.fragment_cache_key(key)
