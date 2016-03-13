@@ -11,7 +11,6 @@ class Jbuilder
 
       if app.config.respond_to?(:api_only) && app.config.api_only
         ActiveSupport.on_load :action_controller do
-          include ActionView::Rendering
           include ActionController::Helpers
           include ActionController::ImplicitRender
         end
