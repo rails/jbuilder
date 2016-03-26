@@ -168,7 +168,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 
 # or
 
-json.comments @post.comments, partial: 'comment/comment', as: :comment
+json.comments @post.comments, partial: 'comments/comment', as: :comment
 ```
 
 You can pass any objects into partial templates with or without `:locals` option.
