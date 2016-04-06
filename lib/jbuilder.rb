@@ -275,7 +275,7 @@ class Jbuilder
     elsif ::Array === updates
       ::Array === current_value ? current_value + updates : updates
     elsif ::Hash === current_value
-      current_value.merge(updates)
+      current_value.deep_merge(updates)
     else
       raise "Can't merge #{updates.inspect} with #{current_value.inspect}"
     end
