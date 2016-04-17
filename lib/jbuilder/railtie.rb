@@ -10,8 +10,13 @@ class Jbuilder
       end
 
       if app.config.respond_to?(:api_only) && app.config.api_only
+        module ::ActionController
+          module ApiRendering
+            include ActionView::Rendering
+          end
+        end
+
         ActiveSupport.on_load :action_controller do
-          include ActionView::Rendering
           include ActionController::Helpers
           include ActionController::ImplicitRender
         end
