@@ -9,7 +9,7 @@ class Jbuilder
         require 'jbuilder/dependency_tracker'
       end
 
-      if app.config.respond_to?(:api_only) && app.config.api_only
+      if Rails::VERSION::MAJOR >= 5
         module ::ActionController
           module ApiRendering
             include ActionView::Rendering
@@ -17,8 +17,10 @@ class Jbuilder
         end
 
         ActiveSupport.on_load :action_controller do
-          include ActionController::Helpers
-          include ActionController::ImplicitRender
+          if self == ActionController::API
+            include ActionController::Helpers
+            include ActionController::ImplicitRender
+          end
         end
       end
     end
