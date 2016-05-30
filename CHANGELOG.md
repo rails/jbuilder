@@ -1,5 +1,10 @@
 # Changelog
 
+2.5.0
+-----
+
+* [Rails 5 compatibility](https://github.com/rails/jbuilder/commit/64c510ec69d9e63b73ffd5942e802d21a7d14701)
+
 2.4.1
 -----
 
