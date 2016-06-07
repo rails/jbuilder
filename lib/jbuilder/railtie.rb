@@ -3,7 +3,7 @@ require 'jbuilder/jbuilder_template'
 
 class Jbuilder
   class Railtie < ::Rails::Railtie
-    initializer :jbuilder do |app|
+    initializer :jbuilder do
       ActiveSupport.on_load :action_view do
         ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
         require 'jbuilder/dependency_tracker'
