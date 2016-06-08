@@ -104,8 +104,12 @@ class JbuilderTemplate < Jbuilder
 
   def _cache_key(key, options)
     key = _fragment_name_with_digest(key, options)
-    key = url_for(key).split('://', 2).last if ::Hash === key
-    ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
+    if @context.respond_to?(:fragment_cache_key)
+      @context.fragment_cache_key(key)
+    else
+      key = url_for(key).split('://', 2).last if ::Hash === key
+      ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
+    end
   end
 
   def _fragment_name_with_digest(key, options)
