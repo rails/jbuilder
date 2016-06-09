@@ -32,7 +32,7 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={})
     if @context.controller.perform_caching
-      value = ::Rails.cache.fetch(_cache_key(key, options), options) do
+      value = _cache_fragment_for(key, options) do
         _scope { yield self }
       end
 
@@ -100,6 +100,25 @@ class JbuilderTemplate < Jbuilder
   def _render_partial(options)
     options[:locals].merge! json: self
     @context.render options
+  end
+
+  def _cache_fragment_for(key, options, &block)
+    key = _cache_key(key, options)
+    _read_fragment_cache(key, options) || _write_fragment_cache(key, options, &block)
+  end
+
+  def _read_fragment_cache(key, options = nil)
+    @context.controller.instrument_fragment_cache :read_fragment, key do
+      ::Rails.cache.read(key, options)
+    end
+  end
+
+  def _write_fragment_cache(key, options = nil)
+    @context.controller.instrument_fragment_cache :write_fragment, key do
+      yield.tap do |value|
+        ::Rails.cache.write(key, value, options)
+      end
+    end
   end
 
   def _cache_key(key, options)
