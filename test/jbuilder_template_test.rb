@@ -332,6 +332,35 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
+  test "fragment caching uses fragment_cache_key" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    @context.expects(:fragment_cache_key).with("cachekey")
+
+    jbuild <<-JBUILDER
+      json.cache! "cachekey" do
+        json.name "Cache"
+      end
+    JBUILDER
+  end
+
+  test "fragment caching instrumentation" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    payloads = {}
+    ActiveSupport::Notifications.subscribe("read_fragment.action_controller") { |*args| payloads[:read_fragment] = args.last }
+    ActiveSupport::Notifications.subscribe("write_fragment.action_controller") { |*args| payloads[:write_fragment] = args.last }
+
+    jbuild <<-JBUILDER
+      json.cache! "cachekey" do
+        json.name "Cache"
+      end
+    JBUILDER
+
+    assert_equal "jbuilder/cachekey", payloads[:read_fragment][:key]
+    assert_equal "jbuilder/cachekey", payloads[:write_fragment][:key]
+  end
+
   test "current cache digest option accepts options" do
     undef_context_methods :fragment_name_with_digest
 

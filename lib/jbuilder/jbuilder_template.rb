@@ -32,7 +32,7 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={})
     if @context.controller.perform_caching
-      value = ::Rails.cache.fetch(_cache_key(key, options), options) do
+      value = _cache_fragment_for(key, options) do
         _scope { yield self }
       end
 
@@ -102,9 +102,34 @@ class JbuilderTemplate < Jbuilder
     @context.render options
   end
 
+  def _cache_fragment_for(key, options, &block)
+    key = _cache_key(key, options)
+    _read_fragment_cache(key, options) || _write_fragment_cache(key, options, &block)
+  end
+
+  def _read_fragment_cache(key, options = nil)
+    @context.controller.instrument_fragment_cache :read_fragment, key do
+      ::Rails.cache.read(key, options)
+    end
+  end
+
+  def _write_fragment_cache(key, options = nil)
+    @context.controller.instrument_fragment_cache :write_fragment, key do
+      yield.tap do |value|
+        ::Rails.cache.write(key, value, options)
+      end
+    end
+  end
+
   def _cache_key(key, options)
     key = _fragment_name_with_digest(key, options)
-    key = url_for(key).split('://', 2).last if ::Hash === key
+
+    if @context.respond_to?(:fragment_cache_key)
+      key = @context.fragment_cache_key(key)
+    else
+      key = url_for(key).split('://', 2).last if ::Hash === key
+    end
+
     ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
   end
 
