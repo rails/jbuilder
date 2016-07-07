@@ -64,7 +64,7 @@ json.set! :author do
   json.set! :name, 'David'
 end
 
-# => "author": { "name": "David" }
+# => {"author": { "name": "David" }}
 ```
 
 Top level arrays can be handled directly.  Useful for index and other collection actions.
