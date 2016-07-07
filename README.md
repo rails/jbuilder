@@ -6,7 +6,7 @@ generation process is fraught with conditionals and loops. Here's a simple
 example:
 
 ``` ruby
-# app/views/message/show.json.jbuilder
+# app/views/messages/show.json.jbuilder
 
 json.content format_content(@message.content)
 json.(@message, :created_at, :updated_at)
