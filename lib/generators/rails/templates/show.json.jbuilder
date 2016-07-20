@@ -1,1 +1,1 @@
-json.extract! @<%= singular_table_name %>, <%= attributes_list_with_timestamps %>
+json.partial! "<%= plural_table_name %>/<%= singular_table_name %>", <%= singular_table_name %>: @<%= singular_table_name %>
