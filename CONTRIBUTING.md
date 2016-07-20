@@ -2,9 +2,9 @@ Contributing to Jbuilder
 =====================
 
 [![Build Status](https://api.travis-ci.org/rails/jbuilder.svg?branch=master)][travis]
-[![Gem Version](http://img.shields.io/gem/v/jbuilder.svg)][gem]
-[![Code Climate](http://img.shields.io/codeclimate/github/rails/jbuilder.svg)][codeclimate]
-[![Dependencies Status](http://img.shields.io/gemnasium/rails/jbuilder.svg)][gemnasium]
+[![Gem Version](https://badge.fury.io/rb/jbuilder.svg)][gem]
+[![Code Climate](https://codeclimate.com/github/rails/jbuilder/badges/gpa.svg)][codeclimate]
+[![Dependencies Status](https://gemnasium.com/rails/jbuilder.svg)][gemnasium]
 
 [travis]: https://travis-ci.org/rails/jbuilder
 [gem]: https://rubygems.org/gems/jbuilder
