@@ -374,6 +374,18 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
+  test "fragment caching accepts expires_in option" do
+    undef_context_methods :fragment_name_with_digest
+
+    @context.expects(:cache_fragment_name).with("cachekey", {})
+
+    jbuild <<-JBUILDER
+      json.cache! "cachekey", expires_in: 1.minute do
+        json.name "Cache"
+      end
+    JBUILDER
+  end
+
   test "does not perform caching when controller.perform_caching is false" do
     controller.perform_caching = false
 
