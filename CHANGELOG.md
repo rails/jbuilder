@@ -1,5 +1,11 @@
 # Changelog
 
+2.6.0
+-----
+
+* [Rails 5 cache! with expire support](https://github.com/rails/jbuilder/commit/d61e3354563863731bc1f358f495b1dbb7ae9d32)
+* [Generated view DRYed by using model partial](https://github.com/rails/jbuilder/commit/83256f4d7e9211c9dc47972feaed7fd31e4f7cac)
+
 2.5.0
 -----
 
