@@ -20,6 +20,7 @@ module Rails
           filename = filename_with_extensions(view)
           template filename, File.join('app/views', controller_file_path, filename)
         end
+        template filename_with_extensions('partial'), File.join('app/views', controller_file_path, filename_with_extensions("_#{singular_table_name}"))
       end
 
 

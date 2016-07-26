@@ -6,7 +6,7 @@ generation process is fraught with conditionals and loops. Here's a simple
 example:
 
 ``` ruby
-# app/views/message/show.json.jbuilder
+# app/views/messages/show.json.jbuilder
 
 json.content format_content(@message.content)
 json.(@message, :created_at, :updated_at)
@@ -64,7 +64,7 @@ json.set! :author do
   json.set! :name, 'David'
 end
 
-# => "author": { "name": "David" }
+# => {"author": { "name": "David" }}
 ```
 
 Top level arrays can be handled directly.  Useful for index and other collection actions.
@@ -168,7 +168,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 
 # or
 
-json.comments @post.comments, partial: 'comment/comment', as: :comment
+json.comments @post.comments, partial: 'comments/comment', as: :comment
 ```
 
 You can pass any objects into partial templates with or without `:locals` option.
@@ -260,7 +260,7 @@ MultiJson.use :yajl
 
 ## Contributing to Jbuilder
 
-Jbuilder is work of many contributors. You're encouraged to submit pull requests, propose
+Jbuilder is the work of many contributors. You're encouraged to submit pull requests, propose
 features and discuss issues.
 
 See [CONTRIBUTING](CONTRIBUTING.md).

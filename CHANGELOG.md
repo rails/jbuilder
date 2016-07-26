@@ -1,5 +1,26 @@
 # Changelog
 
+2.6.0
+-----
+
+* [Rails 5 cache! with expire support](https://github.com/rails/jbuilder/commit/d61e3354563863731bc1f358f495b1dbb7ae9d32)
+* [Generated view DRYed by using model partial](https://github.com/rails/jbuilder/commit/83256f4d7e9211c9dc47972feaed7fd31e4f7cac)
+
+2.5.0
+-----
+
+* [Rails 5 compatibility](https://github.com/rails/jbuilder/commit/64c510ec69d9e63b73ffd5942e802d21a7d14701)
+
+2.4.1
+-----
+
+* [Fix controller generators to be Rails 5 compatible](https://github.com/rails/jbuilder/commit/2dc6203c5c4a98701d5b64c2a5200835a48bb533)
+
+2.4.0
+-----
+
+* [Rails 5 compatibility](https://github.com/rails/jbuilder/commit/4aa2cfcc19a4634d65a28ffc75f0ac0cb8304115)
+
 2.3.2
 -----
 
@@ -32,12 +53,12 @@
 2.2.13
 ------
 
-* Several peformance optimizations: [#260](https://github.com/rails/jbuilder/pull/260) & [#261](https://github.com/rails/jbuilder/pull/261)
+* Several performance optimizations: [#260](https://github.com/rails/jbuilder/pull/260) & [#261](https://github.com/rails/jbuilder/pull/261)
 
 2.2.12
 ------
 
-* [Replace explici block calls with yield for performance](https://github.com/rails/jbuilder/commit/3184f941276ad03a071cf977133d1a32302afa47)
+* [Replace explicit block calls with yield for performance](https://github.com/rails/jbuilder/commit/3184f941276ad03a071cf977133d1a32302afa47)
 
 2.2.11
 ------
@@ -181,7 +202,7 @@
 -----
 * [Add quick collection attribute extraction](https://github.com/rails/jbuilder/commit/c2b966cf653ea4264fbb008b8cc6ce5359ebe40a)
 * [Block has priority over attributes extraction](https://github.com/rails/jbuilder/commit/77c24766362c02769d81dac000b1879a9e4d4a00)
-* [Meaningfull error messages when adding properties to null](https://github.com/rails/jbuilder/commit/e26764602e34b3772e57e730763d512e59489e3b)
+* [Meaningful error messages when adding properties to null](https://github.com/rails/jbuilder/commit/e26764602e34b3772e57e730763d512e59489e3b)
 * [Do not enforce template format, enforce handlers instead](https://github.com/rails/jbuilder/commit/72576755224b15da45e50cbea877679800ab1398)
 
 1.3.0
