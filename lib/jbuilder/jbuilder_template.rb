@@ -32,15 +32,13 @@ class JbuilderTemplate < Jbuilder
   #   json.cache! ['v1', @person], expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache!(key=nil, options={})
+  def cache!(key=nil, options={}, &block)
     if @context.controller.perform_caching
       token = "jbuilder-#{::SecureRandom.hex(8)}"
 
-      not_found = ::Proc.new
-
-      fetcher = ::Proc.new do
+      fetcher = -> do
         value = _cache_fragment_for(key, options) do
-          _scope { not_found.call self }
+          _scope { block.call self }
         end
         ::MultiJson.dump value
       end
