@@ -4,7 +4,7 @@ require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
-require "jbuilder/jbuilder_template"
+require "jbuilder"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.extract! blog_post, :id, :body
@@ -244,6 +244,28 @@ class JbuilderTemplateTest < ActionView::TestCase
     end
 
     assert_equal "bar", result["foo"]
+  end
+
+  test "cache a JSON string" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    jbuild <<-JBUILDER
+      json.cache! "cachekey" do
+        complex = ::MultiJson.dump 'message' => 'The measurement is 1" too long.'
+
+        json.complex complex
+      end
+    JBUILDER
+
+    result = jbuild(<<-JBUILDER)
+      json.cache! "cachekey" do
+        json.complex "Miss"
+      end
+    JBUILDER
+
+    expected_json = ::MultiJson.dump 'message' => 'The measurement is 1" too long.'
+
+    assert_equal expected_json, result["complex"]
   end
 
   test "fragment caching a JSON object" do
