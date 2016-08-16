@@ -114,7 +114,12 @@ class JbuilderTemplate < Jbuilder
         value = value.slice 1...-1
       end
 
-      output.sub! search, value
+      # NOTE: Doing `String#sub` or similar with a `Regexp` will make it try
+      # to do backreferencing with any backslashes found in the replacement
+      # string, this will interfere with any potential backslashes in the
+      # JSON replacement. Therefore we're using `String#[]=` which doesn't
+      # have that behavior.
+      output[search] = value
     end
 
     output
