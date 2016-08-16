@@ -7,6 +7,12 @@ class JbuilderTemplate < Jbuilder
     attr_accessor :template_lookup_options
   end
 
+  CACHE_REVISION = 2
+
+  # Passed to `ActiveSupport::Cache.expand_cache_key` so that we can expire
+  # old entries if our on-disk format changes
+  CACHE_TAG = "jbuilder-revision-#{CACHE_REVISION}".to_sym
+
   self.template_lookup_options = { handlers: [:jbuilder] }
 
   def initialize(context, *args)
@@ -181,7 +187,7 @@ class JbuilderTemplate < Jbuilder
       key = url_for(key).split('://', 2).last if ::Hash === key
     end
 
-    ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
+    ::ActiveSupport::Cache.expand_cache_key(key, CACHE_TAG)
   end
 
   def _fragment_name_with_digest(key, options)

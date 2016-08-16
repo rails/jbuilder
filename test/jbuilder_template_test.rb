@@ -379,8 +379,10 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    assert_equal "jbuilder/cachekey", payloads[:read_fragment][:key]
-    assert_equal "jbuilder/cachekey", payloads[:write_fragment][:key]
+    tag = JbuilderTemplate::CACHE_TAG
+
+    assert_equal "#{tag}/cachekey", payloads[:read_fragment][:key]
+    assert_equal "#{tag}/cachekey", payloads[:write_fragment][:key]
   end
 
   test "current cache digest option accepts options" do
