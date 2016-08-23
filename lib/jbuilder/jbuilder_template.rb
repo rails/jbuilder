@@ -7,7 +7,7 @@ class JbuilderTemplate < Jbuilder
     attr_accessor :template_lookup_options
   end
 
-  CACHE_REVISION = 2
+  CACHE_REVISION = 3
 
   # Passed to `ActiveSupport::Cache.expand_cache_key` so that we can expire
   # old entries if our on-disk format changes
