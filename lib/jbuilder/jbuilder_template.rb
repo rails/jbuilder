@@ -39,13 +39,11 @@ class JbuilderTemplate < Jbuilder
   #     json.extract! @person, :name, :age
   #   end
   def cache!(key=nil, options={}, &block)
-    default_options = {raw: true}
-
     if @context.controller.perform_caching
       token = "jbuilder-#{::SecureRandom.hex(8)}"
 
       fetcher = -> do
-        _cache_fragment_for(key, default_options.merge(options)) do
+        _cache_fragment_for(key, options) do
           value = _scope { block.call self }
 
           ::MultiJson.dump value
