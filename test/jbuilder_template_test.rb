@@ -268,6 +268,20 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal expected_json, result["complex"]
   end
 
+  test "cache a string containing UTF-8" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    # The "-" in this template and the literal in the comparison below are
+    # both in UTF-8
+    result = jbuild <<-JBUILDER
+      json.cache! "cachekey" do
+        json.encoded "a – b"
+      end
+    JBUILDER
+
+    assert_equal "a – b", result["encoded"]
+  end
+
   test "fragment caching a JSON object" do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
@@ -344,8 +358,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test "fragment caching works with current cache digests" do
     undef_context_methods :fragment_name_with_digest
 
-    @context.expects :cache_fragment_name
-    ActiveSupport::Cache.expects :expand_cache_key
+    @context.expects(:cache_fragment_name).returns("cachekey/digest")
 
     jbuild <<-JBUILDER
       json.cache! "cachekey" do
@@ -388,8 +401,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test "current cache digest option accepts options" do
     undef_context_methods :fragment_name_with_digest
 
-    @context.expects(:cache_fragment_name).with("cachekey", skip_digest: true)
-    ActiveSupport::Cache.expects :expand_cache_key
+    @context.expects(:cache_fragment_name).with("cachekey", skip_digest: true).returns("cachekey")
 
     jbuild <<-JBUILDER
       json.cache! "cachekey", skip_digest: true do
