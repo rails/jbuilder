@@ -270,14 +270,14 @@ class Jbuilder
   def _merge_values(current_value, updates)
     if _blank?(updates)
       current_value
-    elsif _blank?(current_value) || updates.nil?
+    elsif _blank?(current_value) || updates.nil? || current_value.empty? && ::Array === updates
       updates
-    elsif ::Array === updates
-      ::Array === current_value ? current_value + updates : updates
-    elsif ::Hash === current_value
+    elsif ::Array === current_value && ::Array === updates
+      current_value + updates
+    elsif ::Hash === current_value && ::Hash === updates
       current_value.merge(updates)
     else
-      raise "Can't merge #{updates.inspect} with #{current_value.inspect}"
+      raise MergeError.build(current_value, updates)
     end
   end
 
