@@ -11,8 +11,8 @@ class Jbuilder
       args.each do |name|
         @format[name] = []
       end
-      options.each do |name, paramaters|
-        @format[name] = paramaters
+      options.each do |name, parameters|
+        @format[name] = parameters
       end
     end
 
