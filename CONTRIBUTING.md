@@ -39,7 +39,8 @@ Ensure that you can build the project and run tests.
 
 ```
 bundle install
-bundle exec rake test
+appraisal install
+appraisal rake test
 ```
 
 #### Write Tests
@@ -52,7 +53,7 @@ We definitely appreciate pull requests that highlight or reproduce a problem, ev
 
 Implement your feature or bug fix.
 
-Make sure that `bundle exec rake test` completes without errors.
+Make sure that `appraisal rake test` completes without errors.
 
 #### Write Documentation
 
@@ -82,7 +83,7 @@ git push origin my-feature-branch
 
 #### Make a Pull Request
 
-Go to https://github.com/contributor/jbuilder and select your feature branch. Click the 'Pull Request' button and fill out the form. Pull requests are usually reviewed within a few days.
+Visit your forked repo and click the 'New pull request' button. Select your feature branch, fill out the form, and click the 'Create pull request' button. Pull requests are usually reviewed within a few days.
 
 #### Rebase
 
@@ -100,7 +101,7 @@ Go back to your pull request after a few minutes and see whether it passed muste
 
 #### Be Patient
 
-It's likely that your change will not be merged and that the nitpicky maintainers will ask you to do more, or fix seemingly benign problems. Hang on there!
+It's likely that your change will not be merged and that the nitpicky maintainers will ask you to do more, or fix seemingly benign problems. Hang in there!
 
 #### Thank You
 
