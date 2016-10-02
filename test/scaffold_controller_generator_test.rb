@@ -50,8 +50,8 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
         assert_match /format\.json \{ head :no_content \}/, m
       end
 
-      assert_match(/def post_params/, content)
-      assert_match(/params\.require\(:post\)\.permit\(:title, :body\)/, content)
+      assert_match /def post_params/, content
+      assert_match /params\.require\(:post\)\.permit\(:title, :body\)/, content
     end
   end
 
@@ -59,8 +59,8 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
     run_generator %w(Post)
 
     assert_file 'app/controllers/posts_controller.rb' do |content|
-      assert_match(/def post_params/, content)
-      assert_match(/params\.fetch\(:post, {}\)/, content)
+      assert_match /def post_params/, content
+      assert_match /params\.fetch\(:post, {}\)/, content
     end
   end
 end
