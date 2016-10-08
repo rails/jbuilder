@@ -603,6 +603,17 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ['name', 'dne'], result.keys
   end
 
+  test 'ignore! with block' do
+    result = jbuild do |json|
+      json.ignore! { |value| value.blank? }
+      json.name 'Bob'
+      json.list []
+      json.email ''
+      json.dne nil
+    end
+    assert_equal ['name'], result.keys
+  end
+
   test 'default ignore_nil!' do
     Jbuilder.ignore_nil
 
