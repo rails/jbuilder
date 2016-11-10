@@ -161,7 +161,7 @@ class JbuilderTemplate < Jbuilder
     elsif _is_collection?(object)
       _scope{ _render_partial_with_options options.merge(collection: object) }
     else
-      locals = ::Hash[options[:as], object]
+      locals = options[:locals].to_h.merge(options[:as].to_sym => object)
       _scope{ _render_partial options.merge(locals: locals) }
     end
 
