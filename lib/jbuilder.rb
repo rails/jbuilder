@@ -11,9 +11,10 @@ class Jbuilder
 
   def initialize(options = {})
     @attributes = {}
+    
+    @key_formatter = options.fetch(:key_formatter) { @@key_formatter ? @@key_formatter.clone : nil }
+    @ignore_nil    = options.fetch(:ignore_nil, @@ignore_nil)
 
-    @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
-    @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
     @cached_root = nil
 
     yield self if ::Kernel.block_given?
