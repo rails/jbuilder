@@ -386,6 +386,35 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
+  test "caching root structure" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    cache_miss_result = jbuild <<-JBUILDER
+      json.cache_root! "cachekey" do
+        json.name "Miss"
+      end
+    JBUILDER
+
+    cache_hit_result = jbuild <<-JBUILDER
+      json.cache_root! "cachekey" do
+        json.name "Hit"
+      end
+    JBUILDER
+
+    assert_equal cache_miss_result, cache_hit_result
+  end
+
+  test "failing to cache root after attributes have been defined" do
+    assert_raises "cache_root! can't be used after JSON structures have been defined" do
+      jbuild <<-JBUILDER
+        json.name "Kaboom"
+        json.cache_root! "cachekey" do
+          json.name "Miss"
+        end
+      JBUILDER
+    end
+  end
+
   test "does not perform caching when controller.perform_caching is false" do
     controller.perform_caching = false
 

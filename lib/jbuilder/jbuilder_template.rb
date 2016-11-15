@@ -42,6 +42,30 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
+  # Caches the json structure at the root using a string rather than the hash structure. This is considerably
+  # faster, but the drawback is that it only works, as the name hints, at the root. So you cannot
+  # use this approach to cache deeper inside the hierarchy, like in partials or such. Continue to use #cache! there.
+  #
+  # Example:
+  #
+  #   json.cache_root! @person do
+  #     json.extract! @person, :name, :age
+  #   end
+  #
+  #   # json.extra 'This will not work either, the root must be exclusive'
+  def cache_root!(key=nil, options={})
+    if @context.controller.perform_caching
+      raise "cache_root! can't be used after JSON structures have been defined" if @attributes.present?
+
+      @cached_root = _cache_fragment_for([ :root, key ], options) do
+        yield
+        target!
+      end
+    else
+      yield
+    end
+  end
+
   # Conditionally caches the json depending in the condition given as first parameter. Has the same
   # signature as the `cache` helper method in `ActionView::Helpers::CacheHelper` and so can be used in
   # the same way.
