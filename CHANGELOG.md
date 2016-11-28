@@ -1,5 +1,10 @@
 # Changelog
 
+2.6.1
+-----
+
+* [Optimize root caches with cache_root!][https://github.com/rails/jbuilder/pull/370]
+
 2.6.0
 -----
 
