@@ -405,7 +405,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   test "failing to cache root after attributes have been defined" do
-    assert_raises "cache_root! can't be used after JSON structures have been defined" do
+    assert_raises ActionView::Template::Error, "cache_root! can't be used after JSON structures have been defined" do
       jbuild <<-JBUILDER
         json.name "Kaboom"
         json.cache_root! "cachekey" do

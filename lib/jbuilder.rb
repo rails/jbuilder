@@ -249,7 +249,7 @@ class Jbuilder
 
   # Encodes the current builder as JSON.
   def target!
-    @cached_root || ::MultiJson.dump(@attributes)
+    ::MultiJson.dump(@attributes)
   end
 
   private

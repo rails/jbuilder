@@ -57,10 +57,7 @@ class JbuilderTemplate < Jbuilder
     if @context.controller.perform_caching
       raise "cache_root! can't be used after JSON structures have been defined" if @attributes.present?
 
-      @cached_root = _cache_fragment_for([ :root, key ], options) do
-        yield
-        target!
-      end
+      @cached_root = _cache_fragment_for([ :root, key ], options) { yield; target! }
     else
       yield
     end
@@ -97,6 +94,10 @@ class JbuilderTemplate < Jbuilder
     else
       super
     end
+  end
+
+  def target!
+    @cached_root || super
   end
 
   private
