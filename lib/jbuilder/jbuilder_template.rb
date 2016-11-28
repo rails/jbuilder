@@ -22,6 +22,26 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
+  def array!(collection = [], *args)
+    options = args.first
+
+    if args.one? && _partial_options?(options)
+      partial! options.merge(collection: collection)
+    else
+      super
+    end
+  end
+
+  def set!(name, object = BLANK, *args)
+    options = args.first
+
+    if args.one? && _partial_options?(options)
+      _set_inline_partial name, object, options
+    else
+      super
+    end
+  end
+
   # Caches the json constructed within the block passed. Has the same signature as the `cache` helper
   # method in `ActionView::Helpers::CacheHelper` and so can be used in the same way.
   #
@@ -74,26 +94,6 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache_if!(condition, *args)
     condition ? cache!(*args, &::Proc.new) : yield
-  end
-
-  def array!(collection = [], *args)
-    options = args.first
-
-    if args.one? && _partial_options?(options)
-      partial! options.merge(collection: collection)
-    else
-      super
-    end
-  end
-
-  def set!(name, object = BLANK, *args)
-    options = args.first
-
-    if args.one? && _partial_options?(options)
-      _set_inline_partial name, object, options
-    else
-      super
-    end
   end
 
   def target!
