@@ -11,6 +11,7 @@ class JbuilderTemplate < Jbuilder
 
   def initialize(context, *args)
     @context = context
+    @cached_root = nil
     super(*args)
   end
 
