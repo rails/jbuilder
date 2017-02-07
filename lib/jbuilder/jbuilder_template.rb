@@ -7,10 +7,18 @@ class JbuilderTemplate < Jbuilder
     attr_accessor :template_lookup_options
   end
 
+  CACHE_REVISION = 3
+
+  # Passed to `ActiveSupport::Cache.expand_cache_key` so that we can expire
+  # old entries if our on-disk format changes
+  CACHE_TAG = "jbuilder-revision-#{CACHE_REVISION}".to_sym
+
   self.template_lookup_options = { handlers: [:jbuilder] }
 
   def initialize(context, *args)
     @context = context
+    @deferred_caches = {}
+
     super(*args)
   end
 
@@ -30,13 +38,21 @@ class JbuilderTemplate < Jbuilder
   #   json.cache! ['v1', @person], expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache!(key=nil, options={})
+  def cache!(key=nil, options={}, &block)
     if @context.controller.perform_caching
-      value = _cache_fragment_for(key, options) do
-        _scope { yield self }
+      token = "jbuilder-#{::SecureRandom.hex(8)}"
+
+      fetcher = -> do
+        _cache_fragment_for(key, options) do
+          value = _scope { block.call self }
+
+          ::MultiJson.dump value
+        end
       end
 
-      merge! value
+      @deferred_caches[token] = fetcher
+
+      merge! token => nil
     else
       yield
     end
@@ -100,6 +116,44 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
+  def target!
+    # Call the superclass implementation to get the output JSON as a string.
+    output = super
+
+    @deferred_caches.each do |token, fetch_block|
+      value  = fetch_block.call
+      search = "\"#{token}\":null"
+
+      if value == "{}".freeze
+        # Special case to handle empty objects: we remove the search key
+        # entirely from the output.
+        search = ::Regexp.new ',?' + ::Regexp.escape(search)
+        value  = "".freeze
+      end
+
+      if value.start_with? "[".freeze
+        # Special case to handle arrays: we actually have to replace the
+        # object with the array.
+        search = "{#{search}}"
+      end
+
+      if value.start_with? "{".freeze
+        # Remove leading and trailing braces so it'll merge seamlessly into
+        # the surrounding object.
+        value = value.slice 1...-1
+      end
+
+      # NOTE: Doing `String#sub` or similar with a `Regexp` will make it try
+      # to do backreferencing with any backslashes found in the replacement
+      # string, this will interfere with any potential backslashes in the
+      # JSON replacement. Therefore we're using `String#[]=` which doesn't
+      # have that behavior.
+      output[search] = value
+    end
+
+    output
+  end
+
   private
 
   def _render_partial_with_options(options)
@@ -156,7 +210,7 @@ class JbuilderTemplate < Jbuilder
       key = url_for(key).split('://', 2).last if ::Hash === key
     end
 
-    ::ActiveSupport::Cache.expand_cache_key(key, :jbuilder)
+    ::ActiveSupport::Cache.expand_cache_key(key, CACHE_TAG)
   end
 
   def _fragment_name_with_digest(key, options)

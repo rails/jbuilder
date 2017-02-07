@@ -4,7 +4,7 @@ require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
-require "jbuilder/jbuilder_template"
+require "jbuilder"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.extract! blog_post, :id, :body
@@ -246,6 +246,42 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal "bar", result["foo"]
   end
 
+  test "cache a JSON string" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    jbuild <<-JBUILDER
+      json.cache! "cachekey" do
+        complex = ::MultiJson.dump 'message' => 'The measurement is 1" too long.'
+
+        json.complex complex
+      end
+    JBUILDER
+
+    result = jbuild(<<-JBUILDER)
+      json.cache! "cachekey" do
+        json.complex "Miss"
+      end
+    JBUILDER
+
+    expected_json = ::MultiJson.dump 'message' => 'The measurement is 1" too long.'
+
+    assert_equal expected_json, result["complex"]
+  end
+
+  test "cache a string containing UTF-8" do
+    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
+
+    # The "-" in this template and the literal in the comparison below are
+    # both in UTF-8
+    result = jbuild <<-JBUILDER
+      json.cache! "cachekey" do
+        json.encoded "a – b"
+      end
+    JBUILDER
+
+    assert_equal "a – b", result["encoded"]
+  end
+
   test "fragment caching a JSON object" do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
@@ -322,8 +358,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   test "fragment caching works with current cache digests" do
     undef_context_methods :fragment_name_with_digest
 
-    @context.expects :cache_fragment_name
-    ActiveSupport::Cache.expects :expand_cache_key
+    @context.expects(:cache_fragment_name).returns("cachekey/digest")
 
     jbuild <<-JBUILDER
       json.cache! "cachekey" do
@@ -357,15 +392,16 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    assert_equal "jbuilder/cachekey", payloads[:read_fragment][:key]
-    assert_equal "jbuilder/cachekey", payloads[:write_fragment][:key]
+    tag = JbuilderTemplate::CACHE_TAG
+
+    assert_equal "#{tag}/cachekey", payloads[:read_fragment][:key]
+    assert_equal "#{tag}/cachekey", payloads[:write_fragment][:key]
   end
 
   test "current cache digest option accepts options" do
     undef_context_methods :fragment_name_with_digest
 
-    @context.expects(:cache_fragment_name).with("cachekey", skip_digest: true)
-    ActiveSupport::Cache.expects :expand_cache_key
+    @context.expects(:cache_fragment_name).with("cachekey", skip_digest: true).returns("cachekey")
 
     jbuild <<-JBUILDER
       json.cache! "cachekey", skip_digest: true do
