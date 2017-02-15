@@ -170,7 +170,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 json.comments @post.comments, partial: 'comments/comment', as: :comment
 ```
 
-The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then the each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`. 
+The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`. 
 
 Be sure not to confuse the `as:` option to mean nesting of the partial. For example:
 
