@@ -307,18 +307,6 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal %w[a b c], result
   end
 
-  test "fragment caching works with previous version of cache digests" do
-    undef_context_methods :cache_fragment_name
-
-    @context.expects :fragment_name_with_digest
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.name "Cache"
-      end
-    JBUILDER
-  end
-
   test "fragment caching works with current cache digests" do
     undef_context_methods :fragment_name_with_digest
 
