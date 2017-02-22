@@ -175,8 +175,8 @@ The `as: :some_symbol` is used with partials. It will take care of mapping the p
 Be sure not to confuse the `as:` option to mean nesting of the partial. For example:
 
 ```ruby
- # Use the default `views/comments/_comment.json.jbuilder`, putting @comment as a the comment local variable
- # comment attributes are "inlined"
+ # Use the default `views/comments/_comment.json.jbuilder`, putting @comment as the comment local variable.
+ # Note, `comment` attributes are "inlined".
  json.partial! @comment, as: :comment
 ```
 
