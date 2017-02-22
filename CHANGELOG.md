@@ -1,5 +1,10 @@
 # Changelog
 
+2.6.2
+-----
+
+* Fix thor warnings
+
 2.6.1
 -----
 
