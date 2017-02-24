@@ -22,6 +22,7 @@ gemfile:
   - gemfiles/rails_4_1.gemfile
   - gemfiles/rails_4_2.gemfile
   - gemfiles/rails_5_0.gemfile
+  - gemfiles/rails_5_1.gemfile
 
 matrix:
   allow_failures:
@@ -32,14 +33,24 @@ matrix:
   exclude:
     - rvm: 1.9
       gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: 1.9
+      gemfile: gemfiles/rails_5_1.gemfile
     - rvm: 2.0
       gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: 2.0
+      gemfile: gemfiles/rails_5_1.gemfile
     - rvm: 2.1
       gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: 2.1
+      gemfile: gemfiles/rails_5_1.gemfile
     - rvm: jruby-19mode
       gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: jruby-19mode
+      gemfile: gemfiles/rails_5_1.gemfile
     - rvm: rbx
       gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: rbx
+      gemfile: gemfiles/rails_5_1.gemfile
     - rvm: 2.4.0
       gemfile: gemfiles/rails_3_0.gemfile
     - rvm: 2.4.0
