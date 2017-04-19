@@ -1,9 +1,19 @@
 # Changelog
 
+2.6.3
+-----
+
+* Support Rails 5.1
+
+2.6.2
+-----
+
+* Fix thor warnings
+
 2.6.1
 -----
 
-* [Optimize root caches with cache_root!][https://github.com/rails/jbuilder/pull/370]
+* [Optimize root caches with cache_root!](https://github.com/rails/jbuilder/pull/370)
 
 2.6.0
 -----

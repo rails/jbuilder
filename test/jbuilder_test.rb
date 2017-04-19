@@ -686,4 +686,31 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "throws MergeError when trying to merge array with non-empty hash" do
+    assert_raise Jbuilder::MergeError do
+      jbuild do |json|
+        json.name "Daniel"
+        json.merge! []
+      end
+    end
+  end
+
+  test "throws MergeError when trying to merge hash with array" do
+    assert_raise Jbuilder::MergeError do
+      jbuild do |json|
+        json.array!
+        json.merge!({})
+      end
+    end
+  end
+
+  test "throws MergeError when trying to merge invalid objects" do
+    assert_raise Jbuilder::MergeError do
+      jbuild do |json|
+        json.name "Daniel"
+        json.merge! "Nope"
+      end
+    end
+  end
 end
