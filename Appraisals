@@ -42,3 +42,9 @@ appraise "rails-5-0" do
   gem "actionpack",  "~> 5.0.0"
   gem "activemodel", "~> 5.0.0"
 end
+
+appraise "rails-5-1" do
+  gem "railties",    ">= 5.1.0.beta1", "< 5.2"
+  gem "actionpack",  ">= 5.1.0.beta1", "< 5.2"
+  gem "activemodel", ">= 5.1.0.beta1", "< 5.2"
+end
