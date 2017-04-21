@@ -32,7 +32,5 @@ class JbuilderGeneratorWithNamespaceTest < Rails::Generators::TestCase
       assert_match %r{json\.extract! api_foo, :id, :bar, :baz, :created_at, :updated_at}, content
       assert_match %r{json\.url api_foo_url\(api_foo, format: :json\)}, content
     end
-    
-
   end
 end
