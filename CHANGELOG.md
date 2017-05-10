@@ -1,5 +1,10 @@
 # Changelog
 
+2.6.4
+-----
+
+* Drop the pessimistic upper-bound restriction on Active Support and MultiJSON to prevent future gemfile resolution deadlocks *DHH*
+
 2.6.3
 -----
 
