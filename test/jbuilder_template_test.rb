@@ -145,6 +145,14 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal "goodbye", result["content"]
   end
 
+  test "inline partial! + locals via :locals option" do
+    result = jbuild(<<-JBUILDER)
+      json.where_is 6, partial: "partial", locals: { foo: "pancakes house?" }, as: "partial"
+    JBUILDER
+
+    assert_equal "pancakes house?", result["where_is"]["content"]
+  end
+
   test "partial! renders collections" do
     result = jbuild(<<-JBUILDER)
       json.partial! "blog_post", collection: BLOG_POST_COLLECTION, as: :blog_post
