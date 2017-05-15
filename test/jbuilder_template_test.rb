@@ -99,6 +99,14 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal "hello", result["content"]
   end
 
+  test "extract_without_nil!" do
+    result = jbuild(<<-JBUILDER)
+      json.extract_without_nil! nil, :itself
+    JBUILDER
+
+    assert_equal false, result.key?("itself")
+  end
+
   test "key_format! with parameter" do
     result = jbuild(<<-JBUILDER)
       json.key_format! camelize: [:lower]
