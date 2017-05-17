@@ -34,10 +34,10 @@ module Rails
         end
 
         def attributes_list_with_timestamps
-          attributes_list(attributes_names + %w(created_at updated_at))
+          attributes_list(attributes.map(&:name) + %w(created_at updated_at))
         end
 
-        def attributes_list(attributes = attributes_names)
+        def attributes_list(attributes = attributes.map(&:name))
           if self.attributes.any? {|attr| attr.name == 'password' && attr.type == :digest}
             attributes = attributes.reject {|name| %w(password password_confirmation).include? name}
           end
