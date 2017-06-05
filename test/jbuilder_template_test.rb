@@ -439,21 +439,19 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal "Chris Harris", result["name"]
   end
 
-  if Rails::VERSION::MAJOR >= 4
-    test "renders partial via set! with same name as HTML partial" do
-      partials = {
-        "_blog_post.html.erb" => "Hello!",
-        "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL
-      }
+  test "renders partial via set! with same name as HTML partial" do
+    partials = {
+      "_blog_post.html.erb" => "Hello!",
+      "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL
+    }
 
-      @post = BLOG_POST_COLLECTION.first
+    @post = BLOG_POST_COLLECTION.first
 
-      result = jbuild(<<-JBUILDER, partials: partials)
-        json.post @post, partial: "blog_post", as: :blog_post
-      JBUILDER
+    result = jbuild(<<-JBUILDER, partials: partials)
+      json.post @post, partial: "blog_post", as: :blog_post
+    JBUILDER
 
-      assert_not_nil result["post"]
-      assert_equal 1, result["post"]["id"]
-    end
+    assert_not_nil result["post"]
+    assert_equal 1, result["post"]["id"]
   end
 end

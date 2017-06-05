@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.9.3'
 
-  s.add_dependency 'activesupport', '>= 4.0.0'
+  s.add_dependency 'activesupport', '>= 4.2.0'
   s.add_dependency 'multi_json',    '>= 1.2'
 
   s.files         = `git ls-files`.split("\n")
