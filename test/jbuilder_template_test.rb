@@ -62,9 +62,9 @@ class JbuilderTemplateTest < ActionView::TestCase
     Rails.cache.clear
   end
 
-  def jbuild(source)
+  def jbuild(source, options = {})
     @rendered = []
-    partials = PARTIALS.clone
+    partials = options.fetch(:partials, PARTIALS).clone
     partials["test.json.jbuilder"] = source
     resolver = ActionView::FixtureResolver.new(partials)
     lookup_context.view_paths = [resolver]
@@ -437,5 +437,23 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal %w[id name], result.keys
     assert_equal 123, result["id"]
     assert_equal "Chris Harris", result["name"]
+  end
+
+  if Rails::VERSION::MAJOR >= 4
+    test "renders partial via set! with same name as HTML partial" do
+      partials = {
+        "_blog_post.html.erb" => "Hello!",
+        "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL
+      }
+
+      @post = BLOG_POST_COLLECTION.first
+
+      result = jbuild(<<-JBUILDER, partials: partials)
+        json.post @post, partial: "blog_post", as: :blog_post
+      JBUILDER
+
+      assert_not_nil result["post"]
+      assert_equal 1, result["post"]["id"]
+    end
   end
 end

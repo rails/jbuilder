@@ -188,7 +188,7 @@ class JbuilderTemplate < Jbuilder
       _scope{ _render_partial_with_options options.merge(collection: object) }
     else
       locals = ::Hash[options[:as], object]
-      _scope{ _render_partial options.merge(locals: locals) }
+      _scope{ _render_partial_with_options options.merge(locals: locals) }
     end
 
     set! name, value
