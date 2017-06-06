@@ -85,6 +85,19 @@ end
 # => [ { "body": "great post...", "author": { "first_name": "Joe", "last_name": "Bloe" }} ]
 ```
 
+If you want to access index inside the block, use `array_with_index!` method.
+
+``` ruby
+# @comments = @post.comments
+
+json.array_with_index! @comments do |comment, index|
+  json.index index
+  json.title comment.title
+end
+
+# => [ { "index": 0, "title": "Comment..." }, { "index": 1, "title": "Another one..." } ]
+```
+
 You can also extract attributes from array directly.
 
 ``` ruby
