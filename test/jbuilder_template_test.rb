@@ -70,7 +70,7 @@ class JbuilderTemplateTest < ActionView::TestCase
     lookup_context.view_paths = [resolver]
     template = ActionView::Template.new(source, "test", JbuilderHandler, virtual_path: "test")
     json = template.render(self, {}).strip
-    MultiJson.load(json)
+    JSON.load(json)
   end
 
   def undef_context_methods(*names)
