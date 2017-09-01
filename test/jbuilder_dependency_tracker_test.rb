@@ -53,7 +53,7 @@ class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
       assert_equal %w[path/to/partial], dependencies
     end
 
-    test 'detects partial in indirect collecton calls' do
+    test 'detects partial in indirect collection calls' do
       dependencies = track_dependencies <<-RUBY
         json.comments @post.comments, partial: 'comments/comment', as: :comment
       RUBY
