@@ -213,10 +213,8 @@ class Jbuilder
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    if ::Hash === object
-      _extract_hash_values(object, attributes)
-    else
-      _extract_method_values(object, attributes)
+    attributes.each do |key|
+      _set_value key, _extract_value(object, key)
     end
   end
 
@@ -252,12 +250,8 @@ class Jbuilder
 
   private
 
-  def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.fetch(key) }
-  end
-
-  def _extract_method_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.public_send(key) }
+  def _extract_value(object, attribute)
+    object.respond_to?(attribute) ? object.public_send(attribute) : object.fetch(attribute)
   end
 
   def _merge_block(key)
