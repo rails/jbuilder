@@ -1,4 +1,3 @@
-require 'jstreamer/jstreamer'
 require 'active_support/core_ext/array'
 
 class Jstreamer

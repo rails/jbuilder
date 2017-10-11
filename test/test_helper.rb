@@ -1,16 +1,38 @@
-require "bundler/setup"
-require "rails/version"
+# To make testing/debugging easier, test within this source tree versus an
+# installed gem
+$LOAD_PATH << File.expand_path('../lib', __FILE__)
 
-if Rails::VERSION::STRING > "4.0"
-  require "active_support/testing/autorun"
-else
-  require "test/unit"
+require 'simplecov'
+SimpleCov.start do
+  add_group 'lib', 'lib'
+  add_group 'ext', 'ext'
+  add_filter "/test"
 end
 
-require "active_support/test_case"
 
-if Rails::VERSION::STRING >= "4.1"
-  require 'minitest/reporters'
-  Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new(:only_failures => false)
+require "active_support"
+
+require 'action_view'
+require 'action_view/testing/resolvers'
+
+require 'jstreamer'
+require 'jstreamer/handler'
+require 'jstreamer/template'
+
+require File.expand_path('../../ext/actionview/buffer', __FILE__)
+require File.expand_path('../../ext/actionview/streaming_template_renderer', __FILE__)
+
+require "active_support/testing/autorun"
+require 'mocha/setup'
+
+class ActiveSupport::TestCase
+  
+  def jbuild(*args, &block)
+    ::Wankel.parse(Jstreamer.encode(*args, &block))
+  end
+  
+  def assert_json(json, &block)
+    assert_equal json, jbuild(&block)
+  end
+  
 end
-

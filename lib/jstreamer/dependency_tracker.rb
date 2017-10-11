@@ -1,4 +1,4 @@
-require 'jstreamer/jstreamer'
+require 'jstreamer'
 
 dependency_tracker = false
 

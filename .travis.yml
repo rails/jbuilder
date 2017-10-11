@@ -4,9 +4,9 @@ rvm:
   - 2.0
   - 2.1
   - 2.2
+  - 2.3
+  - 2.4
   - ruby-head
-  - jruby-19mode
-  - rbx
 
 install:
   - wget 'https://github.com/lloyd/yajl/archive/2.1.0.tar.gz'
@@ -16,15 +16,6 @@ install:
   - bundle install --jobs=3 --retry=3
 
 gemfile:
-  - gemfiles/rails_4_0.gemfile
-  - gemfiles/rails_4_1.gemfile
-
-matrix:
-  allow_failures:
-    - rvm: jruby-19mode
-    - rvm: rbx
-    - rvm: ruby-head
-  fast_finish: true
-
-notifications:
-  email: false
+  - gemfiles/rails-4.2.gemfile
+  - gemfiles/rails-5.0.gemfile
+  - gemfiles/rails-5.1.gemfile

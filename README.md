@@ -1,20 +1,17 @@
-Jstreamer
-=========
+# JStreamer ![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)
 
-[![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)][travis]
-[![Gem Version](http://img.shields.io/gem/v/jstreamer.svg)][gem]
-[![Code Climate](http://img.shields.io/codeclimate/github/malomalo/jstreamer.svg)][codeclimate]
-[![Dependencies Status](http://img.shields.io/gemnasium/malomalo/jstreamer.svg)][gemnasium]
+JStreamer gives you a simple DSL for generating JSON that beats massaging giant
+hash structures. This is particularly helpful when the generation process is
+fraught with conditionals and loops.
 
-[travis]: https://travis-ci.org/malomalo/jstreamer
-[gem]: https://rubygems.org/gems/jstreamer
-[codeclimate]: https://codeclimate.com/github/rails/jstreamer
-[gemnasium]: https://gemnasium.com/malomalo/jstreamer
 
-Jstreamer gives you a simple DSL for declaring JSON structures that beats
-massaging giant hash structures. This is particularly helpful when the
-generation process is fraught with conditionals and loops. Here's a simple
-example:
+[Jbuilder](https://github.com/rails/jbuilder) builds a Hash as it renders the
+template and once complete converts the Hash to JSON. JStreamer on the other
+hand writes directly to the output as it is rendering the template. Because of
+this some of the magic cannot be done and requires a little more verboseness.
+
+Examples
+--------
 
 ``` ruby
 # app/views/message/show.json.jstreamer
@@ -33,6 +30,12 @@ json.object! do
 
   if current_user.admin?
     json.visitors calculate_visitors(@message)
+  end
+  
+  json.tags do
+    json.array! do
+      @message.tags.each { |tag| json.child! tag }
+    end
   end
 
   json.comments @message.comments, :content, :created_at
@@ -62,6 +65,8 @@ This will build the following structure:
 
   "visitors": 15,
 
+  "tags": ['public'],
+  
   "comments": [
     { "content": "Hello everyone!", "created_at": "2011-10-29T20:45:28-05:00" },
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
@@ -85,14 +90,13 @@ json.object! do
   end
 end
 
-# => "author": { "name": "David" }
+# => { "author": { "name": "David" } }
 ```
 
-Top level arrays can be handled directly.  Useful for index and other collection actions.
+Top level arrays can be handled directly.  Useful for index and other collection
+actions.
 
 ``` ruby
-# @comments = @post.comments
-
 json.array! @comments do |comment|
   next if comment.marked_as_spam_by?(current_user)
 
@@ -118,37 +122,7 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
-Jstreamer objects can be directly nested inside each other.  Useful for composing objects.
-
-``` ruby
-class Person
-  # ... Class Definition ... #
-  def to_builder
-    Jstreamer.new do |person|
-      person.extract! self, :name, :age
-    end
-  end
-end
-
-class Company
-  # ... Class Definition ... #
-  def to_builder
-    Jstreamer.new do |company|
-      company.object! do
-        company.name name
-        company.president president.to_builder
-      end
-    end
-  end
-end
-
-company = Company.new('Doodle Corp', Person.new('John Stobs', 58))
-company.to_builder.target!
-
-# => {"name":"Doodle Corp","president":{"name":"John Stobs","age":58}}
-```
-
-You can either use Jstreamer stand-alone or directly as an ActionView template
+You can either use JStreamer stand-alone or directly as an ActionView template
 language. When required in Rails, you can create views ala show.json.jstreamer
 (the json is already yielded):
 
@@ -171,7 +145,6 @@ json.object! do
   end
 end
 ```
-
 
 You can use partials as well. The following will render the file
 `views/comments/_comments.json.jstreamer`, and set a local variable
@@ -200,7 +173,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 json.comments @post.comments, partial: 'comment/comment', as: :comment
 ```
 
-You can explicitly make Jstreamer object return null if you want:
+You can explicitly make JStreamer object return null if you want:
 
 ``` ruby
 json.extract! @post, :id, :title, :content, :published_at
@@ -237,6 +210,31 @@ json.object! do
 end
 ```
 
+The only caveat with caching is inside and object you must cache both the key
+and the value. You cannot just cache the value. For example:
+
+```ruby
+json.boject! do
+  json.key do
+    json.cache! :key do
+    	json.value! 'Cache this.'
+    end
+  end
+end
+```
+
+Will error out, but can easily be rewritten as:
+
+```ruby
+json.boject! do
+  json.cache! :key do
+    json.key do
+      json.value! 'Cache this.'
+    end
+  end
+end
+```
+
 Keys can be auto formatted using `key_format!`, this can be used to convert
 keynames from the standard ruby_format to camelCase:
 
@@ -253,7 +251,7 @@ You can set this globally with the class method `key_format` (from inside your
 environment.rb for example):
 
 ``` ruby
-Jstreamer.key_format camelize: :lower
+JStreamer.key_format camelize: :lower
 ```
 
 Syntax Differences from Jbuilder
@@ -264,18 +262,19 @@ Syntax Differences from Jbuilder
   allow you to put a number, string, or other JSON value if you wish
   to not have an object or array.
 - The call syntax has been removed (eg. `json.(@person, :name, :age)`)
+- Caching inside of a object must cache both the key and the value.
 
 JSON backends
 -------------
 
-Currently Jstreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
+Currently JStreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
 which supports streaming parsing and encoding.
 
 Special Thanks & Contributors
 -----------------------------
 
-Jstreamer is a fork of [Jbuilder](https://github.com/rails/jbuilder), built of
-what they have accopmlished and with out Jbuilder Jstreamer would not be here today.
+JStreamer is a fork of [Jbuilder](https://github.com/rails/jbuilder), built of
+what they have accopmlished and with out Jbuilder JStreamer would not be here today.
 Thanks to everyone who's been a part of Jbuilder!
 
 * David Heinemeier Hansson - http://david.heinemeierhansson.com/ - for writing Jbuidler!!

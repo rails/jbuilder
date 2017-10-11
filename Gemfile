@@ -1,7 +1,4 @@
 source "https://rubygems.org"
 
+# Specify your gem's dependencies in sunstone.gemspec
 gemspec
-
-gem "rake"
-gem "mocha", require: false
-gem "appraisal"

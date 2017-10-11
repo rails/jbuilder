@@ -1,5 +1,6 @@
 tmp
-gemfiles/*.lock
 Gemfile.lock
 .ruby-version
 pkg
+coverage
+.DS_Store
