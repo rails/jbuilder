@@ -1,4 +1,4 @@
-# JStreamer ![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)
+# JStreamer [![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)](https://travis-ci.org/malomalo/jstreamer)
 
 JStreamer gives you a simple DSL for generating JSON that beats massaging giant
 hash structures. This is particularly helpful when the generation process is
