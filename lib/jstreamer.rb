@@ -20,7 +20,7 @@ class Jstreamer
     @array_indexes = []
     
     @output_buffer = options[:output_buffer] || ::StringIO.new
-    @encoder = ::Wankel::StreamEncoder.new(@output_buffer)
+    @encoder = ::Wankel::StreamEncoder.new(@output_buffer, mode: :as_json)
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil }
 
