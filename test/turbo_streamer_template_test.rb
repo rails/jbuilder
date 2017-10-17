@@ -1,10 +1,10 @@
 require 'test_helper'
 
-PARTIAL_TEMPLATE = <<-JSTREAMER
+PARTIAL_TEMPLATE = <<-STREAMER
   json.object! { json.content "hello" }
-JSTREAMER
+STREAMER
 
-BLOG_POST_TEMPLATE = <<-JSTREAMER
+BLOG_POST_TEMPLATE = <<-STREAMER
   json.object! do
     json.extract! blog_post, :id, :body
     json.author do
@@ -15,13 +15,13 @@ BLOG_POST_TEMPLATE = <<-JSTREAMER
       end
     end
   end
-JSTREAMER
+STREAMER
 
-COLLECTION_TEMPLATE = <<-JSTREAMER
+COLLECTION_TEMPLATE = <<-STREAMER
   json.object! do
     json.extract! collection, :id, :name
   end
-JSTREAMER
+STREAMER
 
 CACHE_KEY_PROC = Proc.new { |blog_post| true }
 
@@ -31,7 +31,7 @@ blog_authors = [ 'David Heinemeier Hansson', 'Pavel Pravosud' ].cycle
 BLOG_POST_COLLECTION = 10.times.map{ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 COLLECTION_COLLECTION = 5.times.map{ |i| Collection.new(i+1, "collection #{i+1}") }
 
-ActionView::Template.register_template_handler :jstreamer, Jstreamer::Handler
+ActionView::Template.register_template_handler :streamer, TurboStreamer::Handler
 
 module Rails
   def self.cache
@@ -39,7 +39,7 @@ module Rails
   end
 end
 
-class JstreamerTemplateTest < ActionView::TestCase
+class TurboStreamerTemplateTest < ActionView::TestCase
   setup do
     @context = self
     @virtual_path = nil
@@ -48,16 +48,16 @@ class JstreamerTemplateTest < ActionView::TestCase
 
   def partials
     {
-      '_partial.json.jstreamer'  => PARTIAL_TEMPLATE,
-      '_blog_post.json.jstreamer' => BLOG_POST_TEMPLATE,
-      '_collection.json.jstreamer' => COLLECTION_TEMPLATE
+      '_partial.json.streamer'  => PARTIAL_TEMPLATE,
+      '_blog_post.json.streamer' => BLOG_POST_TEMPLATE,
+      '_collection.json.streamer' => COLLECTION_TEMPLATE
     }
   end
 
-  def render_jstreamer(source)
+  def render_streamer(source)
     @rendered = []
-    lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.jstreamer' => source))]
-    ActionView::Template.new(source, 'test', Jstreamer::Handler, virtual_path: 'test').render(self, {}).strip
+    lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.streamer' => source))]
+    ActionView::Template.new(source, 'test', TurboStreamer::Handler, virtual_path: 'test').render(self, {}).strip
   end
 
   def undef_context_methods(*names)
@@ -68,9 +68,12 @@ class JstreamerTemplateTest < ActionView::TestCase
     end
   end
 
-  def assert_collection_rendered(json, *selector)
+  def assert_collection_rendered(json, overrides = {}, *selector)
     result = Wankel.load(json)
-    overrides = selector.last.is_a?(Hash) ? selector.pop : {}
+    if !overrides.is_a?(Hash)
+      selector.unshift(overrides)
+      overrides = {}
+    end
     result = result.dig(*selector) if !selector.empty?
 
     assert_equal 10, result.length
@@ -86,11 +89,11 @@ class JstreamerTemplateTest < ActionView::TestCase
   end
 
   test 'rendering' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.content 'hello'
       end
-    JSTREAMER
+    STREAMER
 
     assert_equal({"content" => 'hello'}, Wankel.load(json))
   end
@@ -98,93 +101,93 @@ class JstreamerTemplateTest < ActionView::TestCase
   # Partial Test ===========================================================
 
   test 'partial! renders partial' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! 'partial'
-    JSTREAMER
+    STREAMER
 
     assert_equal({"content" => 'hello'}, Wankel.load(json))
   end
 
   test 'partial! renders collections' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered json
   end
 
   test 'partial! renders collections when as argument is a string' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! 'blog_post', collection: BLOG_POST_COLLECTION, as: "blog_post"
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered json
   end
 
   test 'partial! renders collections as collections' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! 'collection', collection: COLLECTION_COLLECTION, as: :collection
-    JSTREAMER
+    STREAMER
 
     assert_equal 5, Wankel.load(json).length
   end
 
   test 'partial! renders as empty array for nil-collection' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! 'blog_post', :collection => nil, :as => :blog_post
-    JSTREAMER
+    STREAMER
 
     assert_equal '[]', json
   end
 
   test 'partial! renders collection (alt. syntax)' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! :partial => 'blog_post', :collection => BLOG_POST_COLLECTION, :as => :blog_post
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered json
   end
 
   test 'partial! renders as empty array for nil-collection (alt. syntax)' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.partial! :partial => 'blog_post', :collection => nil, :as => :blog_post
-    JSTREAMER
+    STREAMER
 
     assert_equal '[]', json
   end
 
   test 'render array of partials' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.array! BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered json
   end
 
   test 'render array of partials as empty array with nil-collection' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.array! nil, :partial => 'blog_post', :as => :blog_post
-    JSTREAMER
+    STREAMER
 
     assert_equal '[]', json
   end
 
   test 'render array if partials as a value' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.posts BLOG_POST_COLLECTION, :partial => 'blog_post', :as => :blog_post
       end
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered json, 'posts'
   end
 
   test 'render as empty array if partials as a nil value' do
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.posts nil, :partial => 'blog_post', :as => :blog_post
       end
-    JSTREAMER
+    STREAMER
 
     assert_equal '{"posts":[]}', json
   end
@@ -194,29 +197,29 @@ class JstreamerTemplateTest < ActionView::TestCase
   test 'fragment caching a JSON object' do
     undef_context_methods :cache_fragment_name
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache! 'cachekey' do
           json.name 'Cache'
         end
       end
-    JSTREAMER
+    STREAMER
     assert_equal({'name' => 'Cache'}, Wankel.load(json))
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache! 'cachekey' do
           json.name 'Miss'
         end
       end
-    JSTREAMER
+    STREAMER
     assert_equal({'name' => 'Cache'}, Wankel.load(json))
   end
 
   test 'conditionally fragment caching a JSON object' do
     undef_context_methods :cache_fragment_name
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache_if! true, 'cachekey' do
           json.test1 'Cache'
@@ -225,10 +228,10 @@ class JstreamerTemplateTest < ActionView::TestCase
           json.test2 'Cache'
         end
       end
-    JSTREAMER
+    STREAMER
     assert_equal({'test1' => 'Cache', 'test2' => 'Cache'}, Wankel.load(json))
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache_if! true, 'cachekey' do
           json.test1 'Miss'
@@ -237,27 +240,27 @@ class JstreamerTemplateTest < ActionView::TestCase
           json.test2 'Miss'
         end
       end
-    JSTREAMER
+    STREAMER
     assert_equal({'test1' => 'Cache', 'test2' => 'Miss'}, Wankel.load(json))
   end
 
   test 'fragment caching deserializes an array' do
     undef_context_methods :cache_fragment_name
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.cache! 'cachekey' do
         json.array! %w[a b c]
       end
-    JSTREAMER
+    STREAMER
 
     # cache miss output correct
     assert_equal(%w[a b c], Wankel.load(json))
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.cache! 'cachekey' do
         json.array! %w[1 2 3]
       end
-    JSTREAMER
+    STREAMER
 
     # cache hit output correct
     assert_equal(%w[a b c], Wankel.load(json))
@@ -266,13 +269,13 @@ class JstreamerTemplateTest < ActionView::TestCase
   test 'fragment caching works with current cache digests' do
     @context.expects(:cache_fragment_name).with('cachekey', {})
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache! 'cachekey' do
           json.name 'Cache'
         end
       end
-    JSTREAMER
+    STREAMER
 
     assert_equal({'name' => 'Cache'}, Wankel.load(json))
   end
@@ -280,13 +283,13 @@ class JstreamerTemplateTest < ActionView::TestCase
   test 'current cache digest option accepts options' do
     @context.expects(:cache_fragment_name).with('cachekey', skip_digest: true)
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache! 'cachekey', skip_digest: true do
           json.name 'Cache'
         end
       end
-    JSTREAMER
+    STREAMER
 
     assert_equal({'name' => 'Cache'}, Wankel.load(json))
   end
@@ -294,13 +297,13 @@ class JstreamerTemplateTest < ActionView::TestCase
   test 'does not perform caching when controller.perform_caching is false' do
     controller.perform_caching = false
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.object! do
         json.cache! 'cachekey' do
           json.name 'Cache'
         end
       end
-    JSTREAMER
+    STREAMER
 
     assert_equal Rails.cache.inspect[/entries=(\d+)/, 1], '0'
     assert_equal({'name' => 'Cache'}, Wankel.load(json))
@@ -309,28 +312,28 @@ class JstreamerTemplateTest < ActionView::TestCase
   test 'renders cached array of block partials' do
     undef_context_methods :cache_fragment_name
 
-    Rails.cache.write("jstreamer/8/post body 8/Pavel Pravosud", '"CACHE HIT"')
-    
-    json = render_jstreamer <<-JSTREAMER
+    Rails.cache.write("streamer/8/post body 8/Pavel Pravosud", '"CACHE HIT"')
+
+    json = render_streamer <<-STREAMER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
-    JSTREAMER
-    
+    STREAMER
+
     assert_collection_rendered(json, {7 => 'CACHE HIT'})
   end
 
   test 'renders cached array with a key specified as a proc' do
     undef_context_methods :cache_fragment_name
-    CACHE_KEY_PROC.expects(:call)
+    CACHE_KEY_PROC.expects(:call).returns(true)
 
-    Rails.cache.write("jstreamer/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
+    Rails.cache.write("streamer/true/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
     
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.cache_collection! BLOG_POST_COLLECTION, key: CACHE_KEY_PROC do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered(json, {0 => 'CACHE HIT'})
   end
@@ -338,13 +341,33 @@ class JstreamerTemplateTest < ActionView::TestCase
   test 'reverts to array! when controller.perform_caching is false' do
     controller.perform_caching = false
 
-    json = render_jstreamer <<-JSTREAMER
+    json = render_streamer <<-STREAMER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
       end
-    JSTREAMER
+    STREAMER
 
     assert_collection_rendered json
+  end
+
+  test 'cache_collection! inside an object' do
+    undef_context_methods :cache_fragment_name
+    CACHE_KEY_PROC.expects(:call)
+
+    Rails.cache.write("streamer/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
+
+    json = render_streamer <<-STREAMER
+      json.object! do
+        json.one 2
+        json.set! 'key' do
+          json.cache_collection! BLOG_POST_COLLECTION, key: CACHE_KEY_PROC do |blog_post|
+            json.partial! 'blog_post', :blog_post => blog_post
+          end
+        end
+      end
+    STREAMER
+
+    assert_collection_rendered(json, {0 => 'CACHE HIT'}, 'key')
   end
   
 end

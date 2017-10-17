@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class Jstreamer::InjectTest < ActiveSupport::TestCase
+class TurboStreamer::InjectTest < ActiveSupport::TestCase
 
   test 'support inject! method' do
     result = jbuild do |json|

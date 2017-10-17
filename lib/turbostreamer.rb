@@ -1,11 +1,17 @@
-require 'wankel'
 require 'stringio'
-require 'jstreamer/key_formatter'
+require 'turbostreamer/key_formatter'
 
-class Jstreamer
+class TurboStreamer
   
   BLANK = ::Object.new
   
+  
+  ENCODERS = {
+    json: {oj: 'Oj', wankel: 'Wankel'},
+    msgpack: {msgpack: 'MessagePack'}
+  }
+  
+  @@default_encoders = {}
   @@key_formatter = nil
 
   undef_method :==
@@ -16,11 +22,8 @@ class Jstreamer
   end
   
   def initialize(options = {})
-    @stack = []
-    @array_indexes = []
-    
     @output_buffer = options[:output_buffer] || ::StringIO.new
-    @encoder = ::Wankel::StreamEncoder.new(@output_buffer, mode: :as_json)
+    @encoder = options[:encoder] || TurboStreamer.default_encoder_for(options[:mime] || :json).new(@output_buffer)
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil }
 
@@ -28,22 +31,17 @@ class Jstreamer
   end
   
   def key!(key)
-    @encoder.string(_key(key))
+    @encoder.key(_key(key))
   end
     
   def value!(value)
-    if @stack.last == :array
-      @array_indexes[-1] -= 1
-    end
     @encoder.value(value)
   end
   
   def object!(&block)
-    @stack << :map
     @encoder.map_open
     _scope { block.call } if block
     @encoder.map_close
-    @stack.pop
   end
   
   # Extracts the mentioned attributes or hash elements from the passed object 
@@ -116,8 +114,6 @@ class Jstreamer
   #
   #   [1,2,3]
   def array!(collection = BLANK, *attributes, &block)
-    @stack << :array
-    @array_indexes << 0
     @encoder.array_open
     
     if _blank?(collection)
@@ -127,10 +123,7 @@ class Jstreamer
     end
 
     @encoder.array_close
-    @array_indexes.pop
-    @stack.pop
   end
-
   
   def set!(key, value = BLANK, *args, &block)
     key!(key)
@@ -205,6 +198,35 @@ class Jstreamer
     @@key_formatter = formatter
   end
   
+  def self.set_default_encoder(mime, encoder)
+    @@default_encoders[mime] = encoder
+  end
+  
+  def self.get_encoder(mime, key)
+    require "turbostreamer/encoders/#{key}"
+    Object.const_get("TurboStreamer::#{ENCODERS[mime][key]}Encoder")
+  end
+  
+  def self.default_encoder_for(mime)
+    if @@default_encoders[mime]
+      @@default_encoders[mime]
+    else
+      ENCODERS[mime].to_a.find do |key, class_name|
+        next if !const_defined?(class_name)
+        return get_encoder(mime, key)
+      end
+    
+      ENCODERS[mime].to_a.find do |key, class_name|
+        begin
+          return get_encoder(mime, key)
+        rescue ::LoadError
+          next
+        end
+      end
+      
+      raise ArgumentError, "Could not find an adapter to use"
+    end
+  end
 
   def _extract_collection(collection, *attributes, &block)
     if collection.nil?
@@ -222,19 +244,7 @@ class Jstreamer
 
   # Inject a valid JSON string into the current
   def inject!(json_text)
-    @encoder.flush
-    
-    if @stack.last == :array
-      @encoder.output.write(',') if @array_indexes.last != 0
-      @array_indexes[-1] -= 1
-    elsif @stack.last == :map
-      _capture do
-        @encoder.string("")
-        @encoder.string("")
-      end
-    end
-    
-    @encoder.output.write(json_text)
+    @encoder.inject(json_text)
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -287,7 +297,7 @@ class Jstreamer
   private
   
   def _write(key, value)
-    @encoder.string(_key(key))
+    @encoder.key(_key(key))
     @encoder.value(value)
   end
 
@@ -300,17 +310,8 @@ class Jstreamer
     _write key, value
   end
 
-  def _capture(to=nil)
-    @encoder.flush
-    old, to = @encoder.output, to || ::StringIO.new
-    @encoder.output = to
-    
-    yield
-    
-    @encoder.flush
-    to.string.gsub(/\A,|,\Z/, '')
-  ensure
-    @encoder.output = old
+  def _capture(to=nil, &block)
+    @encoder.capture(to, &block)
   end
     
   def _scope
@@ -330,4 +331,5 @@ class Jstreamer
   
 end
 
-require 'jstreamer/railtie' if defined?(Rails)
+
+require 'turbostreamer/railtie' if defined?(Rails)

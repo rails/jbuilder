@@ -1,12 +1,12 @@
-# JStreamer [![Build Status](https://api.travis-ci.org/malomalo/jstreamer.svg)](https://travis-ci.org/malomalo/jstreamer)
+# TurboStreamer [![Build Status](https://api.travis-ci.org/malomalo/turbostreamer.svg)](https://travis-ci.org/malomalo/turbostreamer)
 
-JStreamer gives you a simple DSL for generating JSON that beats massaging giant
+TurboStreamer gives you a simple DSL for generating JSON that beats massaging giant
 hash structures. This is particularly helpful when the generation process is
 fraught with conditionals and loops.
 
 
 [Jbuilder](https://github.com/rails/jbuilder) builds a Hash as it renders the
-template and once complete converts the Hash to JSON. JStreamer on the other
+template and once complete converts the Hash to JSON. TurboStreamer on the other
 hand writes directly to the output as it is rendering the template. Because of
 this some of the magic cannot be done and requires a little more verboseness.
 
@@ -14,7 +14,7 @@ Examples
 --------
 
 ``` ruby
-# app/views/message/show.json.jstreamer
+# app/views/message/show.json.streamer
 
 json.object! do
   json.content format_content(@message.content)
@@ -122,8 +122,8 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
-You can either use JStreamer stand-alone or directly as an ActionView template
-language. When required in Rails, you can create views ala show.json.jstreamer
+You can either use TurboStreamer stand-alone or directly as an ActionView template
+language. When required in Rails, you can create views ala show.json.streamer
 (the json is already yielded):
 
 ``` ruby
@@ -147,7 +147,7 @@ end
 ```
 
 You can use partials as well. The following will render the file
-`views/comments/_comments.json.jstreamer`, and set a local variable
+`views/comments/_comments.json.streamer`, and set a local variable
 `comments` with all this message's comments, which you can use inside
 the partial.
 
@@ -173,7 +173,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 json.comments @post.comments, partial: 'comment/comment', as: :comment
 ```
 
-You can explicitly make JStreamer object return null if you want:
+You can explicitly make TurboStreamer object return null if you want:
 
 ``` ruby
 json.extract! @post, :id, :title, :content, :published_at
@@ -251,7 +251,7 @@ You can set this globally with the class method `key_format` (from inside your
 environment.rb for example):
 
 ``` ruby
-JStreamer.key_format camelize: :lower
+TurboStreamer.key_format camelize: :lower
 ```
 
 Syntax Differences from Jbuilder
@@ -264,17 +264,41 @@ Syntax Differences from Jbuilder
 - The call syntax has been removed (eg. `json.(@person, :name, :age)`)
 - Caching inside of a object must cache both the key and the value.
 
-JSON backends
--------------
+Backends
+--------
 
-Currently JStreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
+Currently TurboStreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
 which supports streaming parsing and encoding.
+
+The idea was to also support [Oj](https://github.com/ohler55/oj) and
+[MessagePack](http://msgpack.org/).
+
+Oj should be relatively easily to do, you just need to figure out how to switch
+out the io so it can be captured for caching.
+
+MessagePack would require a bit more work as you would need a change in the
+protocol. We do not know how big an array or map/object will be when we
+start emitting it and MessagePack require we know it. It seems like a relatively
+small change, instead of a marker followed by number of elements there would be
+a start marker followed by the elements and then an end marker.
+
+All backends must have the following functions:
+
+- `key(string)` Output a map key
+- `value(value)` Output a value
+- `map_open` Open a object/map
+- `map_close` Close a object/map
+- `array_open` Open an Array
+- `array_close` Close an Array
+- `flush` Flush any buffers
+- `inject(string)` Inject a (usually cached) string into the output; instering any delimiters as needed.
+- `capture(&block)` Capture the output of the block (w/o any delimiters)
 
 Special Thanks & Contributors
 -----------------------------
 
-JStreamer is a fork of [Jbuilder](https://github.com/rails/jbuilder), built of
-what they have accopmlished and with out Jbuilder JStreamer would not be here today.
+TurboStreamer is a fork of [Jbuilder](https://github.com/rails/jbuilder), built of
+what they have accopmlished and with out Jbuilder TurboStreamer would not be here today.
 Thanks to everyone who's been a part of Jbuilder!
 
 * David Heinemeier Hansson - http://david.heinemeierhansson.com/ - for writing Jbuidler!!

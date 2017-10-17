@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class Jstreamer::EdgeCaseTest < ActiveSupport::TestCase
+class TurboStreamer::EdgeCaseTest < ActiveSupport::TestCase
   
   Comment = Struct.new(:content, :id)
   

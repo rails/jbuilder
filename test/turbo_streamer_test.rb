@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class JstreamerTest < ActiveSupport::TestCase
+class TurboStreamerTest < ActiveSupport::TestCase
 
   test 'outputting a top-level primative value' do
     result = jbuild { |json| json.value! nil  }

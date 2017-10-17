@@ -1,4 +1,4 @@
-require 'jstreamer'
+require 'turbostreamer'
 
 dependency_tracker = false
 
@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 if dependency_tracker
-  class Jstreamer
+  class TurboStreamer
     module DependencyTrackerMethods
       # Matches:
       #   json.partial! "messages/message"
@@ -55,7 +55,7 @@ if dependency_tracker
     end
   end
 
-  ::Jstreamer::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
-  ::Jstreamer::DependencyTracker.send :include, ::Jstreamer::DependencyTrackerMethods
-  dependency_tracker.register_tracker :jstreamer, ::Jstreamer::DependencyTracker
+  ::TurboStreamer::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
+  ::TurboStreamer::DependencyTracker.send :include, ::TurboStreamer::DependencyTrackerMethods
+  dependency_tracker.register_tracker :streamer, ::TurboStreamer::DependencyTracker
 end

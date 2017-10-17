@@ -1,12 +1,12 @@
-require File.expand_path("../lib/jstreamer/version", __FILE__)
+require File.expand_path("../lib/turbostreamer/version", __FILE__)
 
 Gem::Specification.new do |spec|
-  spec.name          = "jstreamer"
-  spec.version       = Jstreamer::VERSION
+  spec.name          = "turbostreamer"
+  spec.version       = TurboStreamer::VERSION
   spec.licenses      = ['MIT']
   spec.authors       = ["Jon Bracy"]
   spec.email         = ["jonbracy@gmail.com"]
-  spec.homepage      = "https://github.com/malomalo/jstreamer"
+  spec.homepage      = "https://github.com/malomalo/turbostreamer"
   spec.summary       = 'Stream JSON via a Builder-style DSL'
   # spec.description   = %q{}
 
@@ -18,9 +18,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency 'activesupport', '>= 4.2.0'
-  spec.add_runtime_dependency 'wankel',        '~> 0.6'
     
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "wankel"
   spec.add_development_dependency "bundler", '~> 1.11', '>= 1.11.2'
   spec.add_development_dependency "mocha"
   spec.add_development_dependency "simplecov"

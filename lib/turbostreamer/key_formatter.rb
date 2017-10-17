@@ -1,6 +1,6 @@
 require 'active_support/core_ext/array'
 
-class Jstreamer
+class TurboStreamer
   class KeyFormatter
     def initialize(*args)
       @format = {}

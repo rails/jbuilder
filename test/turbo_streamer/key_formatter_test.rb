@@ -1,10 +1,10 @@
 require 'test_helper'
 
-class Jstreamer::KeyFormatterTest < ActiveSupport::TestCase
+class TurboStreamer::KeyFormatterTest < ActiveSupport::TestCase
 
   test 'initialize via options hash' do
-    jstreamer = Jstreamer.new(key_formatter: 1)
-    assert_equal 1, jstreamer.instance_eval{ @key_formatter }
+    turbo_streamer = TurboStreamer.new(key_formatter: 1)
+    assert_equal 1, turbo_streamer.instance_eval{ @key_formatter }
   end
 
   test 'key_format! with parameter' do
@@ -95,16 +95,16 @@ class Jstreamer::KeyFormatterTest < ActiveSupport::TestCase
   end
 
   test 'default key_format!' do
-    Jstreamer.key_format camelize: :lower
+    TurboStreamer.key_format camelize: :lower
     result = jbuild{ |json| json.object! { json.camel_style 'for JS' } }
     assert_equal ['camelStyle'], result.keys
-    Jstreamer.send :class_variable_set, '@@key_formatter', Jstreamer::KeyFormatter.new
+    TurboStreamer.send :class_variable_set, '@@key_formatter', TurboStreamer::KeyFormatter.new
   end
 
   test 'do not use default key formatter directly' do
-    Jstreamer.key_formatter = Jstreamer::KeyFormatter.new
-    jstreamer = Jstreamer.new
-    assert_not_equal Jstreamer.class_variable_get(:@@key_formatter).object_id, jstreamer.object_id
+    TurboStreamer.key_formatter = TurboStreamer::KeyFormatter.new
+    turbo_streamer = TurboStreamer.new
+    assert_not_equal TurboStreamer.class_variable_get(:@@key_formatter).object_id, turbo_streamer.object_id
   end
 
 end

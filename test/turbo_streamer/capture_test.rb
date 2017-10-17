@@ -1,10 +1,10 @@
 require 'test_helper'
 
-class Jstreamer::CaptureTest < ActiveSupport::TestCase
+class TurboStreamer::CaptureTest < ActiveSupport::TestCase
 
   test "_capture" do
     old_buf_size = Wankel::DEFAULTS[:write_buffer_size]
-    builder = Jstreamer.new
+    builder = TurboStreamer.new
     capture = nil
 
     begin

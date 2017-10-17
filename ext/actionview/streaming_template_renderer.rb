@@ -8,7 +8,7 @@ module ActionView
       layout   = layout_name && find_layout(layout_name, locals.keys, [formats.first])
 
       Body.new do |buffer|
-        if template.handler == Jstreamer::Handler
+        if template.handler == TurboStreamer::Handler
           delayed_render_json(buffer, template, layout, @view, locals)
         else
           delayed_render(buffer, template, layout, @view, locals)

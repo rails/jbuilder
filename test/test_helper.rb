@@ -15,20 +15,21 @@ require "active_support"
 require 'action_view'
 require 'action_view/testing/resolvers'
 
-require 'jstreamer'
-require 'jstreamer/handler'
-require 'jstreamer/template'
+require 'turbostreamer'
+require 'turbostreamer/handler'
+require 'turbostreamer/template'
 
 require File.expand_path('../../ext/actionview/buffer', __FILE__)
 require File.expand_path('../../ext/actionview/streaming_template_renderer', __FILE__)
 
 require "active_support/testing/autorun"
 require 'mocha/setup'
+require 'wankel'
 
 class ActiveSupport::TestCase
   
   def jbuild(*args, &block)
-    ::Wankel.parse(Jstreamer.encode(*args, &block))
+    ::Wankel.parse(TurboStreamer.encode(*args, &block))
   end
   
   def assert_json(json, &block)

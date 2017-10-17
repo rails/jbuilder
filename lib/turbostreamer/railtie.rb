@@ -1,16 +1,16 @@
 require 'rails/railtie'
-require 'jstreamer/handler'
-require 'jstreamer/template'
+require 'turbostreamer/handler'
+require 'turbostreamer/template'
 
 require File.expand_path('../../../ext/actionview/buffer', __FILE__)
 require File.expand_path('../../../ext/actionview/streaming_template_renderer', __FILE__)
 
-class Jstreamer
+class TurboStreamer
   class Railtie < ::Rails::Railtie
-    initializer :jstreamer do
+    initializer :turbostreamer do
       ActiveSupport.on_load :action_view do
-        ActionView::Template.register_template_handler :jstreamer, Jstreamer::Handler
-        require 'jstreamer/dependency_tracker'
+        ActionView::Template.register_template_handler :streamer, TurboStreamer::Handler
+        require 'turbostreamer/dependency_tracker'
       end
     end
   end
