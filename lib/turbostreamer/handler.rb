@@ -5,7 +5,8 @@ require "active_support/core_ext"
 class TurboStreamer
   class Handler
     
-    class_attribute :default_format, default: [:json, :msgpack]
+    class_attribute :default_format
+    self.default_format = :json
     
     def self.supports_streaming?
       true
