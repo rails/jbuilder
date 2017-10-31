@@ -246,17 +246,22 @@ Jbuilder.key_format camelize: :lower
 Faster JSON backends
 --------------------
 
-Jbuilder uses MultiJson, which by default will use the JSON gem. That gem is
-currently tangled with ActiveSupport's all-Ruby `#to_json` implementation,
-which is slow (fixed in Rails >= 4.1). For faster Jbuilder rendering, you can
-specify something like the Yajl JSON generator instead. You'll need to include
-the `yajl-ruby` gem in your Gemfile and then set the following configuration
-for MultiJson:
+Jbuilder depends on `ActiveSupport::JSON::Encoding`, which uses the stdlib's
+`json` gem by default. If you wish to use a third-party JSON implementation
+for faster encoding, you can do so by replacing the default encoder. For
+example, in order to use the [oj](https://github.com/ohler55/oj) gem, require
+the gem and call the `#optimize_rails` method in your application
+initializer:
 
-``` ruby
-require 'multi_json'
-MultiJson.use :yajl
- ```
+```ruby
+require 'oj'
+
+Oj.optimize_rails
+```
+
+This will inject Oj's JSON encoder into `ActiveSupport::JSON::Encoding`
+without breaking compatibility (with a few exceptions). For more details
+about Oj's Rails mode, please refer to [their official documentation](https://github.com/ohler55/oj/blob/master/pages/Rails.md#oj-rails-compatibility).
 
 ## Contributing to Jbuilder
 

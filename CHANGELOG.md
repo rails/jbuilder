@@ -1,5 +1,10 @@
 # Changelog
 
+Unreleased
+-----
+
+* Drop the MultiJson dependency
+
 2.6.4
 -----
 
