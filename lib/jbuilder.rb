@@ -1,4 +1,5 @@
 require 'jbuilder/jbuilder'
+require 'jbuilder/cache'
 require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'

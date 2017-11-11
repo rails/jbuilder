@@ -12,6 +12,7 @@ class JbuilderTemplate < Jbuilder
   def initialize(context, *args)
     @context = context
     @cached_root = nil
+    @cache = Cache.new
     super(*args)
   end
 
@@ -33,11 +34,9 @@ class JbuilderTemplate < Jbuilder
   #   end
   def cache!(key=nil, options={})
     if @context.controller.perform_caching
-      value = _cache_fragment_for(key, options) do
+      _cache_fragment_for(key, options) do
         _scope { yield self }
       end
-
-      merge! value
     else
       yield
     end
@@ -58,7 +57,8 @@ class JbuilderTemplate < Jbuilder
     if @context.controller.perform_caching
       raise "cache_root! can't be used after JSON structures have been defined" if @attributes.present?
 
-      @cached_root = _cache_fragment_for([ :root, key ], options) { yield; target! }
+      cache_key = _cache_key([ :root, key ], options)
+      @cached_root = ::Rails.cache.fetch(cache_key, options) { yield; target! }
     else
       yield
     end
@@ -78,7 +78,13 @@ class JbuilderTemplate < Jbuilder
   end
 
   def target!
-    @cached_root || super
+    return @cached_root if @cached_root
+
+    @cache.resolve.each do |value|
+      @attributes = _merge_values(@attributes, value)
+    end
+
+    super
   end
 
   def array!(collection = [], *args)
@@ -130,21 +136,7 @@ class JbuilderTemplate < Jbuilder
 
   def _cache_fragment_for(key, options, &block)
     key = _cache_key(key, options)
-    _read_fragment_cache(key, options) || _write_fragment_cache(key, options, &block)
-  end
-
-  def _read_fragment_cache(key, options = nil)
-    @context.controller.instrument_fragment_cache :read_fragment, key do
-      ::Rails.cache.read(key, options)
-    end
-  end
-
-  def _write_fragment_cache(key, options = nil)
-    @context.controller.instrument_fragment_cache :write_fragment, key do
-      yield.tap do |value|
-        ::Rails.cache.write(key, value, options)
-      end
-    end
+    @cache.add(key, options, &block)
   end
 
   def _cache_key(key, options)
