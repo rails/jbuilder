@@ -49,7 +49,7 @@ end
 
 
 class JbuilderTest < ActiveSupport::TestCase
-  setup do
+  teardown do
     Jbuilder.send :class_variable_set, '@@key_formatter', nil
   end
 
