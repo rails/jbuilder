@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "active_support"
+require 'active_support/core_ext/array/access'
 require "rails/version"
 
 if Rails::VERSION::STRING > "4.0"
