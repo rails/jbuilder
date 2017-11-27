@@ -106,7 +106,8 @@ class TurboStreamer
       # Strip brackets as promised above
       result = result.gsub(/\A{\s*|\s*}\Z/, '') if @stack.last == :map
       result = result.gsub(/\A\[\s*|\s*\]\Z/, '') if @stack.last == :array
-      result
+      # Remove newline char to pass tests
+      result.gsub(/\A\n|\n\Z/, '')
     ensure
       @indexes.pop
       @stream_writer = old_writer
@@ -115,6 +116,15 @@ class TurboStreamer
 
     def flush
       stream_writer.flush
+    end
+
+    def to_output
+      if output.is_a?(::StringIO)
+        # Remove newline char to pass tests
+        output.string.gsub(/\A\n|\n\Z/, '')
+      else
+        output
+      end
     end
 
   end
