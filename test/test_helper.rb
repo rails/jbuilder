@@ -26,14 +26,17 @@ require "active_support/testing/autorun"
 require 'mocha/setup'
 require 'wankel'
 
+require "turbostreamer/encoders/oj"
+# Wankel.set_default_encoder(:json, TurboStreamer::OjEncoder)
+
 class ActiveSupport::TestCase
-  
+
   def jbuild(*args, &block)
     ::Wankel.parse(TurboStreamer.encode(*args, &block))
   end
-  
+
   def assert_json(json, &block)
     assert_equal json, jbuild(&block)
   end
-  
+
 end
