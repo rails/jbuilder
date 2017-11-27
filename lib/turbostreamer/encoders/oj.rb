@@ -21,7 +21,6 @@ class TurboStreamer
     attr_reader :stream_writer
 
     def key(k)
-      map_open if @stack.last
       stream_writer.push_key(k)
     end
 
@@ -60,18 +59,14 @@ class TurboStreamer
       stream_writer.flush
 
       if @stack.last == :array
-        self.output.write(',') if @indexes.last > 0
+        # self.output.write(',') if @indexes.last > 0
         @indexes[-1] += 1
       elsif @stack.last == :map
-        self.output.write(',') if @indexes.last > 0
-        # capture do
-        #   push_json("")
-        #   push_json("")
-        # end
+        # self.output.write(',') if @indexes.last > 0
         @indexes[-1] += 1
       end
 
-      self.output.write(string)
+      stream_writer.push_json(string)
     end
 
     def capture(to=nil)
@@ -86,14 +81,17 @@ class TurboStreamer
         output,
         {mode: :json}.merge(options),
       )
-      @stack = []
-      @indexes = []
+
+      # This is to prevent error from OJ streamer
+      # We will strip the brackets afterward
+      stream_writer.push_object if @stack.last == :map
+      stream_writer.push_array if @stack.last == :array
 
       yield
 
       stream_writer.pop_all
       stream_writer.flush
-      output.string.gsub(/\A,|,\Z/, '')
+      output.string.gsub(/\A,|,\Z|\A{\s*|\s*}\Z|\A\[\s*|\s*\]\Z/, '')
     ensure
       @indexes.pop
       @stream_writer = old_writer
