@@ -66,7 +66,18 @@ class TurboStreamer
         @indexes[-1] += 1
       end
 
-      stream_writer.push_json(string)
+      # For string containing key and value like `"key":"value"`
+      # OJ stream writer does NOT allow writing the whole string
+      # But instead requiring key and value to be input separately
+      key_value_match_data = /\A"(\w+?)":(.+)\Z/.match(string)
+      if key_value_match_data
+        stream_writer.push_json(
+          key_value_match_data[2],
+          key_value_match_data[1],
+        )
+      else
+        stream_writer.push_json(string)
+      end
     end
 
     def capture(to=nil)
@@ -91,7 +102,11 @@ class TurboStreamer
 
       stream_writer.pop_all
       stream_writer.flush
-      output.string.gsub(/\A,|,\Z|\A{\s*|\s*}\Z|\A\[\s*|\s*\]\Z/, '')
+      result = output.string.gsub(/\A,|,\Z/, '')
+      # Strip brackets as promised above
+      result = result.gsub(/\A{\s*|\s*}\Z/, '') if @stack.last == :map
+      result = result.gsub(/\A\[\s*|\s*\]\Z/, '') if @stack.last == :array
+      result
     ensure
       @indexes.pop
       @stream_writer = old_writer
