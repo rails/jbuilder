@@ -3,14 +3,6 @@ require 'wankel'
 class TurboStreamer
   class WankelEncoder < ::Wankel::StreamEncoder
 
-    def to_output
-      if output.is_a?(::StringIO)
-        output.string
-      else
-        output
-      end
-    end
-
     def initialize(io, options={})
       @stack = []
       @indexes = []
@@ -84,6 +76,14 @@ class TurboStreamer
     ensure
       @indexes.pop
       self.output = old
+    end
+
+    def to_output
+      if output.is_a?(::StringIO)
+        output.string
+      else
+        output
+      end
     end
 
   end
