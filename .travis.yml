@@ -12,6 +12,8 @@ install:
   - sudo ldconfig
   - bundle install --jobs=3 --retry=3
 
+script: rake test
+
 gemfile:
   - gemfiles/rails-4.2.gemfile
   - gemfiles/rails-5.0.gemfile
