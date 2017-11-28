@@ -2,13 +2,6 @@
 # installed gem
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 
-require 'simplecov'
-SimpleCov.start do
-  add_group 'lib', 'lib'
-  add_group 'ext', 'ext'
-  add_filter "/test"
-end
-
 
 require "active_support"
 
@@ -26,8 +19,9 @@ require "active_support/testing/autorun"
 require 'mocha/setup'
 require 'wankel'
 
-require "turbostreamer/encoders/oj"
-# Wankel.set_default_encoder(:json, TurboStreamer::OjEncoder)
+if ENV["TSENCODER"]
+  TurboStreamer.set_default_encoder(:json, ENV["TSENCODER"].to_sym)
+end
 
 class ActiveSupport::TestCase
 

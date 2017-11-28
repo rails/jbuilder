@@ -199,7 +199,11 @@ class TurboStreamer
   end
 
   def self.set_default_encoder(mime, encoder)
-    @@default_encoders[mime] = encoder
+    if encoder.is_a?(Symbol)
+      @@default_encoders[mime] = get_encoder(mime, encoder)
+    else
+      @@default_encoders[mime] = encoder
+    end
   end
 
   def self.get_encoder(mime, key)
