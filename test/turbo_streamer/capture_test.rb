@@ -14,6 +14,7 @@ class TurboStreamer::CaptureTest < ActiveSupport::TestCase
         builder.key1 'value1'
         capture = builder.__send__(:_capture) do
           builder.key2 'value2'
+          builder.key4 'value4'
         end
         builder.key3 'value3'
       end
@@ -21,7 +22,7 @@ class TurboStreamer::CaptureTest < ActiveSupport::TestCase
       Wankel::DEFAULTS[:write_buffer_size] = old_buf_size
     end
 
-    assert_equal '"key2":"value2"', capture
+    assert_equal '"key2":"value2","key4":"value4"', capture
     assert_equal '{"key1":"value1","key3":"value3"}', builder.target!
   end
 
