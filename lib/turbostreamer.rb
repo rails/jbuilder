@@ -290,7 +290,12 @@ class TurboStreamer
   # Encodes the current builder as JSON.
   def target!
     @encoder.flush
-    @encoder.to_output
+    
+    if @encoder.output.is_a?(::StringIO)
+      @encoder.output.string
+    else
+      @encoder.output
+    end
   end
 
   private

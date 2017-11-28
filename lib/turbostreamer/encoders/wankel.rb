@@ -65,7 +65,8 @@ class TurboStreamer
 
     def capture(to=nil)
       flush
-      old, to = self.output, to || ::StringIO.new
+      old_output = self.output
+      to = to || ::StringIO.new
       @indexes << 0
       self.output = to
 
@@ -75,15 +76,7 @@ class TurboStreamer
       to.string.gsub(/\A,|,\Z/, '')
     ensure
       @indexes.pop
-      self.output = old
-    end
-
-    def to_output
-      if output.is_a?(::StringIO)
-        output.string
-      else
-        output
-      end
+      self.output = old_output
     end
 
   end

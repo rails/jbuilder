@@ -7,13 +7,10 @@ class TurboStreamer
       @stack = []
       @indexes = []
 
-      @options = options
+      @options = {mode: :json}.merge(options)
 
       @output = io
-      @stream_writer = ::Oj::StreamWriter.new(
-        io,
-        {mode: :json}.merge(options),
-      )
+      @stream_writer = ::Oj::StreamWriter.new(io, @options)
     end
 
     attr_reader :options
@@ -88,15 +85,15 @@ class TurboStreamer
       @indexes << 0
 
       @output = (to || ::StringIO.new)
-      @stream_writer = ::Oj::StreamWriter.new(
-        output,
-        {mode: :json}.merge(options),
-      )
+      @stream_writer = ::Oj::StreamWriter.new(@output, @options)
 
       # This is to prevent error from OJ streamer
       # We will strip the brackets afterward
-      stream_writer.push_object if @stack.last == :map
-      stream_writer.push_array if @stack.last == :array
+      if @stack.last == :map
+        stream_writer.push_object
+      elsif @stack.last == :array
+        stream_writer.push_array
+      end
 
       yield
 
@@ -104,10 +101,13 @@ class TurboStreamer
       stream_writer.flush
       result = output.string.gsub(/\A,|,\Z/, '')
       # Strip brackets as promised above
-      result = result.gsub(/\A{\s*|\s*}\Z/, '') if @stack.last == :map
-      result = result.gsub(/\A\[\s*|\s*\]\Z/, '') if @stack.last == :array
-      # Remove newline char to pass tests
-      result.gsub(/\A\n|\n\Z/, '')
+      if @stack.last == :map
+        result = result.gsub(/\A{\s*|\s*}\s*\Z/m, '') 
+      elsif @stack.last == :array
+        result = result.gsub(/\A\[\s*|\s*\]\s*\Z/m, '')
+      end
+
+      result
     ensure
       @indexes.pop
       @stream_writer = old_writer
@@ -116,15 +116,6 @@ class TurboStreamer
 
     def flush
       stream_writer.flush
-    end
-
-    def to_output
-      if output.is_a?(::StringIO)
-        # Remove newline char to pass tests
-        output.string.gsub(/\A\n|\n\Z/, '')
-      else
-        output
-      end
     end
 
   end
