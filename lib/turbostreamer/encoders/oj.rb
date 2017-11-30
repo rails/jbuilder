@@ -115,12 +115,12 @@ class TurboStreamer
 
       stream_writer.pop_all
       stream_writer.flush
-      result = output.string.gsub(/\A,|,\Z/, '')
+      result = output.string.sub(/\A,/, ''.freeze).chomp(",".freeze).strip
       # Strip brackets as promised above
       if @stack.last == :map
-        result = result.gsub(/\A{\s*|\s*}\s*\Z/m, '')
+        result = result.sub(/\A{/, ''.freeze).chomp("}".freeze)
       elsif @stack.last == :array
-        result = result.gsub(/\A\[\s*|\s*\]\s*\Z/m, '')
+        result = result.sub(/\A\[/, ''.freeze).chomp("]".freeze)
       end
 
       result
