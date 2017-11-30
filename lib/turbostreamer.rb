@@ -23,7 +23,14 @@ class TurboStreamer
 
   def initialize(options = {})
     @output_buffer = options[:output_buffer] || ::StringIO.new
-    @encoder = options[:encoder] || TurboStreamer.default_encoder_for(options[:mime] || :json).new(@output_buffer)
+    @encoder = if options[:encoder].is_a?(Symbol)
+      TurboStreamer.get_encoder(options[:mime] || :json, options[:encoder])
+    elsif options[:encoder].nil?
+      TurboStreamer.default_encoder_for(options[:mime] || :json)
+    else
+      options[:encoder]
+    end
+    @encoder = @encoder.new(@output_buffer)
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil }
 
