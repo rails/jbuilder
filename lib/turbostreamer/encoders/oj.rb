@@ -66,12 +66,17 @@ class TurboStreamer
       # For string containing key and value like `"key":"value"`
       # OJ stream writer does NOT allow writing the whole string
       # But instead requiring key and value to be input separately
-      key_value_match_data = /\A"(\w+?)":(.+)\Z/.match(string)
+      key_value_match_data = /\A"(\w+?)":.+\Z/.match(string)
       if key_value_match_data
-        stream_writer.push_json(
-          key_value_match_data[2],
-          key_value_match_data[1],
-        )
+        key = key_value_match_data[1]
+        # 2 quotes, 1 colon
+        # Use range form to get substring is fastest
+        #
+        # See benchmark on SO
+        # https://stackoverflow.com/a/3614592/838346
+        value = string[(3 + key.length)..-1]
+
+        stream_writer.push_json(value, key)
       else
         stream_writer.push_json(string)
       end
@@ -102,7 +107,7 @@ class TurboStreamer
       result = output.string.gsub(/\A,|,\Z/, '')
       # Strip brackets as promised above
       if @stack.last == :map
-        result = result.gsub(/\A{\s*|\s*}\s*\Z/m, '') 
+        result = result.gsub(/\A{\s*|\s*}\s*\Z/m, '')
       elsif @stack.last == :array
         result = result.gsub(/\A\[\s*|\s*\]\s*\Z/m, '')
       end
