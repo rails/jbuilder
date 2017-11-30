@@ -66,9 +66,20 @@ class TurboStreamer
       # For string containing key and value like `"key":"value"`
       # OJ stream writer does NOT allow writing the whole string
       # But instead requiring key and value to be input separately
-      key_value_match_data = /\A"(\w+?)":.+\Z/.match(string)
-      if key_value_match_data
-        key = key_value_match_data[1]
+
+      # `Regexp#match?` is much faster than `=~`
+      # https://stackoverflow.com/a/11908214/838346
+      string_contain_key = if REGEXP_SUPPORT_FAST_MATCH
+        JSON_OBJ_KEY_REGEXP.match?(string)
+      else
+        JSON_OBJ_KEY_REGEXP =~ string
+      end
+
+      if string_contain_key
+        # Using `String[Regexp, index]`
+        # is faster than `#match` according to benchmark
+        # Of course still slower than `=~` & `match?`
+        key = string[JSON_OBJ_KEY_REGEXP, 1]
         # 2 quotes, 1 colon
         # Use range form to get substring is fastest
         #
@@ -122,6 +133,12 @@ class TurboStreamer
     def flush
       stream_writer.flush
     end
+
+    JSON_OBJ_KEY_REGEXP = /\A"(\w+?)":/.freeze
+    private_constant :JSON_OBJ_KEY_REGEXP
+
+    REGEXP_SUPPORT_FAST_MATCH = JSON_OBJ_KEY_REGEXP.respond_to?(:match?)
+    private_constant :REGEXP_SUPPORT_FAST_MATCH
 
   end
 end
