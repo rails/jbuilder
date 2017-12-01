@@ -1,7 +1,9 @@
 require "bundler/setup"
 require "active_support"
+require 'active_support/core_ext/array/access'
 require "active_support/cache"
 require "rails/version"
+require "jbuilder"
 
 if Rails::VERSION::STRING > "4.0"
   require "active_support/testing/autorun"
