@@ -56,10 +56,8 @@ class TurboStreamer
       stream_writer.flush
 
       if @stack.last == :array
-        # self.output.write(',') if @indexes.last > 0
         @indexes[-1] += 1
       elsif @stack.last == :map
-        # self.output.write(',') if @indexes.last > 0
         @indexes[-1] += 1
       end
 
