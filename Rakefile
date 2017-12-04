@@ -16,7 +16,7 @@ ENCODERS.each do |encoder|
       t.warning = true
       t.verbose = false
     end
-    
+
     namespace encoder do
       task(:env) { ENV["TSENCODER"] = encoder }
     end
@@ -24,7 +24,7 @@ ENCODERS.each do |encoder|
 end
 
 namespace :test do
-  
+
   task :coverage do
     require 'simplecov'
     SimpleCov.start do
@@ -33,7 +33,7 @@ namespace :test do
       add_filter "/test"
     end
   end
-  
+
   desc "Run test with all encoders"
   task all: ENCODERS.shuffle.map{ |e| "test:#{e}" }
 
@@ -45,9 +45,9 @@ task :performance do
   files = ['jbuilder/oj.rb', 'turbostreamer/oj.rb', 'turbostreamer/wankel.rb'].map{ |i| File.join(base, i) }
   analyzer = Analyzer.new(*files, lib: File.join(base, 'lib.rb'))
   analyzer.plot(output_file)
-  
-  
-  
+
+
+
   base = File.expand_path("../performance/dirk", __FILE__)
   output_file = File.join(base, 'report.png')
   files = ['jbuilder/oj.rb', 'turbostreamer/oj.rb', 'turbostreamer/wankel.rb'].map{ |i| File.join(base, i) }

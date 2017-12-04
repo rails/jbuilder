@@ -11,6 +11,7 @@ class TurboStreamer
 
       @output = io
       @stream_writer = ::Oj::StreamWriter.new(io, @options)
+      @write_comma_on_next_push = false
     end
 
     attr_reader :options
@@ -18,12 +19,25 @@ class TurboStreamer
     attr_reader :stream_writer
 
     def key(k)
+      if @stack.last == :array || @stack.last == :map
+        if @write_comma_on_next_push
+          stream_writer.flush
+          self.output.write(",")
+          @write_comma_on_next_push = false
+        end
+      end
       stream_writer.push_key(k)
     end
 
     def value(v)
       if @stack.last == :array || @stack.last == :map
         @indexes[-1] += 1
+
+        if @write_comma_on_next_push
+          stream_writer.flush
+          self.output.write(",")
+          @write_comma_on_next_push = false
+        end
       end
       stream_writer.push_value(v)
     end
@@ -31,6 +45,11 @@ class TurboStreamer
     def map_open
       @stack << :map
       @indexes << 0
+      if @write_comma_on_next_push
+        stream_writer.flush
+        self.output.write(",")
+        @write_comma_on_next_push = false
+      end
       stream_writer.push_object
     end
 
@@ -43,6 +62,11 @@ class TurboStreamer
     def array_open
       @stack << :array
       @indexes << 0
+      if @write_comma_on_next_push
+        stream_writer.flush
+        self.output.write(",")
+        @write_comma_on_next_push = false
+      end
       stream_writer.push_array
     end
 
@@ -55,40 +79,28 @@ class TurboStreamer
     def inject(string)
       stream_writer.flush
 
-      if @stack.last == :array
+      if @write_comma_on_next_push
+        self.output.write(",")
+        @write_comma_on_next_push = false
+      end
+
+      if @stack.last == :array && !string.empty?
+        if @indexes.last > 0
+          self.output.write(",")
+        else
+          @write_comma_on_next_push = true
+        end
         @indexes[-1] += 1
-      elsif @stack.last == :map
+      elsif @stack.last == :map && !string.empty?
+        if @indexes.last > 0
+          self.output.write(",")
+        else
+          @write_comma_on_next_push = true
+        end
         @indexes[-1] += 1
       end
 
-      # For string containing key and value like `"key":"value"`
-      # OJ stream writer does NOT allow writing the whole string
-      # But instead requiring key and value to be input separately
-
-      # `Regexp#match?` is much faster than `=~`
-      # https://stackoverflow.com/a/11908214/838346
-      string_contain_key = if REGEXP_SUPPORT_FAST_MATCH
-        JSON_OBJ_KEY_REGEXP.match?(string)
-      else
-        JSON_OBJ_KEY_REGEXP =~ string
-      end
-
-      if string_contain_key
-        # Using `String[Regexp, index]`
-        # is faster than `#match` according to benchmark
-        # Of course still slower than `=~` & `match?`
-        key = string[JSON_OBJ_KEY_REGEXP, 1]
-        # 2 quotes, 1 colon
-        # Use range form to get substring is fastest
-        #
-        # See benchmark on SO
-        # https://stackoverflow.com/a/3614592/838346
-        value = string[(3 + key.length)..-1]
-
-        stream_writer.push_json(value, key)
-      else
-        stream_writer.push_json(string)
-      end
+      self.output.write(string.sub(/\A,/, ''.freeze).chomp(",".freeze).strip)
     end
 
     def capture(to=nil)
@@ -131,12 +143,6 @@ class TurboStreamer
     def flush
       stream_writer.flush
     end
-
-    JSON_OBJ_KEY_REGEXP = /\A"(\w+?)":/.freeze
-    private_constant :JSON_OBJ_KEY_REGEXP
-
-    REGEXP_SUPPORT_FAST_MATCH = JSON_OBJ_KEY_REGEXP.respond_to?(:match?)
-    private_constant :REGEXP_SUPPORT_FAST_MATCH
 
   end
 end
