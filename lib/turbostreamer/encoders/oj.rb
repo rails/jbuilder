@@ -3,6 +3,8 @@ require "oj"
 class TurboStreamer
   class OjEncoder
 
+    attr_reader :output
+    
     def initialize(io, options={})
       @stack = []
       @indexes = []
@@ -14,19 +16,13 @@ class TurboStreamer
       @write_comma_on_next_push = false
     end
 
-    attr_reader :options
-    attr_reader :output
-    attr_reader :stream_writer
-
     def key(k)
-      if @stack.last == :array || @stack.last == :map
-        if @write_comma_on_next_push
-          stream_writer.flush
-          self.output.write(",")
-          @write_comma_on_next_push = false
-        end
+      if @write_comma_on_next_push && (@stack.last == :array || @stack.last == :map)
+        @stream_writer.flush
+        @output.write(",".freeze)
+        @write_comma_on_next_push = false
       end
-      stream_writer.push_key(k)
+      @stream_writer.push_key(k)
     end
 
     def value(v)
@@ -34,53 +30,53 @@ class TurboStreamer
         @indexes[-1] += 1
 
         if @write_comma_on_next_push
-          stream_writer.flush
-          self.output.write(",")
+          @stream_writer.flush
+          @output.write(",".freeze)
           @write_comma_on_next_push = false
         end
       end
-      stream_writer.push_value(v)
+      @stream_writer.push_value(v)
     end
 
     def map_open
       @stack << :map
       @indexes << 0
       if @write_comma_on_next_push
-        stream_writer.flush
-        self.output.write(",")
+        @stream_writer.flush
+        @output.write(",".freeze)
         @write_comma_on_next_push = false
       end
-      stream_writer.push_object
+      @stream_writer.push_object
     end
 
     def map_close
       @indexes.pop
       @stack.pop
-      stream_writer.pop
+      @stream_writer.pop
     end
 
     def array_open
       @stack << :array
       @indexes << 0
       if @write_comma_on_next_push
-        stream_writer.flush
-        self.output.write(",")
+        @stream_writer.flush
+        @output.write(",".freeze)
         @write_comma_on_next_push = false
       end
-      stream_writer.push_array
+      @stream_writer.push_array
     end
 
     def array_close
       @indexes.pop
       @stack.pop
-      stream_writer.pop
+      @stream_writer.pop
     end
 
     def inject(string)
-      stream_writer.flush
+      @stream_writer.flush
 
       if @write_comma_on_next_push
-        self.output.write(",")
+        @output.write(",".freeze)
         @write_comma_on_next_push = false
       end
 
@@ -104,10 +100,10 @@ class TurboStreamer
     end
 
     def capture(to=nil)
-      stream_writer.flush
+      @stream_writer.flush
 
-      old_writer = self.stream_writer
-      old_output = self.output
+      old_writer = @stream_writer
+      old_output = @output
       @indexes << 0
 
       @output = (to || ::StringIO.new)
@@ -116,16 +112,17 @@ class TurboStreamer
       # This is to prevent error from OJ streamer
       # We will strip the brackets afterward
       if @stack.last == :map
-        stream_writer.push_object
+        @stream_writer.push_object
       elsif @stack.last == :array
-        stream_writer.push_array
+        @stream_writer.push_array
       end
 
       yield
 
-      stream_writer.pop_all
-      stream_writer.flush
+      @stream_writer.pop_all
+      @stream_writer.flush
       result = output.string.sub(/\A,/, ''.freeze).chomp(",".freeze).strip
+
       # Strip brackets as promised above
       if @stack.last == :map
         result = result.sub(/\A{/, ''.freeze).chomp("}".freeze)
@@ -141,7 +138,7 @@ class TurboStreamer
     end
 
     def flush
-      stream_writer.flush
+      @stream_writer.flush
     end
 
   end

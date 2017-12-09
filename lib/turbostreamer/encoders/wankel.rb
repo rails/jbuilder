@@ -49,13 +49,13 @@ class TurboStreamer
       flush
 
       if @stack.last == :array
-        self.output.write(',') if @indexes.last > 0
+        self.output.write(','.freeze) if @indexes.last > 0
         @indexes[-1] += 1
       elsif @stack.last == :map
-        self.output.write(',') if @indexes.last > 0
+        self.output.write(','.freeze) if @indexes.last > 0
         capture do
-          string("")
-          string("")
+          string("".freeze)
+          string("".freeze)
         end
         @indexes[-1] += 1
       end
@@ -73,7 +73,7 @@ class TurboStreamer
       yield
 
       flush
-      to.string.gsub(/\A,|,\Z/, '')
+      to.string.sub(/\A,/, ''.freeze).chomp(",".freeze)
     ensure
       @indexes.pop
       self.output = old_output
