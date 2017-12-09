@@ -5,12 +5,18 @@ rvm:
   - 2.4
   - ruby-head
 
+env:
+  - ENCODER=oj
+  - ENCODER=wankel
+
 install:
   - wget 'https://github.com/lloyd/yajl/archive/2.1.0.tar.gz'
   - tar -xvf '2.1.0.tar.gz'
   - cd 'yajl-2.1.0' && ./configure && make && sudo make install
   - sudo ldconfig
   - bundle install --jobs=3 --retry=3
+
+script: rake test:$ENCODER
 
 gemfile:
   - gemfiles/rails-4.2.gemfile

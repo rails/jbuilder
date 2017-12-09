@@ -2,49 +2,56 @@ require 'stringio'
 require 'turbostreamer/key_formatter'
 
 class TurboStreamer
-  
+
   BLANK = ::Object.new
-  
-  
+
+
   ENCODERS = {
     json: {oj: 'Oj', wankel: 'Wankel'},
     msgpack: {msgpack: 'MessagePack'}
   }
-  
+
   @@default_encoders = {}
   @@key_formatter = nil
 
   undef_method :==
   undef_method :equal?
-  
+
   def self.encode(options = {}, &block)
     new(options, &block).target!
   end
-  
+
   def initialize(options = {})
     @output_buffer = options[:output_buffer] || ::StringIO.new
-    @encoder = options[:encoder] || TurboStreamer.default_encoder_for(options[:mime] || :json).new(@output_buffer)
+    @encoder = if options[:encoder].is_a?(Symbol)
+      TurboStreamer.get_encoder(options[:mime] || :json, options[:encoder])
+    elsif options[:encoder].nil?
+      TurboStreamer.default_encoder_for(options[:mime] || :json)
+    else
+      options[:encoder]
+    end
+    @encoder = @encoder.new(@output_buffer)
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil }
 
     yield self if ::Kernel.block_given?
   end
-  
+
   def key!(key)
     @encoder.key(_key(key))
   end
-    
+
   def value!(value)
     @encoder.value(value)
   end
-  
+
   def object!(&block)
     @encoder.map_open
     _scope { block.call } if block
     @encoder.map_close
   end
-  
-  # Extracts the mentioned attributes or hash elements from the passed object 
+
+  # Extracts the mentioned attributes or hash elements from the passed object
   # and turns them into a JSON object.
   #
   # Example:
@@ -63,8 +70,8 @@ class TurboStreamer
       extract!(object, *attributes)
     end
   end
-  
-  # Extracts the mentioned attributes or hash elements from the passed object 
+
+  # Extracts the mentioned attributes or hash elements from the passed object
   # and turns them into attributes of the JSON.
   #
   # Example:
@@ -85,7 +92,7 @@ class TurboStreamer
       attributes.each{ |key| _set_value key, object.public_send(key) }
     end
   end
-  
+
   # Turns the current element into an array and iterates over the passed
   # collection, adding each iteration as an element of the resulting array.
   #
@@ -98,7 +105,7 @@ class TurboStreamer
   #
   #   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
   #
-  # It's generally only needed to use this method for top-level arrays. If you 
+  # It's generally only needed to use this method for top-level arrays. If you
   # have named arrays, you can do:
   #
   #   json.people(@people) do |person|
@@ -115,7 +122,7 @@ class TurboStreamer
   #   [1,2,3]
   def array!(collection = BLANK, *attributes, &block)
     @encoder.array_open
-    
+
     if _blank?(collection)
       _scope(&block) if block
     else
@@ -124,10 +131,10 @@ class TurboStreamer
 
     @encoder.array_close
   end
-  
+
   def set!(key, value = BLANK, *args, &block)
     key!(key)
-    
+
     if block
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
@@ -197,16 +204,20 @@ class TurboStreamer
   def self.key_formatter=(formatter)
     @@key_formatter = formatter
   end
-  
+
   def self.set_default_encoder(mime, encoder)
-    @@default_encoders[mime] = encoder
+    if encoder.is_a?(Symbol)
+      @@default_encoders[mime] = get_encoder(mime, encoder)
+    else
+      @@default_encoders[mime] = encoder
+    end
   end
-  
+
   def self.get_encoder(mime, key)
     require "turbostreamer/encoders/#{key}"
     Object.const_get("TurboStreamer::#{ENCODERS[mime][key]}Encoder")
   end
-  
+
   def self.default_encoder_for(mime)
     if @@default_encoders[mime]
       @@default_encoders[mime]
@@ -215,7 +226,7 @@ class TurboStreamer
         next if !const_defined?(class_name)
         return get_encoder(mime, key)
       end
-    
+
       ENCODERS[mime].to_a.find do |key, class_name|
         begin
           return get_encoder(mime, key)
@@ -223,7 +234,7 @@ class TurboStreamer
           next
         end
       end
-      
+
       raise ArgumentError, "Could not find an adapter to use"
     end
   end
@@ -280,9 +291,9 @@ class TurboStreamer
     else
       object!{ extract!(value, *args) }
     end
-    
+
   end
-  
+
   # Encodes the current builder as JSON.
   def target!
     @encoder.flush
@@ -293,9 +304,9 @@ class TurboStreamer
       @encoder.output
     end
   end
-  
+
   private
-  
+
   def _write(key, value)
     @encoder.key(_key(key))
     @encoder.value(value)
@@ -313,7 +324,7 @@ class TurboStreamer
   def _capture(to=nil, &block)
     @encoder.capture(to, &block)
   end
-    
+
   def _scope
     parent_formatter = @key_formatter
     yield
@@ -328,7 +339,7 @@ class TurboStreamer
   def _blank?(value=@attributes)
     BLANK == value
   end
-  
+
 end
 
 

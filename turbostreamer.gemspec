@@ -18,15 +18,18 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency 'activesupport', '>= 4.2.0'
-    
+
   spec.add_development_dependency "rake"
   spec.add_development_dependency "wankel"
+  spec.add_development_dependency "oj"
   spec.add_development_dependency "bundler", '~> 1.11', '>= 1.11.2'
   spec.add_development_dependency "mocha"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "byebug"
   spec.add_development_dependency "actionview"
   spec.add_development_dependency "actionpack"
+  spec.add_development_dependency 'analyzer'
+  spec.add_development_dependency 'jbuilder'
   # spec.add_development_dependency 'sdoc',                '~> 0.4'
   # spec.add_development_dependency 'sdoc-templates-42floors', '~> 0.3'
 end
