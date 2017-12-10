@@ -267,19 +267,39 @@ Syntax Differences from Jbuilder
 Backends
 --------
 
-Currently TurboStreamer only uses the [Wankel JSON backend](https://github.com/malomalo/wankel),
-which supports streaming parsing and encoding.
+Currently TurboStreamer supports [Wankel](https://github.com/malomalo/wankel) and
+[Oj](https://github.com/ohler55/oj) for JSON encoding.
 
-The idea was to also support [Oj](https://github.com/ohler55/oj) and
-[MessagePack](http://msgpack.org/).
+By default TurboStreamer will look for `Oj` and `Wankel` and use the first
+available option.
 
-Oj should be relatively easily to do, you just need to figure out how to switch
-out the io so it can be captured for caching.
+You can also set the encoder when initializing:
 
-MessagePack would require a bit more work as you would need a change in the
-protocol. We do not know how big an array or map/object will be when we
+```ruby
+TurboStreamer.encode(encoder: :oj)
+# Or
+TurboStreamer.encode(encoder: :wankel)
+
+# You can also pass the class
+TurboStreamer.encode(encoder: TurboStreamer::WankelEncoder)
+
+# Or your own encoder
+TurboStreamer.encode(encoder: MyEncoder)
+```
+
+If you need explicitly set the default:
+
+```ruby
+TurboStreamer.set_default_encoder(:json, :oj)
+```
+
+The idea was to also support [MessagePack](http://msgpack.org/), hence requring
+the mime type when setting a default encoder.
+
+Implementing MessagePack would require a bit of work as you would need a change
+in the protocol. We do not know how big an array or map/object will be when we
 start emitting it and MessagePack require we know it. It seems like a relatively
-small change, instead of a marker followed by number of elements there would be
+small change, instead of a marker followed by number of lements there would be
 a start marker followed by the elements and then an end marker.
 
 All backends must have the following functions:
