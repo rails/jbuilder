@@ -1,5 +1,9 @@
 # Changelog
 
+1.2.0
+-----
+* Add `TurboStreamer#merge!` to merge a hash or array into the current json stream.
+
 1.1.0
 -----
 * Add `Oj` as an encoder option
