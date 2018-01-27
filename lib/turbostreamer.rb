@@ -1,5 +1,6 @@
 require 'stringio'
 require 'turbostreamer/key_formatter'
+require 'turbostreamer/errors'
 
 class TurboStreamer
 
@@ -160,6 +161,21 @@ class TurboStreamer
     end
   end
 
+  def merge!(hash_or_array)
+    if ::Array === hash_or_array
+      hash_or_array.each do |array_element|
+        value!(array_element)
+      end
+    elsif ::Hash === hash_or_array
+      hash_or_array.each_pair do |key, value|
+        key!(key)
+        value!(value)
+      end
+    else
+      raise Errors::MergeError.build(hash_or_array)
+    end
+  end
+
   alias_method :method_missing, :set!
   private :method_missing
 
@@ -297,7 +313,7 @@ class TurboStreamer
   # Encodes the current builder as JSON.
   def target!
     @encoder.flush
-    
+
     if @encoder.output.is_a?(::StringIO)
       @encoder.output.string
     else
