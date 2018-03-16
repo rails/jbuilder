@@ -320,10 +320,10 @@ class JbuilderTemplateTest < ActionView::TestCase
     JBUILDER
   end
 
-  test "fragment caching uses fragment_cache_key" do
+  test "fragment caching uses combined_fragment_cache_key" do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
-    @context.expects(:fragment_cache_key).with("cachekey")
+    @context.expects(:combined_fragment_cache_key).with("cachekey")
 
     jbuild <<-JBUILDER
       json.cache! "cachekey" do
