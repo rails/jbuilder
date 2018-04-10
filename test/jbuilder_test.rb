@@ -177,6 +177,20 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'Pavel', result['author']['name']
   end
 
+  test 'support merge! method with other builder' do
+    partial = jbuild do |json|
+      json.name 'Pavel'
+      json.foo 'bar'
+    end
+
+    result = jbuild do |json|
+      json.merge! partial
+    end
+
+    assert_equal 'Pavel', result['name']
+    assert_equal 'bar', result['foo']
+  end
+
   test 'blocks are additive via extract syntax' do
     person = Person.new('Pavel', 27)
 

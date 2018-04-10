@@ -240,8 +240,25 @@ class Jbuilder
     @attributes
   end
 
-  # Merges hash or array into current builder.
-  def merge!(hash_or_array)
+  # Merges hash, array, or any object that responds to the :attributes! method
+  # into current builder.
+  #
+  # Example:
+  #
+  #   info = Jbuilder.new do |json|
+  #     json.name("John")
+  #     json.email("john@example.com")
+  #   end
+  #
+  #   combined = Jbuilder.new do |json|
+  #     json.id(1)
+  #     json.merge!(info)
+  #   end
+  #
+  #   combined.target!
+  #   # => {"id":1,"name":"John","email":"john@example.com"}
+  def merge!(object)
+    hash_or_array = object.respond_to?(:attributes!) ? object.attributes! : object
     @attributes = _merge_values(@attributes, hash_or_array)
   end
 
