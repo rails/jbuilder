@@ -15,6 +15,16 @@ BLOG_POST_PARTIAL = <<-JBUILDER
   end
 JBUILDER
 
+BLOG_POST_PARTIAL_WITH_LOCALS = <<-JBUILDER
+  json.extract! blog_post, :id, :body
+  json.author do
+    first_name, last_name = blog_post.author_name.split(nil, 2)
+    json.first_name first_name
+    json.last_name last_name
+  end
+  json.published published
+JBUILDER
+
 COLLECTION_PARTIAL = <<-JBUILDER
   json.extract! collection, :id, :name
 JBUILDER
@@ -46,6 +56,7 @@ ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
 PARTIALS = {
   "_partial.json.jbuilder"  => "foo ||= 'hello'; json.content foo",
   "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL,
+  "_blog_post_with_locals.json.jbuilder" => BLOG_POST_PARTIAL_WITH_LOCALS,
   "racers/_racer.json.jbuilder" => RACER_PARTIAL,
   "_collection.json.jbuilder" => COLLECTION_PARTIAL
 }
@@ -453,5 +464,13 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     assert_not_nil result["post"]
     assert_equal 1, result["post"]["id"]
+  end
+
+  test "render array of partials with locals passed as part of the params" do
+    result = jbuild(<<-JBUILDER)
+      json.array! BLOG_POST_COLLECTION, partial: "blog_post_with_locals", as: :blog_post, published: true
+    JBUILDER
+
+    assert_equal result[0]["published"], true
   end
 end
