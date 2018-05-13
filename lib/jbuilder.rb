@@ -295,7 +295,8 @@ class Jbuilder
 
   def _map_collection(collection)
     collection.map do |element|
-      _scope{ yield element }
+      element_result = _scope{ yield element }
+      element_result == BLANK ? BLANK : element_result.clone
     end - [BLANK]
   end
 
