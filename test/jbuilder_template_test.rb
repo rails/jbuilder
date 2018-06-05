@@ -217,14 +217,6 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_collection_rendered result, "posts"
   end
 
-  test "render as empty array if partials as a nil value" do
-    result = jbuild <<-JBUILDER
-      json.posts nil, partial: "blog_post", as: :blog_post
-    JBUILDER
-
-    assert_equal [], result["posts"]
-  end
-
   test "cache an empty block" do
     undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 

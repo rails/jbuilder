@@ -183,7 +183,7 @@ class JbuilderTemplate < Jbuilder
 
   def _set_inline_partial(name, object, options)
     value = if object.nil?
-      []
+      nil
     elsif _is_collection?(object)
       _scope{ _render_partial_with_options options.merge(collection: object) }
     else
