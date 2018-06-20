@@ -35,6 +35,17 @@ class Person
   end
 end
 
+class PersonWithHash
+  attr_reader :name, :collection
+
+  def initialize(name, age)
+    @collection = { age: age }
+    @name = name
+  end
+
+  delegate :[], :fetch, to: :@collection
+end
+
 class RelationMock
   include Enumerable
 
@@ -119,6 +130,17 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal 'Jim', result['name']
     assert_equal 34, result['age']
+  end
+
+  test 'extracting from object with internal hash' do
+    person = PersonWithHash.new('David', 32)
+
+    result = jbuild do |json|
+      json.extract! person, :name, :age
+    end
+
+    assert_equal 'David', result['name']
+    assert_equal 32, result['age']
   end
 
   test 'nesting single child with block' do
