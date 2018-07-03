@@ -111,8 +111,9 @@ class JbuilderTemplate < Jbuilder
     if as && options.key?(:collection)
       as = as.to_sym
       collection = options.delete(:collection)
+      locals = options.delete(:locals) || {}
       array! collection do |member|
-        member_locals = options.clone
+        member_locals = options.clone.merge(locals)
         member_locals.merge! collection: collection
         member_locals.merge! as => member
         _render_partial options.merge(locals: member_locals)
