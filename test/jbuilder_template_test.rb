@@ -473,4 +473,12 @@ class JbuilderTemplateTest < ActionView::TestCase
 
     assert_equal result[0]["published"], true
   end
+
+  test "render array of partials with locals passed in locals" do
+    result = jbuild(<<-JBUILDER)
+      json.array! BLOG_POST_COLLECTION, partial: "blog_post_with_locals", as: :blog_post, locals: { published: true }
+    JBUILDER
+
+    assert_equal result[0]["published"], true
+  end
 end
