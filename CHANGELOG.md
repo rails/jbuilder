@@ -1,5 +1,10 @@
 # Changelog
 
+2.8.0
+-----
+
+* [Replace deprecated fragment_cache_key for Rails 5.2 support](https://github.com/rails/jbuilder/pull/430)
+
 2.7.0
 -----
 
