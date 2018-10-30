@@ -4,13 +4,6 @@ require 'active_support/core_ext/array/access'
 require "rails/version"
 require "jbuilder"
 
-if Rails::VERSION::STRING > "4.0"
-  require "active_support/testing/autorun"
-else
-  require "test/unit"
-end
+require "active_support/testing/autorun"
 
-
-if ActiveSupport.respond_to?(:test_order=)
-  ActiveSupport.test_order = :random
-end
+ActiveSupport.test_order = :random
