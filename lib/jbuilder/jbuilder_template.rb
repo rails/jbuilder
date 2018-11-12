@@ -104,7 +104,7 @@ class JbuilderTemplate < Jbuilder
   private
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: {}
+    options.reverse_merge! locals: options.except(:partial, :as, :collection)
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
@@ -199,7 +199,6 @@ class JbuilderTemplate < Jbuilder
     when ::Hash
       # partial! partial: 'name', foo: 'bar'
       options = name_or_options
-      options[:locals] ||= options.except(:partial, :as, :collection)
     else
       # partial! 'name', locals: {foo: 'bar'}
       if locals.one? && (locals.keys.first == :locals)
