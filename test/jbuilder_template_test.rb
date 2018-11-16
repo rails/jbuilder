@@ -44,7 +44,7 @@ COLLECTION_COLLECTION = Array.new(5){ |i| Collection.new(i+1, "collection #{i+1}
 ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
 
 PARTIALS = {
-  "_partial.json.jbuilder"  => "foo ||= 'hello'; json.content foo",
+  "_partial.json.jbuilder"  => "json.content foo",
   "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL,
   "racers/_racer.json.jbuilder" => RACER_PARTIAL,
   "_collection.json.jbuilder" => COLLECTION_PARTIAL
@@ -123,13 +123,13 @@ class JbuilderTemplateTest < ActionView::TestCase
 
   test "partial! renders partial" do
     result = jbuild(<<-JBUILDER)
-      json.partial! "partial"
+      json.partial! "partial", foo: 'hello'
     JBUILDER
 
     assert_equal "hello", result["content"]
   end
 
-  test "partial! + locals via :locals option" do
+  test "partial! + locals without :partial key with :locals key" do
     result = jbuild(<<-JBUILDER)
       json.partial! "partial", locals: { foo: "howdy" }
     JBUILDER
@@ -137,9 +137,25 @@ class JbuilderTemplateTest < ActionView::TestCase
     assert_equal "howdy", result["content"]
   end
 
-  test "partial! + locals without :locals key" do
+  test "partial! + locals with :partial key with :locals key" do
     result = jbuild(<<-JBUILDER)
-      json.partial! "partial", foo: "goodbye"
+      json.partial! partial: "partial", locals: { foo: "goodbye" }
+    JBUILDER
+
+    assert_equal "goodbye", result["content"]
+  end
+
+  test "partial! + locals without :partial key without :locals key" do
+    result = jbuild(<<-JBUILDER)
+      json.partial! "partial", foo: "howdy"
+    JBUILDER
+
+    assert_equal "howdy", result["content"]
+  end
+
+  test "partial! + locals with :partial key without :locals key" do
+    result = jbuild(<<-JBUILDER)
+      json.partial! partial: "partial", foo: "goodbye"
     JBUILDER
 
     assert_equal "goodbye", result["content"]

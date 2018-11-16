@@ -104,7 +104,7 @@ class JbuilderTemplate < Jbuilder
   private
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: {}
+    options.reverse_merge! locals: options.except(:partial, :as, :collection)
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
