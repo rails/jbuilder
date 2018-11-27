@@ -42,7 +42,12 @@ end
 task :performance do
   base = File.expand_path("../performance/rolftimmermans", __FILE__)
   output_file = File.join(base, 'report.png')
-  files = ['jbuilder/oj.rb', 'turbostreamer/oj.rb', 'turbostreamer/wankel.rb'].map{ |i| File.join(base, i) }
+  files = [
+    'rabl/oj.rb',
+    'jbuilder/oj.rb',
+    'turbostreamer/oj.rb',
+    'turbostreamer/wankel.rb',
+  ].map{ |i| File.join(base, i) }
   analyzer = Analyzer.new(*files, lib: File.join(base, 'lib.rb'))
   analyzer.plot(output_file)
 
@@ -50,7 +55,12 @@ task :performance do
 
   base = File.expand_path("../performance/dirk", __FILE__)
   output_file = File.join(base, 'report.png')
-  files = ['jbuilder/oj.rb', 'turbostreamer/oj.rb', 'turbostreamer/wankel.rb'].map{ |i| File.join(base, i) }
+  files = [
+    'rabl/oj.rb',
+    'jbuilder/oj.rb',
+    'turbostreamer/oj.rb',
+    'turbostreamer/wankel.rb',
+  ].map{ |i| File.join(base, i) }
   analyzer = Analyzer.new(*files, lib: File.join(base, 'lib.rb'))
   analyzer.plot(output_file)
 end
