@@ -36,11 +36,8 @@ class Person
 end
 
 class PersonWithHash
-  attr_reader :name, :collection
-
-  def initialize(name, age)
-    @collection = { age: age }
-    @name = name
+  def initialize(name, age, object_id)
+    @collection = { name: name, age: age, object_id: object_id }
   end
 
   delegate :[], :fetch, to: :@collection
@@ -133,14 +130,17 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'extracting from object with internal hash' do
-    person = PersonWithHash.new('David', 32)
+    person = PersonWithHash.new('David', 32, 1)
+    ruby_object_id = person.object_id
 
     result = jbuild do |json|
-      json.extract! person, :name, :age
+      json.extract! person, :name, :age, :object_id
     end
 
     assert_equal 'David', result['name']
     assert_equal 32, result['age']
+    assert_equal 1, result['object_id']
+    assert_not_equal ruby_object_id, result['object_id']
   end
 
   test 'nesting single child with block' do

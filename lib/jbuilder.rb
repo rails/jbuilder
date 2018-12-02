@@ -251,7 +251,7 @@ class Jbuilder
   private
 
   def _extract_value(object, attribute)
-    object.respond_to?(attribute) ? object.public_send(attribute) : object.fetch(attribute)
+    object.respond_to?(:[]) ? object[attribute] : object.public_send(attribute)
   end
 
   def _merge_block(key)
