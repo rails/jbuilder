@@ -33,7 +33,7 @@ JbuilderTemplate.encode FakeContext.new do |json|
   end
 end
 
-# Everthing before this is run once initialy, after is the test
+# Everthing before this is run once initially, after is the test
 __SETUP__
 
 JbuilderTemplate.encode FakeContext.new do |json|

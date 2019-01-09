@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "actionpack"
   spec.add_development_dependency 'analyzer'
   spec.add_development_dependency 'jbuilder'
+  spec.add_development_dependency 'rabl'
   # spec.add_development_dependency 'sdoc',                '~> 0.4'
   # spec.add_development_dependency 'sdoc-templates-42floors', '~> 0.3'
 end
