@@ -3,11 +3,21 @@ language: ruby
 rvm:
   - 2.3
   - 2.4
+  - 2.5
+  - 2.6
   - ruby-head
 
 env:
   - ENCODER=oj
   - ENCODER=wankel
+
+before_install:
+  # Cannot use bundler 2.x due to dependency
+  # Solution from https://github.com/travis-ci/travis-ci/issues/5290#issuecomment-164600246
+  - gem update --system
+  - gem --version
+  - rvm @global do gem uninstall bundler -a -x
+  - rvm @global do gem install bundler -v '~> 1.17.0' --conservative
 
 install:
   - wget 'https://github.com/lloyd/yajl/archive/2.1.0.tar.gz'
@@ -22,3 +32,9 @@ gemfile:
   - gemfiles/rails-4.2.gemfile
   - gemfiles/rails-5.0.gemfile
   - gemfiles/rails-5.1.gemfile
+  - gemfiles/rails-5.2.gemfile
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - rvm: ruby-head

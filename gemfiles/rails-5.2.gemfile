@@ -1,0 +1,7 @@
+source "https://rubygems.org"
+
+gem "railties", "~> 5.2.0"
+gem "activesupport", "~> 5.2.0"
+gem "actionview", "~> 5.2.0"
+
+gemspec path: "../"
