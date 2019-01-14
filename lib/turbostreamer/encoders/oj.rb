@@ -42,8 +42,6 @@ class TurboStreamer
       @stack << :map
       @indexes << 0
       if @write_comma_on_next_push
-        @stream_writer.flush
-        @output.write(",".freeze)
         @write_comma_on_next_push = false
       end
       @stream_writer.push_object
@@ -59,8 +57,6 @@ class TurboStreamer
       @stack << :array
       @indexes << 0
       if @write_comma_on_next_push
-        @stream_writer.flush
-        @output.write(",".freeze)
         @write_comma_on_next_push = false
       end
       @stream_writer.push_array
