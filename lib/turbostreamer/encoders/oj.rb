@@ -4,7 +4,7 @@ class TurboStreamer
   class OjEncoder
 
     attr_reader :output
-    
+
     def initialize(io, options={})
       @stack = []
       @indexes = []
@@ -75,21 +75,26 @@ class TurboStreamer
     def inject(string)
       @stream_writer.flush
 
+      # It's possible to have
+      # `@write_comma_on_next_push == true` and `@indexes.last > 0`
+      # So there might be double comma written without this flag
+      comma_written = false
       if @write_comma_on_next_push
         @output.write(",".freeze)
         @write_comma_on_next_push = false
+        comma_written = true
       end
 
       if @stack.last == :array && !string.empty?
         if @indexes.last > 0
-          self.output.write(",")
+          self.output.write(",") unless comma_written
         else
           @write_comma_on_next_push = true
         end
         @indexes[-1] += 1
       elsif @stack.last == :map && !string.empty?
         if @indexes.last > 0
-          self.output.write(",")
+          self.output.write(",") unless comma_written
         else
           @write_comma_on_next_push = true
         end
@@ -130,7 +135,10 @@ class TurboStreamer
         result = result.sub(/\A\[/, ''.freeze).chomp("]".freeze)
       end
 
-      result
+      # Possible for `output.string` to have value like
+      # `[,{"key":"value"}]\n`
+      # Thus the comma must be removed here
+      result.sub(/\A,/, ''.freeze)
     ensure
       @indexes.pop
       @stream_writer = old_writer
