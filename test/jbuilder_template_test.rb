@@ -3,7 +3,6 @@ require "mocha/setup"
 require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
-require "active_support/cache"
 require "jbuilder/jbuilder_template"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
@@ -49,12 +48,6 @@ PARTIALS = {
   "racers/_racer.json.jbuilder" => RACER_PARTIAL,
   "_collection.json.jbuilder" => COLLECTION_PARTIAL
 }
-
-module Rails
-  def self.cache
-    @cache ||= ActiveSupport::Cache::MemoryStore.new
-  end
-end
 
 class JbuilderTemplateTest < ActionView::TestCase
   setup do
@@ -346,23 +339,6 @@ class JbuilderTemplateTest < ActionView::TestCase
         json.name "Cache"
       end
     JBUILDER
-  end
-
-  test "fragment caching instrumentation" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    payloads = {}
-    ActiveSupport::Notifications.subscribe("read_fragment.action_controller") { |*args| payloads[:read_fragment] = args.last }
-    ActiveSupport::Notifications.subscribe("write_fragment.action_controller") { |*args| payloads[:write_fragment] = args.last }
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.name "Cache"
-      end
-    JBUILDER
-
-    assert_equal "jbuilder/cachekey", payloads[:read_fragment][:key]
-    assert_equal "jbuilder/cachekey", payloads[:write_fragment][:key]
   end
 
   test "current cache digest option accepts options" do
