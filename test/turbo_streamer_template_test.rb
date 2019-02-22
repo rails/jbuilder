@@ -82,7 +82,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
     overrides.each do |index, value|
       assert_equal value, result[index]
     end
-    
+
     assert_equal('post body 5', result[4]['body']) unless overrides[4]
     assert_equal('Heinemeier Hansson', result[2]['author']['last_name']) unless overrides[2]
     assert_equal('Pavel', result[5]['author']['first_name']) unless overrides[5]
@@ -266,6 +266,174 @@ class TurboStreamerTemplateTest < ActionView::TestCase
     assert_equal(%w[a b c], Wankel.load(json))
   end
 
+  test 'fragment caching works in an array' do
+    undef_context_methods :cache_fragment_name
+
+    json = render_streamer <<-STREAMER
+      json.array! do
+        %w[a b c d].each do |char|
+          json.cache!("char_" + char) do
+            json.object! do
+              json.set!(:char, char)
+            end
+          end
+        end
+      end
+    STREAMER
+
+    # cache miss output correct
+    assert_equal([
+      {"char" => "a"},
+      {"char" => "b"},
+      {"char" => "c"},
+      {"char" => "d"},
+    ], Wankel.load(json))
+
+    json = render_streamer <<-STREAMER
+      json.array! do
+        %w[a b c d].each do |char|
+          json.cache!("char_" + char) do
+            json.object! do
+              json.set!(:char, char)
+            end
+          end
+        end
+      end
+    STREAMER
+
+    # cache hit output correct
+    assert_equal([
+      {"char" => "a"},
+      {"char" => "b"},
+      {"char" => "c"},
+      {"char" => "d"},
+    ], Wankel.load(json))
+  end
+
+  test 'fragment caching works with objects in array in object' do
+    undef_context_methods :cache_fragment_name
+
+    json = render_streamer <<-STREAMER
+      json.object! do
+        json.set!(:chars) do
+          json.array! do
+            %w[a b c d].each do |char|
+              json.object! do
+                json.cache!("char_" + char) do
+                  json.set!(:char, char)
+                end
+              end 
+            end
+          end
+        end
+      end
+    STREAMER
+
+    # cache miss output correct
+    assert_equal(
+      {
+        "chars" => [
+          {"char" => "a"},
+          {"char" => "b"},
+          {"char" => "c"},
+          {"char" => "d"},
+        ]
+      },
+      Wankel.load(json),
+    )
+
+    json = render_streamer <<-STREAMER
+      json.object! do
+        json.set!(:chars) do
+          json.array! do
+            %w[a b c d].each do |char|
+              json.object! do
+                json.cache!("char_" + char) do
+                  json.set!(:char, char)
+                end
+              end 
+            end
+          end
+        end
+      end
+    STREAMER
+
+    # cache hit output correct
+    assert_equal(
+      {
+        "chars" => [
+          {"char" => "a"},
+          {"char" => "b"},
+          {"char" => "c"},
+          {"char" => "d"},
+        ]
+      },
+      Wankel.load(json),
+    )
+  end
+
+  test 'fragment caching works with array in array in object' do
+    undef_context_methods :cache_fragment_name
+
+    json = render_streamer <<-STREAMER
+      json.object! do
+        json.set!(:chars) do
+          json.array! do
+            %w[a b c d].each do |char|
+              json.array! do
+                json.cache!("char_" + char) do
+                  json.value!(char)
+                end
+              end 
+            end
+          end
+        end
+      end
+    STREAMER
+
+    # cache miss output correct
+    assert_equal(
+      {
+        "chars" => [
+          ["a"],
+          ["b"],
+          ["c"],
+          ["d"],
+        ]
+      },
+      Wankel.load(json),
+    )
+
+    json = render_streamer <<-STREAMER
+      json.object! do
+        json.set!(:chars) do
+          json.array! do
+            %w[a b c d].each do |char|
+              json.array! do
+                json.cache!("char_" + char) do
+                  json.value!(char)
+                end
+              end 
+            end
+          end
+        end
+      end
+    STREAMER
+
+    # cache hit output correct
+    assert_equal(
+      {
+        "chars" => [
+          ["a"],
+          ["b"],
+          ["c"],
+          ["d"],
+        ]
+      },
+      Wankel.load(json),
+    )
+  end
+
   test 'fragment caching works with current cache digests' do
     @context.expects(:cache_fragment_name).with('cachekey', {})
 
@@ -328,7 +496,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
     CACHE_KEY_PROC.expects(:call).returns(true)
 
     Rails.cache.write("streamer/true/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
-    
+
     json = render_streamer <<-STREAMER
       json.cache_collection! BLOG_POST_COLLECTION, key: CACHE_KEY_PROC do |blog_post|
         json.partial! 'blog_post', :blog_post => blog_post
@@ -369,5 +537,5 @@ class TurboStreamerTemplateTest < ActionView::TestCase
 
     assert_collection_rendered(json, {0 => 'CACHE HIT'}, 'key')
   end
-  
+
 end
