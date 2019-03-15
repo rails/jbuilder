@@ -177,8 +177,8 @@ class TurboStreamer::Template < TurboStreamer
     name_options = options.slice(:skip_digest, :virtual_path)
     key = _fragment_name_with_digest(key, name_options)
 
-    if @context.respond_to?(:fragment_cache_key)
-      key = @context.fragment_cache_key(key)
+    if @context.respond_to?(:combined_fragment_cache_key)
+      key = @context.combined_fragment_cache_key(key)
     elsif ::Hash === key
       key = url_for(key).split('://', 2).last
     end
