@@ -179,6 +179,9 @@ class TurboStreamer::Template < TurboStreamer
 
     if @context.respond_to?(:combined_fragment_cache_key)
       key = @context.combined_fragment_cache_key(key)
+    elsif @context.respond_to?(:fragment_cache_key)
+      # TODO: remove after droping rails 5.1 support
+      key = @context.fragment_cache_key(key)
     elsif ::Hash === key
       key = url_for(key).split('://', 2).last
     end
