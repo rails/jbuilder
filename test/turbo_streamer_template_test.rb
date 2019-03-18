@@ -41,8 +41,6 @@ end
 
 class TurboStreamerTemplateTest < ActionView::TestCase
   setup do
-    @context = self
-    @virtual_path = nil
     Rails.cache.clear
   end
 
@@ -53,15 +51,18 @@ class TurboStreamerTemplateTest < ActionView::TestCase
       '_collection.json.streamer' => COLLECTION_TEMPLATE
     }
   end
-
+  
   def render_streamer(source)
     @rendered = []
-    lookup_context.view_paths = [ActionView::FixtureResolver.new(partials.merge('test.json.streamer' => source))]
-    ActionView::Template.new(source, 'test', TurboStreamer::Handler, virtual_path: 'test').render(self, {}).strip
+    resolver = ActionView::FixtureResolver.new(partials.merge('test.json.streamer' => source))
+    view_paths = ActionView::PathSet.new([resolver])
+    lookup_context.instance_variable_set(:@view_paths, view_paths)
+    template = ActionView::Template.new(source, 'test', TurboStreamer::Handler, format: :json, virtual_path: 'test')
+    template.render(view, {}).strip
   end
 
   def undef_context_methods(*names)
-    self.class_eval do
+    view.class_eval do
       names.each do |name|
         undef_method name.to_sym if method_defined?(name.to_sym)
       end
@@ -435,7 +436,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching works with current cache digests' do
-    @context.expects(:cache_fragment_name).with('cachekey', {})
+    view.expects(:cache_fragment_name).with('cachekey', {})
 
     json = render_streamer <<-STREAMER
       json.object! do
@@ -449,7 +450,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
   end
 
   test 'current cache digest option accepts options' do
-    @context.expects(:cache_fragment_name).with('cachekey', skip_digest: true)
+    view.expects(:cache_fragment_name).with('cachekey', skip_digest: true)
 
     json = render_streamer <<-STREAMER
       json.object! do
@@ -480,7 +481,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
   test 'renders cached array of block partials' do
     undef_context_methods :cache_fragment_name
 
-    Rails.cache.write("streamer/8/post body 8/Pavel Pravosud", '"CACHE HIT"')
+    Rails.cache.write("streamer/views/8/post body 8/Pavel Pravosud", '"CACHE HIT"')
 
     json = render_streamer <<-STREAMER
       json.cache_collection! BLOG_POST_COLLECTION do |blog_post|
@@ -495,7 +496,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
     undef_context_methods :cache_fragment_name
     CACHE_KEY_PROC.expects(:call).returns(true)
 
-    Rails.cache.write("streamer/true/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
+    Rails.cache.write("streamer/views/true/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
 
     json = render_streamer <<-STREAMER
       json.cache_collection! BLOG_POST_COLLECTION, key: CACHE_KEY_PROC do |blog_post|
@@ -522,7 +523,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
     undef_context_methods :cache_fragment_name
     CACHE_KEY_PROC.expects(:call)
 
-    Rails.cache.write("streamer/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
+    Rails.cache.write("streamer/views/1/post body 1/David Heinemeier Hansson", '"CACHE HIT"')
 
     json = render_streamer <<-STREAMER
       json.object! do

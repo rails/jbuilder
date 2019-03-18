@@ -202,16 +202,6 @@ class TurboStreamer::Template < TurboStreamer
     end
   end
 
-  def _fragment_name_with_digest(key, options)
-    if @context.respond_to?(:cache_fragment_name)
-      # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
-      # should be used instead.
-      @context.cache_fragment_name(key, options)
-    else
-      key
-    end
-  end
-
   def _partial_options?(options)
     ::Hash === options && options.key?(:as) && options.key?(:partial)
   end
