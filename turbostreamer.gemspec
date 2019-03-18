@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -- {test}/*`.split("\n")
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'activesupport', '>= 4.2.0'
+  spec.add_runtime_dependency 'activesupport', '>= 5.0.0'
 
   spec.add_development_dependency "rake"
   spec.add_development_dependency "wankel"

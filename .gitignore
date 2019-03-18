@@ -4,3 +4,5 @@ Gemfile.lock
 pkg
 coverage
 .DS_Store
+*.gem
+gemfiles/*.gemfile.lock
