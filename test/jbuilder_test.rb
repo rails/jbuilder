@@ -75,7 +75,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert result.has_key?('content')
-    assert_equal nil, result['content']
+    assert_nil result['content']
   end
 
   test 'multiple keys' do
