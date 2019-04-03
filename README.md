@@ -156,7 +156,6 @@ if current_user.admin?
 end
 ```
 
-
 You can use partials as well. The following will render the file
 `views/comments/_comments.json.jbuilder`, and set a local variable
 `comments` with all this message's comments, which you can use inside
@@ -182,6 +181,25 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 # or
 
 json.comments @post.comments, partial: 'comments/comment', as: :comment
+```
+
+The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`. 
+
+Be sure not to confuse the `as:` option to mean nesting of the partial. For example:
+
+```ruby
+ # Use the default `views/comments/_comment.json.jbuilder`, putting @comment as the comment local variable.
+ # Note, `comment` attributes are "inlined".
+ json.partial! @comment, as: :comment
+```
+
+is quite different than:
+
+```ruby
+ # comment attributes are nested under a "comment" property
+json.comment do
+  json.partial! "/comments/comment.json.jbuilder", comment: @comment
+end
 ```
 
 You can pass any objects into partial templates with or without `:locals` option.
