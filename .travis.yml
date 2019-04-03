@@ -1,6 +1,5 @@
 language: ruby
 
-sudo: false
 cache: bundler
 
 before_install:
@@ -10,7 +9,7 @@ before_install:
 rvm:
   - 2.2.10
   - 2.3.8
-  - 2.4.5
+  - 2.4.6
   - 2.5.5
   - 2.6.2
   - ruby-head
@@ -46,7 +45,7 @@ matrix:
       gemfile: gemfiles/rails_head.gemfile
     - rvm: 2.3.8
       gemfile: gemfiles/rails_head.gemfile
-    - rvm: 2.4.5
+    - rvm: 2.4.6
       gemfile: gemfiles/rails_head.gemfile
   allow_failures:
     - rvm: jruby-19mode
