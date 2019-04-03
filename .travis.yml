@@ -13,7 +13,7 @@ rvm:
   - 2.5.5
   - 2.6.2
   - ruby-head
-  - rbx
+  - rbx-3.107
 
 gemfile:
   - gemfiles/rails_4_2.gemfile
@@ -34,7 +34,7 @@ matrix:
       gemfile: gemfiles/rails_4_2.gemfile
     - rvm: jruby-19mode
       gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: rbx
+    - rvm: rbx-3.107
       gemfile: gemfiles/rails_4_2.gemfile
   exclude:
     - rvm: 2.5.5
@@ -49,7 +49,7 @@ matrix:
       gemfile: gemfiles/rails_head.gemfile
   allow_failures:
     - rvm: jruby-19mode
-    - rvm: rbx
+    - rvm: rbx-3.107
     - rvm: ruby-head
     - gemfile: gemfiles/rails_head.gemfile
   fast_finish: true
