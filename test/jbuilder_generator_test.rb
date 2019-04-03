@@ -21,11 +21,11 @@ class JbuilderGeneratorTest < Rails::Generators::TestCase
     run_generator
 
     assert_file 'app/views/posts/index.json.jbuilder' do |content|
-      assert_match %r{json.array! @posts, partial: 'posts/post', as: :post}, content
+      assert_match %r{json\.array! @posts, partial: "posts/post", as: :post}, content
     end
 
     assert_file 'app/views/posts/show.json.jbuilder' do |content|
-      assert_match %r{json.partial! \"posts/post\", post: @post}, content
+      assert_match %r{json\.partial! "posts/post", post: @post}, content
     end
 
     assert_file 'app/views/posts/_post.json.jbuilder' do |content|
