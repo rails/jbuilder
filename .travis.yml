@@ -37,6 +37,8 @@ matrix:
     - rvm: rbx-3.107
       gemfile: gemfiles/rails_4_2.gemfile
   exclude:
+    - rvm: 2.4.6
+      gemfile: gemfiles/rails_4_2.gemfile
     - rvm: 2.5.5
       gemfile: gemfiles/rails_4_2.gemfile
     - rvm: 2.6.2
