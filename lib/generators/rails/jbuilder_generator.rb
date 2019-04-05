@@ -50,6 +50,10 @@ module Rails
 
           attributes.map { |a| ":#{a}"} * ', '
         end
+
+        def virtual_attributes
+          attributes.select {|name| name.respond_to?(:virtual?) && name.virtual? }
+        end
     end
   end
 end

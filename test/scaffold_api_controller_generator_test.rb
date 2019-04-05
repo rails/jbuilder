@@ -55,5 +55,16 @@ if Rails::VERSION::MAJOR > 4
         assert_match %r{params\.fetch\(:post, \{\}\)}, content
       end
     end
+
+
+    if Rails::VERSION::MAJOR >= 6
+      test 'handles virtual attributes' do
+        run_generator ["Message", "content:rich_text", "video:attachment", "photos:attachments"]
+
+        assert_file 'app/controllers/messages_controller.rb' do |content|
+          assert_match %r{params\.require\(:message\)\.permit\(:content, :video, photos: \[\]\)}, content
+        end
+      end
+    end
   end
 end
