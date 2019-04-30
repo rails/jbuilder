@@ -57,7 +57,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
     resolver = ActionView::FixtureResolver.new(partials.merge('test.json.streamer' => source))
     view_paths = ActionView::PathSet.new([resolver])
     lookup_context.instance_variable_set(:@view_paths, view_paths)
-    template = ActionView::Template.new(source, 'test', TurboStreamer::Handler, format: :json, virtual_path: 'test')
+    template = ActionView::Template.new(source, 'test', TurboStreamer::Handler, format: :json, virtual_path: 'test', locals: [])
     template.render(view, {}).strip
   end
 

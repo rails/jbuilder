@@ -1,7 +1,7 @@
 require 'bundler/setup'
 require "bundler/gem_tasks"
-Bundler.require(:development)
 
+require 'byebug'
 require 'fileutils'
 require "rake/testtask"
 
@@ -40,6 +40,8 @@ namespace :test do
 end
 
 task :performance do
+  require 'analyzer'
+  
   base = File.expand_path("../performance/rolftimmermans", __FILE__)
   output_file = File.join(base, 'report.png')
   files = [
