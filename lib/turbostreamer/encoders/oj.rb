@@ -5,11 +5,13 @@ class TurboStreamer
 
     attr_reader :output
 
+    BUFFER_SIZE = 4096
+
     def initialize(io, options={})
       @stack = []
       @indexes = []
 
-      @options = {mode: :json}.merge(options)
+      @options = {mode: :json, buffer_size: BUFFER_SIZE}.merge(options)
 
       @output = io
       @stream_writer = ::Oj::StreamWriter.new(io, @options)
