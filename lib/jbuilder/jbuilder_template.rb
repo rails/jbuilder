@@ -222,7 +222,7 @@ end
 
 class JbuilderHandler
   cattr_accessor :default_format
-  self.default_format = Mime[:json]
+  self.default_format = :json
 
   def self.call(template, source = nil)
     source ||= template.source
