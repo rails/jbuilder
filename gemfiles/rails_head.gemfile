@@ -5,7 +5,6 @@ source "https://rubygems.org"
 gem "rake"
 gem "mocha", require: false
 gem "appraisal"
-gem "byebug"
 gem "rails", github: "rails/rails"
 
 gemspec path: "../"

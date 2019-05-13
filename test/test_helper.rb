@@ -1,5 +1,4 @@
 require "bundler/setup"
-require "byebug"
 
 require "active_support"
 require "active_support/core_ext/array/access"

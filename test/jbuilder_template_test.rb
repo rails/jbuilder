@@ -293,16 +293,16 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       view.render(template: "source.json.jbuilder")
     end
 
-    def build_view(fixtures:, assigns: {})
-      resolver = ActionView::FixtureResolver.new(fixtures)
+    def build_view(options = {})
+      resolver = ActionView::FixtureResolver.new(options.fetch(:fixtures))
       lookup_context = ActionView::LookupContext.new([ resolver ], {}, [""])
       controller = ActionView::TestCase::TestController.new
 
       # TODO: Use with_empty_template_cache unconditionally after dropping support for Rails <6.0.
       view = if ActionView::Base.respond_to?(:with_empty_template_cache)
-        ActionView::Base.with_empty_template_cache.new(lookup_context, assigns, controller)
+        ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
       else
-        ActionView::Base.new(lookup_context, assigns, controller)
+        ActionView::Base.new(lookup_context, options.fetch(:assigns, {}), controller)
       end
 
       def view.view_cache_dependencies; []; end
