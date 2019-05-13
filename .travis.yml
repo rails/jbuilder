@@ -20,6 +20,7 @@ gemfile:
   - gemfiles/rails_5_0.gemfile
   - gemfiles/rails_5_1.gemfile
   - gemfiles/rails_5_2.gemfile
+  - gemfiles/rails_6_0.gemfile
   - gemfiles/rails_head.gemfile
 
 matrix:
@@ -43,6 +44,12 @@ matrix:
       gemfile: gemfiles/rails_4_2.gemfile
     - rvm: 2.6.2
       gemfile: gemfiles/rails_4_2.gemfile
+    - rvm: 2.2.10
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.3.8
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.4.6
+      gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.2.10
       gemfile: gemfiles/rails_head.gemfile
     - rvm: 2.3.8
