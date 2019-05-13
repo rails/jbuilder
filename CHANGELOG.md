@@ -9,6 +9,7 @@
 * [Allow omitting timestamps from generated partials](https://github.com/rails/jbuilder/pull/448)
 * [Respect changing scaffold generator](https://github.com/rails/jbuilder/pull/458)
 * [Use a symbolic default format for Rails 6.0 forward compatibility](https://github.com/rails/jbuilder/commit/3895a7243f3db292b0bf15513fc05494e6e50576)
+* [Drop MultiJSON in favor of Ruby standard library JSON](https://github.com/rails/jbuilder/commit/b952ae096eb1828b0fcfde06e6ba62311494ec49)
 
 2.8.0
 -----
