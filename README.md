@@ -183,7 +183,7 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 json.comments @post.comments, partial: 'comments/comment', as: :comment
 ```
 
-The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`. 
+The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`.
 
 Be sure not to confuse the `as:` option to mean nesting of the partial. For example:
 
@@ -273,21 +273,6 @@ environment.rb for example):
 ``` ruby
 Jbuilder.key_format camelize: :lower
 ```
-
-Faster JSON backends
---------------------
-
-Jbuilder uses MultiJson, which by default will use the JSON gem. That gem is
-currently tangled with ActiveSupport's all-Ruby `#to_json` implementation,
-which is slow (fixed in Rails >= 4.1). For faster Jbuilder rendering, you can
-specify something like the Yajl JSON generator instead. You'll need to include
-the `yajl-ruby` gem in your Gemfile and then set the following configuration
-for MultiJson:
-
-``` ruby
-require 'multi_json'
-MultiJson.use :yajl
- ```
 
 ## Contributing to Jbuilder
 

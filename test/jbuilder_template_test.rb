@@ -195,7 +195,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       end
     JBUILDER
 
-    assert_equal MultiJson.dump(name: "Hit"), Rails.cache.read("jbuilder/root/cache-key")
+    assert_equal JSON.dump(name: "Hit"), Rails.cache.read("jbuilder/root/cache-key")
 
     result = render(<<-JBUILDER)
       json.cache_root! "cache-key" do
@@ -223,7 +223,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       end
     JBUILDER
 
-    assert_equal MultiJson.dump(%w[ a b c ]), Rails.cache.read("jbuilder/root/cache-key")
+    assert_equal JSON.dump(%w[ a b c ]), Rails.cache.read("jbuilder/root/cache-key")
 
     assert_equal %w[ a b c ], render(<<-JBUILDER)
       json.cache_root! "cache-key" do
@@ -285,7 +285,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
 
   private
     def render(*args)
-      MultiJson.load render_without_parsing(*args)
+      JSON.load render_without_parsing(*args)
     end
 
     def render_without_parsing(source, assigns = {})
