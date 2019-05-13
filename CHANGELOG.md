@@ -1,5 +1,15 @@
 # Changelog
 
+2.9.0
+-----
+
+* [Fix passing object with partial without locals](https://github.com/rails/jbuilder/pull/435)
+* [Fix deprecation warning in Rails 6.0](https://github.com/rails/jbuilder/pull/453)
+* [Use quotes consistently in generated templates](https://github.com/rails/jbuilder/pull/455)
+* [Allow omitting timestamps from generated partials](https://github.com/rails/jbuilder/pull/448)
+* [Respect changing scaffold generator](https://github.com/rails/jbuilder/pull/458)
+* [Use a symbolic default format for Rails 6.0 forward compatibility](https://github.com/rails/jbuilder/commit/3895a7243f3db292b0bf15513fc05494e6e50576)
+
 2.8.0
 -----
 
