@@ -247,7 +247,7 @@ class Jbuilder
 
   # Encodes the current builder as JSON.
   def target!
-    ::JSON.dump(@attributes)
+    @attributes.to_json
   end
 
   private
