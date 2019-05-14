@@ -1,5 +1,10 @@
 # Changelog
 
+2.9.1
+-----
+
+* [Respect JSON encoding customizations](https://github.com/rails/jbuilder/commit/e2e8623b08078ad6a2323ce8ecaf642b7afe1166)
+
 2.9.0
 -----
 
