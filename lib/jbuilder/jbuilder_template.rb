@@ -104,7 +104,7 @@ class JbuilderTemplate < Jbuilder
   private
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: {}
+    options.reverse_merge! locals: options.except(:partial, :as, :collection)
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
@@ -225,11 +225,12 @@ end
 
 class JbuilderHandler
   cattr_accessor :default_format
-  self.default_format = Mime[:json]
+  self.default_format = :json
 
-  def self.call(template)
+  def self.call(template, source = nil)
+    source ||= template.source
     # this juggling is required to keep line numbers right in the error
-    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{template.source}
+    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{source}
       json.target! unless (__already_defined && __already_defined != "method")}
   end
 end

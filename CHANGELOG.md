@@ -1,5 +1,33 @@
 # Changelog
 
+2.9.1
+-----
+
+* [Respect JSON encoding customizations](https://github.com/rails/jbuilder/commit/e2e8623b08078ad6a2323ce8ecaf642b7afe1166)
+
+2.9.0
+-----
+
+* [Fix passing object with partial without locals](https://github.com/rails/jbuilder/pull/435)
+* [Fix deprecation warning in Rails 6.0](https://github.com/rails/jbuilder/pull/453)
+* [Use quotes consistently in generated templates](https://github.com/rails/jbuilder/pull/455)
+* [Allow omitting timestamps from generated partials](https://github.com/rails/jbuilder/pull/448)
+* [Respect changing scaffold generator](https://github.com/rails/jbuilder/pull/458)
+* [Use a symbolic default format for Rails 6.0 forward compatibility](https://github.com/rails/jbuilder/commit/3895a7243f3db292b0bf15513fc05494e6e50576)
+* [Drop MultiJSON in favor of Ruby standard library JSON](https://github.com/rails/jbuilder/commit/b952ae096eb1828b0fcfde06e6ba62311494ec49)
+
+2.8.0
+-----
+
+* [Replace deprecated fragment_cache_key for Rails 5.2 support](https://github.com/rails/jbuilder/pull/430)
+
+2.7.0
+-----
+
+* [Requires Rails 4+](https://github.com/rails/jbuilder/commit/5207ff394533177fffdd768bfaa6413a0cd16dc8)
+* [Fix implicitly rendering a JSON partial with the same name as an
+   HTML partial](https://github.com/rails/jbuilder/pull/400)
+
 2.6.4
 -----
 
