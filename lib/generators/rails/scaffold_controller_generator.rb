@@ -7,6 +7,12 @@ module Rails
       source_paths << File.expand_path('../templates', __FILE__)
 
       hook_for :jbuilder, type: :boolean, default: true
+
+      private
+
+        def permitted_params
+          attributes_names.map { |name| ":#{name}" }.join(', ')
+        end unless private_method_defined? :permitted_params
     end
   end
 end

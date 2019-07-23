@@ -2,7 +2,7 @@ require 'jbuilder/jbuilder'
 require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
-require 'multi_json'
+require 'json'
 require 'ostruct'
 
 class Jbuilder
@@ -247,7 +247,7 @@ class Jbuilder
 
   # Encodes the current builder as JSON.
   def target!
-    ::MultiJson.dump(@attributes)
+    @attributes.to_json
   end
 
   private
