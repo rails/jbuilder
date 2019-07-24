@@ -159,7 +159,6 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   end
 
   test "fragment caching a JSON object with force option" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
 
     jbuild <<-JBUILDER
       json.cache! "cachekey" do
