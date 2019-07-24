@@ -160,32 +160,31 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
 
   test "fragment caching a JSON object with force option" do
 
-    jbuild <<-JBUILDER
+    render(<<-JBUILDER)
       json.cache! "cachekey" do
         json.test1 "Value"
       end
     JBUILDER
 
-    result = jbuild(<<-JBUILDER)
+    result = render(<<-JBUILDER)
       json.cache! "cachekey", force: false do
         json.test1 "New Value"
       end
     JBUILDER
     assert_equal "Value", result["test1"]
 
-    result = jbuild(<<-JBUILDER)
+    result = render(<<-JBUILDER)
       json.cache! "cachekey", force: true do
         json.test1 "New Value"
       end
     JBUILDER
     assert_equal "New Value", result["test1"]
-    result = jbuild(<<-JBUILDER)
+    result = render(<<-JBUILDER)
       json.cache! "cachekey" do
         json.test1 "Cache Miss"
       end
     JBUILDER
     assert_equal "New Value", result["test1"]
-    puts result
   end
 
   test "object fragment caching with expiry" do
