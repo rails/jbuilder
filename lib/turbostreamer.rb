@@ -237,7 +237,7 @@ class TurboStreamer
     @@encoder_options[encoder] = default_options
   end
   
-  def self.set_encoder_options(encoder, options)
+  def self.set_default_encoder_options(encoder, options)
     @@encoder_options[encoder] = options
   end
 
