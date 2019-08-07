@@ -6,13 +6,13 @@ class TurboStreamer
 
   BLANK = ::Object.new
 
-
   ENCODERS = {
     json: {oj: 'Oj', wankel: 'Wankel'},
     msgpack: {msgpack: 'MessagePack'}
   }
 
   @@default_encoders = {}
+  @@encoder_options = Hash.new { |h, k| h[k] = {} }
   @@key_formatter = nil
 
   undef_method :==
@@ -24,15 +24,22 @@ class TurboStreamer
 
   def initialize(options = {})
     @output_buffer = options[:output_buffer] || ::StringIO.new
-    @encoder = if options[:encoder].is_a?(Symbol)
-      TurboStreamer.get_encoder(options[:mime] || :json, options[:encoder])
+    if options[:encoder].is_a?(Symbol)
+      @encoder = TurboStreamer.get_encoder(options[:mime] || :json, options[:encoder])
+      @encoder_options = @@encoder_options[options[:encoder]]
     elsif options[:encoder].nil?
-      TurboStreamer.default_encoder_for(options[:mime] || :json)
+      @encoder = TurboStreamer.default_encoder_for(options[:mime] || :json)
+      if encoder_symbol = ENCODERS[options[:mime] || :json].find { |k, v| v == @encoder.name.delete_prefix('TurboStreamer::').delete_suffix('Encoder') }&.first
+        @encoder_options = @@encoder_options[encoder_symbol]
+      else
+        @encoder_options = {}
+      end
     else
-      options[:encoder]
+      @encoder = options[:encoder]
+      @encoder_options = {}
     end
-    @encoder = @encoder.new(@output_buffer)
 
+    @encoder = @encoder.new(@output_buffer, @encoder_options)
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil }
 
     yield self if ::Kernel.block_given?
@@ -221,12 +228,17 @@ class TurboStreamer
     @@key_formatter = formatter
   end
 
-  def self.set_default_encoder(mime, encoder)
+  def self.set_default_encoder(mime, encoder, default_options={})
     if encoder.is_a?(Symbol)
       @@default_encoders[mime] = get_encoder(mime, encoder)
     else
       @@default_encoders[mime] = encoder
     end
+    @@encoder_options[encoder] = default_options
+  end
+  
+  def self.set_encoder_options(encoder, options)
+    @@encoder_options[encoder] = options
   end
 
   def self.get_encoder(mime, key)

@@ -299,10 +299,23 @@ TurboStreamer.encode(encoder: TurboStreamer::WankelEncoder)
 TurboStreamer.encode(encoder: MyEncoder)
 ```
 
+# Setting the default encoder and options
 If you need explicitly set the default:
 
 ```ruby
 TurboStreamer.set_default_encoder(:json, :oj)
+```
+
+You can also set default options to pass to the encoder if needed:
+
+```ruby
+TurboStreamer.set_default_encoder(:json, :oj, buffer_size: 1_024)
+```
+
+You may also just set the default options for an encoder:
+
+```ruby
+TurboStreamer.set_default_encoder_options(:oj, buffer_size: 2_048)
 ```
 
 The idea was to also support [MessagePack](http://msgpack.org/), hence requring
