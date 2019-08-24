@@ -16,7 +16,6 @@ rvm:
   - rbx-3.107
 
 gemfile:
-  - gemfiles/rails_4_2.gemfile
   - gemfiles/rails_5_0.gemfile
   - gemfiles/rails_5_1.gemfile
   - gemfiles/rails_5_2.gemfile
@@ -24,26 +23,7 @@ gemfile:
   - gemfiles/rails_head.gemfile
 
 matrix:
-  include:
-    - rvm: 1.9
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: 2.0
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: 2.1
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: 2.3
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: jruby-19mode
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: rbx-3.107
-      gemfile: gemfiles/rails_4_2.gemfile
   exclude:
-    - rvm: 2.4.6
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: 2.5.5
-      gemfile: gemfiles/rails_4_2.gemfile
-    - rvm: 2.6.2
-      gemfile: gemfiles/rails_4_2.gemfile
     - rvm: 2.2.10
       gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.3.8

@@ -99,7 +99,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['age']
   end
 
-  test 'extracting from object using call style for 1.9' do
+  test 'extracting from object using call style' do
     person = Struct.new(:name, :age).new('David', 32)
 
     result = jbuild do |json|

@@ -163,7 +163,7 @@ class Jbuilder
   #
   #   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
   #
-  # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
+  # You can use the call syntax instead of an explicit extract! call:
   #
   #   json.(@people) { |person| ... }
   #

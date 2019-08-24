@@ -1,5 +1,10 @@
 # Changelog
 
+Unreleased
+----------
+
+* Requires Rails 5+ and Ruby 2.2+
+
 2.9.1
 -----
 
