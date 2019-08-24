@@ -5,6 +5,6 @@ source "https://rubygems.org"
 gem "rake"
 gem "mocha", require: false
 gem "appraisal"
-gem "rails", "~> 6.0.0.rc1"
+gem "rails", "~> 6.0.0"
 
 gemspec path: "../"
