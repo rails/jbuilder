@@ -2,7 +2,8 @@ module ActionView
   class StreamingTemplateRenderer < TemplateRenderer
     
     def render_template(template, layout_name = nil, locals = {}) #:nodoc:
-      return [super] unless layout_name && template.supports_streaming?
+      template_supports_streaming = (layout_name && template.supports_streaming?) || template.handler == TurboStreamer::Handler
+      return [super] unless template_supports_streaming
 
       locals ||= {}
       layout   = layout_name && find_layout(layout_name, locals.keys, [formats.first])
