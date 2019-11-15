@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'active_support/inflector'
+require 'active_support/core_ext/hash/deep_merge'
 require 'jbuilder'
 
 def jbuild(*args, &block)
@@ -157,6 +158,25 @@ class JbuilderTest < ActiveSupport::TestCase
 
     assert_equal 'David', result['author']['name']
     assert_equal 32, result['author']['age']
+  end
+
+  test 'nested blocks are additive' do
+    result = jbuild do |json|
+      json.author do
+        json.name do
+          json.first 'David'
+        end
+      end
+
+      json.author do
+        json.name do
+          json.last 'Heinemeier Hansson'
+        end
+      end
+    end
+
+    assert_equal 'David', result['author']['name']['first']
+    assert_equal 'Heinemeier Hansson', result['author']['name']['last']
   end
 
   test 'support merge! method' do

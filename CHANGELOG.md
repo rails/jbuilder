@@ -4,6 +4,7 @@ Unreleased
 ----------
 
 * Requires Rails 5+ and Ruby 2.2+
+* Nested hashes are deep-merged
 
 2.9.1
 -----
