@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'active_support/inflector'
-require 'active_support/core_ext/hash/deep_merge'
 require 'jbuilder'
 
 def jbuild(*args, &block)

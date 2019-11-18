@@ -4,6 +4,7 @@ require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'json'
 require 'ostruct'
+require 'active_support/core_ext/hash/deep_merge'
 
 class Jbuilder
   @@key_formatter = nil
