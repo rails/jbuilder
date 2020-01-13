@@ -1,18 +1,18 @@
 module ActionView
   class StreamingTemplateRenderer < TemplateRenderer
     
-    def render_template(template, layout_name = nil, locals = {}) #:nodoc:
+    def render_template(view, template, layout_name = nil, locals = {}) #:nodoc:
       template_supports_streaming = (layout_name && template.supports_streaming?) || template.handler == TurboStreamer::Handler
-      return [super] unless template_supports_streaming
+      return [super.body] unless layout_name && template_supports_streaming
 
       locals ||= {}
       layout   = layout_name && find_layout(layout_name, locals.keys, [formats.first])
 
       Body.new do |buffer|
         if template.handler == TurboStreamer::Handler
-          delayed_render_json(buffer, template, layout, @view, locals)
+          delayed_render_json(buffer, template, layout, view, locals)
         else
-          delayed_render(buffer, template, layout, @view, locals)
+          delayed_render(buffer, template, layout, view, locals)
         end
       end
     end
