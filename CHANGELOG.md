@@ -1,6 +1,6 @@
 # Changelog
 
-Unreleased
+2.10.0
 ----------
 
 * Requires Rails 5+ and Ruby 2.2+
