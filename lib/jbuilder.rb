@@ -29,7 +29,7 @@ class Jbuilder
 
   def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
-      if !_blank?(value)
+      unless _blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
         _scope{ array! value, &block }
