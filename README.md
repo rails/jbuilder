@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rails/jbuilder.svg?branch=master)](https://travis-ci.org/rails/jbuilder)
+
 # Jbuilder
 
 Jbuilder gives you a simple DSL for declaring JSON structures that beats
