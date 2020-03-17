@@ -11,7 +11,7 @@ require "rails/version"
 require "jbuilder"
 
 require "active_support/testing/autorun"
-require "mocha/setup"
+require "mocha/minitest"
 
 ActiveSupport.test_order = :random
 
