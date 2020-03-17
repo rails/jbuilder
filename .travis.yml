@@ -22,27 +22,6 @@ gemfile:
   - gemfiles/rails_head.gemfile
 
 matrix:
-  include:
-    - name: "Rubinius - 5.0"
-      rvm: rbx-3.107
-      dist: trusty
-      gemfile: gemfiles/rails_5_0.gemfile
-    - name: "Rubinius - 5.1"
-      rvm: rbx-3.107
-      dist: trusty
-      gemfile: gemfiles/rails_5_1.gemfile
-    - name: "Rubinius - 5.2"
-      rvm: rbx-3.107
-      dist: trusty
-      gemfile: gemfiles/rails_5_2.gemfile
-    - name: "Rubinius - 6.0"
-      rvm: rbx-3.107
-      dist: trusty
-      gemfile: gemfiles/rails_6_0.gemfile
-    - name: "Rubinius - head"
-      rvm: rbx-3.107
-      dist: trusty
-      gemfile: gemfiles/rails_head.gemfile
   exclude:
     - rvm: 2.2.10
       gemfile: gemfiles/rails_6_0.gemfile
@@ -57,8 +36,6 @@ matrix:
     - rvm: 2.4.6
       gemfile: gemfiles/rails_head.gemfile
   allow_failures:
-    - rvm: jruby-19mode
-    - rvm: rbx-3.107
     - rvm: ruby-head
     - gemfile: gemfiles/rails_head.gemfile
   fast_finish: true
