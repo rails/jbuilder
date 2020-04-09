@@ -581,6 +581,58 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ['oats and friends'], result.keys
   end
 
+  test 'key_format! with merge!' do
+    hash = { camel_style: 'for JS' }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.merge! hash
+    end
+
+    assert_equal ['camelStyle'], result.keys
+  end
+
+  test 'key_format! with merge! deep' do
+    hash = { camel_style: { sub_attr: 'for JS' } }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.merge! hash
+    end
+
+    assert_equal ['subAttr'], result['camelStyle'].keys
+  end
+
+  test 'key_format! with set! array of hashes' do
+    names = [{ first_name: 'camel', last_name: 'case' }]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.set! :names, names
+    end
+
+    assert_equal %w[firstName lastName], result['names'][0].keys
+  end
+
+  test 'key_format! with array! of hashes' do
+    names = [{ first_name: 'camel', last_name: 'case' }]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.array! names
+    end
+
+    assert_equal %w[firstName lastName], result[0].keys
+  end
+
+  test 'key_format! with merge! array of hashes' do
+    names = [{ first_name: 'camel', last_name: 'case' }]
+    new_names = [{ first_name: 'snake', last_name: 'case' }]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.array! names
+      json.merge! new_names
+    end
+
+    assert_equal %w[firstName lastName], result[1].keys
+  end
+
   test 'default key_format!' do
     Jbuilder.key_format camelize: :lower
     result = jbuild{ |json| json.camel_style 'for JS' }
