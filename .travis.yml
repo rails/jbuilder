@@ -7,11 +7,12 @@ before_install:
   - "gem install bundler -v '<2'"
 
 rvm:
-  - 2.2.10
-  - 2.3.8
-  - 2.4.6
-  - 2.5.5
-  - 2.6.2
+  - 2.2
+  - 2.3
+  - 2.4
+  - 2.5
+  - 2.6
+  - 2.7
   - ruby-head
 
 gemfile:
@@ -23,17 +24,17 @@ gemfile:
 
 matrix:
   exclude:
-    - rvm: 2.2.10
+    - rvm: 2.2
       gemfile: gemfiles/rails_6_0.gemfile
-    - rvm: 2.3.8
+    - rvm: 2.3
       gemfile: gemfiles/rails_6_0.gemfile
-    - rvm: 2.4.6
+    - rvm: 2.4
       gemfile: gemfiles/rails_6_0.gemfile
-    - rvm: 2.2.10
+    - rvm: 2.2
       gemfile: gemfiles/rails_head.gemfile
-    - rvm: 2.3.8
+    - rvm: 2.3
       gemfile: gemfiles/rails_head.gemfile
-    - rvm: 2.4.6
+    - rvm: 2.4
       gemfile: gemfiles/rails_head.gemfile
   allow_failures:
     - rvm: ruby-head
