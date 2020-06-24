@@ -106,8 +106,8 @@ class TurboStreamer::Template < TurboStreamer
   #   json.cache_if! !admin?, @person, expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache_if!(condition, *args)
-    condition ? cache!(*args, &::Proc.new) : yield
+  def cache_if!(condition, *args, &block)
+    condition ? cache!(*args, &block) : yield
   end
 
   private

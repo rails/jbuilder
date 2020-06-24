@@ -16,7 +16,7 @@ require File.expand_path('../../ext/actionview/buffer', __FILE__)
 require File.expand_path('../../ext/actionview/streaming_template_renderer', __FILE__)
 
 require "active_support/testing/autorun"
-require 'mocha/setup'
+require 'mocha/minitest'
 require 'wankel'
 
 if ENV["TSENCODER"]
