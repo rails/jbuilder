@@ -1,5 +1,10 @@
 # Changelog
 
+2.10.1
+----------
+
+* Fix keyword arguments warning on Ruby 2.7
+
 2.10.0
 ----------
 
