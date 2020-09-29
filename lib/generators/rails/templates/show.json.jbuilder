@@ -1,1 +1,1 @@
-json.partial! "<%= plural_table_name %>/<%= singular_table_name %>", <%= singular_table_name %>: @<%= singular_table_name %>
+json.partial! "<%= controller_file_path %>/<%= singular_table_name %>", <%= singular_table_name %>: @<%= singular_table_name %>
