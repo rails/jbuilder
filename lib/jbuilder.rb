@@ -15,6 +15,7 @@ class Jbuilder
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
+    @ignore_block = nil
 
     yield self if ::Kernel.block_given?
   end
@@ -105,6 +106,24 @@ class Jbuilder
   # Same as the instance method key_format! except sets the default.
   def self.key_format(*args)
     @@key_formatter = KeyFormatter.new(*args)
+  end
+
+  # If you want to skip adding some values to your JSON hash like empty string
+  # or empty array, you can pass a block.
+  #
+  # Example:
+  #   json.ignore! { |value| value.nil? }
+  #   json.id       User.new.id
+  #   json.email    ''
+  #   {"emails" : '' }
+  #
+  #   json.ignore! { |value| value.nil? || (value.respond_to?(:empty) && value.empty?) }
+  #   json.id       User.new.id
+  #   json.email   ''
+  #   { }
+  #
+  def ignore!(&block)
+    @ignore_block = block
   end
 
   # If you want to skip adding nil values to your JSON hash. This is useful
@@ -289,9 +308,13 @@ class Jbuilder
   def _set_value(key, value)
     raise NullError.build(key) if @attributes.nil?
     raise ArrayError.build(key) if ::Array === @attributes
-    return if @ignore_nil && value.nil? or _blank?(value)
+    return if _ignore_value?(value) or _blank?(value)
     @attributes = {} if _blank?
     @attributes[_key(key)] = value
+  end
+
+  def _ignore_value?(value)
+    (@ignore_nil && value.nil?) || (@ignore_block && @ignore_block.call(value))
   end
 
   def _map_collection(collection)
