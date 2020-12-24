@@ -450,6 +450,34 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal       2, result.second['id']
   end
 
+  test 'extract hash keys directly from array' do
+    comments = [ { content: 'hello', id: 1 }, { content: 'world', id: 2 } ]
+
+    result = jbuild do |json|
+      json.array! comments, :content, :id
+    end
+
+    assert_equal 'hello', result.first['content']
+    assert_equal       1, result.first['id']
+    assert_equal 'world', result.second['content']
+    assert_equal       2, result.second['id']
+  end
+
+  test 'missing hash keys ' do
+    comments = [ { content: 'hello', id: 1, meta: 'meta' }, { content: 'world', id: 2 } ]
+
+    result = jbuild do |json|
+      json.array! comments, :content, :id, :meta
+    end
+
+    assert_equal 'hello', result.first['content']
+    assert_equal       1, result.first['id']
+    assert_equal  'meta', result.first['meta']
+    assert_equal 'world', result.second['content']
+    assert_equal       2, result.second['id']
+    assert_nil            result.second['meta']
+  end
+
   test 'empty top-level array' do
     comments = []
 
