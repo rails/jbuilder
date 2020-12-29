@@ -26,7 +26,6 @@ install:
 script: rake test:$ENCODER
 
 gemfile:
-  - gemfiles/rails-5.2.gemfile
   - gemfiles/rails-6.0.gemfile
   - gemfiles/rails-6.1.gemfile
 
