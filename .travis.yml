@@ -1,9 +1,8 @@
 language: ruby
 
 rvm:
-  - 2.5
-  - 2.6
-  - ruby-head
+  - 2.7
+  - 3.0
 
 env:
   - ENCODER=oj
@@ -27,12 +26,9 @@ install:
 script: rake test:$ENCODER
 
 gemfile:
-  - gemfiles/rails-5.0.gemfile
-  - gemfiles/rails-5.1.gemfile
   - gemfiles/rails-5.2.gemfile
   - gemfiles/rails-6.0.gemfile
+  - gemfiles/rails-6.1.gemfile
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - rvm: ruby-head
