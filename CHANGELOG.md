@@ -1,5 +1,10 @@
 # Changelog
 
+2.10.2
+----------
+
+* Update scaffold generator to use double quotes, 422 form error responds, and modern string-of-arrays syntax [DHH]
+
 2.10.1
 ----------
 
