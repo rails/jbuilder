@@ -1,17 +1,24 @@
 # Changelog
 
+2.11.0
+------
+
+* [Allow jbuilder instance to be passed to #merge!](https://github.com/rails/jbuilder/pull/485)
+* [Fix for key_format! when using nested hashes](https://github.com/rails/jbuilder/pull/486)
+* [Include rich_text, attachment, and attachments fields in json partial](https://github.com/rails/jbuilder/pull/459)
+
 2.10.2
-----------
+------
 
 * Update scaffold generator to use double quotes, 422 form error responds, and modern string-of-arrays syntax [DHH]
 
 2.10.1
-----------
+------
 
 * Fix keyword arguments warning on Ruby 2.7
 
 2.10.0
-----------
+------
 
 * Requires Rails 5+ and Ruby 2.2+
 * Nested hashes are deep-merged
