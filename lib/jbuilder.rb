@@ -241,8 +241,15 @@ class Jbuilder
     @attributes
   end
 
-  # Merges hash or array into current builder.
-  def merge!(hash_or_array)
+  # Merges hash, array, or Jbuilder instance into current builder.
+  def merge!(obj)
+    hash_or_array =
+      if ::Jbuilder === obj
+        obj.attributes!
+      else
+        obj
+      end
+
     @attributes = _merge_values(@attributes, hash_or_array)
   end
 
