@@ -13,7 +13,7 @@ Jbuilder is work of [many contributors](https://github.com/rails/jbuilder/graphs
 
 #### Fork the Project
 
-Fork the [project on Github](https://github.com/rails/jbuilder) and check out your copy.
+Fork the [project on GitHub](https://github.com/rails/jbuilder) and check out your copy.
 
 ```
 git clone https://github.com/contributor/jbuilder.git
