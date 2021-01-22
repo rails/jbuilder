@@ -43,11 +43,11 @@ class Jbuilder
         # json.age 32
         # json.person another_jbuilder
         # { "age": 32, "person": { ...  }
-        value.attributes!
+        _format_keys(value.attributes!)
       else
         # json.age 32
         # { "age": 32 }
-        value
+        _format_keys(value)
       end
     elsif _is_collection?(value)
       # json.comments @post.comments, :content, :created_at
@@ -272,11 +272,11 @@ class Jbuilder
     if _blank?(updates)
       current_value
     elsif _blank?(current_value) || updates.nil? || current_value.empty? && ::Array === updates
-      updates
+      _format_keys(updates)
     elsif ::Array === current_value && ::Array === updates
-      current_value + updates
+      current_value + _format_keys(updates)
     elsif ::Hash === current_value && ::Hash === updates
-      current_value.deep_merge(updates)
+      current_value.deep_merge(_format_keys(updates))
     else
       raise MergeError.build(current_value, updates)
     end
@@ -284,6 +284,16 @@ class Jbuilder
 
   def _key(key)
     @key_formatter ? @key_formatter.format(key) : key.to_s
+  end
+
+  def _format_keys(hash_or_array)
+    if ::Array === hash_or_array
+      hash_or_array.map { |value| _format_keys(value) }
+    elsif ::Hash === hash_or_array
+      ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+    else
+      hash_or_array
+    end
   end
 
   def _set_value(key, value)
