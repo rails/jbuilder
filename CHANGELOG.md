@@ -1,5 +1,11 @@
 # Changelog
 
+2.11.1
+------
+
+* Use symbols instead of strings for before_action fitlers [DHH]
+* Slim down comments in generated scaffold code [DHH]
+
 2.11.0
 ------
 
