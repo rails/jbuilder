@@ -6,14 +6,12 @@ require_dependency "<%= namespaced_path %>/application_controller"
 class <%= controller_class_name %>Controller < ApplicationController
   before_action :set_<%= singular_table_name %>, only: %i[ show edit update destroy ]
 
-  # GET <%= route_url %>
-  # GET <%= route_url %>.json
+  # GET <%= route_url %> or <%= route_url %>.json
   def index
     @<%= plural_table_name %> = <%= orm_class.all(class_name) %>
   end
 
-  # GET <%= route_url %>/1
-  # GET <%= route_url %>/1.json
+  # GET <%= route_url %>/1 or <%= route_url %>/1.json
   def show
   end
 
@@ -26,8 +24,7 @@ class <%= controller_class_name %>Controller < ApplicationController
   def edit
   end
 
-  # POST <%= route_url %>
-  # POST <%= route_url %>.json
+  # POST <%= route_url %> or <%= route_url %>.json
   def create
     @<%= singular_table_name %> = <%= orm_class.build(class_name, "#{singular_table_name}_params") %>
 
@@ -42,8 +39,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     end
   end
 
-  # PATCH/PUT <%= route_url %>/1
-  # PATCH/PUT <%= route_url %>/1.json
+  # PATCH/PUT <%= route_url %>/1 or <%= route_url %>/1.json
   def update
     respond_to do |format|
       if @<%= orm_instance.update("#{singular_table_name}_params") %>
@@ -56,8 +52,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     end
   end
 
-  # DELETE <%= route_url %>/1
-  # DELETE <%= route_url %>/1.json
+  # DELETE <%= route_url %>/1 or <%= route_url %>/1.json
   def destroy
     @<%= orm_instance.destroy %>
     respond_to do |format|
