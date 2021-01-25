@@ -255,7 +255,7 @@ class Jbuilder
   private
 
   def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.fetch(key) }
+    attributes.each{ |key| _set_value key, object.fetch(key, BLANK) }
   end
 
   def _extract_method_values(object, attributes)
