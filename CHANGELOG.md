@@ -3,7 +3,7 @@
 2.11.1
 ------
 
-* Use symbols instead of strings for before_action fitlers [DHH]
+* Use symbols instead of strings for before_action filters [DHH]
 * Slim down comments in generated scaffold code [DHH]
 
 2.11.0
