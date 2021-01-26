@@ -566,6 +566,36 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'one', result['level1']
   end
 
+  test 'key_format! can be changed in child elements' do
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+
+      json.level_one do
+        json.key_format! :upcase
+        json.value 'two'
+      end
+    end
+
+    assert_equal ['levelOne'], result.keys
+    assert_equal ['VALUE'], result['levelOne'].keys
+  end
+
+  test 'key_format! can be changed in array!' do
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+
+      json.level_one do
+        json.array! [{value: 'two'}] do |object|
+          json.key_format! :upcase
+          json.value object[:value]
+        end
+      end
+    end
+
+    assert_equal ['levelOne'], result.keys
+    assert_equal ['VALUE'], result['levelOne'][0].keys
+  end
+
   test 'key_format! with no parameter' do
     result = jbuild do |json|
       json.key_format! :upcase
@@ -623,6 +653,16 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal %w[firstName lastName], result['names'][0].keys
   end
 
+  test 'key_format! with set! extracting hash from object' do
+    comment = Struct.new(:author).new({ first_name: 'camel', last_name: 'case' })
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.set! :comment, comment, :author
+    end
+
+    assert_equal %w[firstName lastName], result['comment']['author'].keys
+  end
+
   test 'key_format! with array! of hashes' do
     names = [{ first_name: 'camel', last_name: 'case' }]
     result = jbuild do |json|
@@ -643,6 +683,36 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal %w[firstName lastName], result[1].keys
+  end
+
+  test 'key_format! is applied to hash extracted from object' do
+    comment = Struct.new(:author).new({ first_name: 'camel', last_name: 'case' })
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.extract! comment, :author
+    end
+
+    assert_equal %w[firstName lastName], result['author'].keys
+  end
+
+  test 'key_format! is applied to hash extracted from hash' do
+    comment = {author: { first_name: 'camel', last_name: 'case' }}
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.extract! comment, :author
+    end
+
+    assert_equal %w[firstName lastName], result['author'].keys
+  end
+
+  test 'key_format! is applied to hash extracted directly from array' do
+    comments = [Struct.new(:author).new({ first_name: 'camel', last_name: 'case' })]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.array! comments, :author
+    end
+
+    assert_equal %w[firstName lastName], result[0]['author'].keys
   end
 
   test 'default key_format!' do

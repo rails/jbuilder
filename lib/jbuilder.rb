@@ -190,10 +190,10 @@ class Jbuilder
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
-      collection.to_a
+      _format_keys(collection.to_a)
     end
 
-    merge! array
+    @attributes = _merge_values(@attributes, array)
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -244,7 +244,7 @@ class Jbuilder
   # Merges hash, array, or Jbuilder instance into current builder.
   def merge!(object)
     hash_or_array = ::Jbuilder === object ? object.attributes! : object
-    @attributes = _merge_values(@attributes, hash_or_array)
+    @attributes = _merge_values(@attributes, _format_keys(hash_or_array))
   end
 
   # Encodes the current builder as JSON.
@@ -255,11 +255,11 @@ class Jbuilder
   private
 
   def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.fetch(key) }
+    attributes.each{ |key| _set_value key, _format_keys(object.fetch(key)) }
   end
 
   def _extract_method_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.public_send(key) }
+    attributes.each{ |key| _set_value key, _format_keys(object.public_send(key)) }
   end
 
   def _merge_block(key)
@@ -273,11 +273,11 @@ class Jbuilder
     if _blank?(updates)
       current_value
     elsif _blank?(current_value) || updates.nil? || current_value.empty? && ::Array === updates
-      _format_keys(updates)
+      updates
     elsif ::Array === current_value && ::Array === updates
-      current_value + _format_keys(updates)
+      current_value + updates
     elsif ::Hash === current_value && ::Hash === updates
-      current_value.deep_merge(_format_keys(updates))
+      current_value.deep_merge(updates)
     else
       raise MergeError.build(current_value, updates)
     end
