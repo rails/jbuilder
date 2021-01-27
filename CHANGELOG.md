@@ -1,5 +1,10 @@
 # Changelog
 
+2.11.2
+------
+
+* [Improve key formatting for nested hashes and disable by default](https://github.com/rails/jbuilder/pull/497)
+
 2.11.1
 ------
 
