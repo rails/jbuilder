@@ -9,12 +9,14 @@ require 'active_support/core_ext/hash/deep_merge'
 class Jbuilder
   @@key_formatter = nil
   @@ignore_nil    = false
+  @@deep_format_keys = false
 
   def initialize(options = {})
     @attributes = {}
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
+    @deep_format_keys = options.fetch(:deep_format_keys, @@deep_format_keys)
 
     yield self if ::Kernel.block_given?
   end
@@ -131,6 +133,31 @@ class Jbuilder
     @@ignore_nil = value
   end
 
+  # Deeply apply key format to nested hashes and arrays passed to
+  # methods like set!, merge! or array!.
+  #
+  # Example:
+  #
+  #   json.key_format! camelize: :lower
+  #   json.settings({some_value: "abc"})
+  #
+  #   { "settings": { "some_value": "abc" }}
+  #
+  #   json.key_format! camelize: :lower
+  #   json.deep_format_keys!
+  #   json.settings({some_value: "abc"})
+  #
+  #   { "settings": { "someValue": "abc" }}
+  #
+  def deep_format_keys!(value = true)
+    @deep_format_keys = value
+  end
+
+  # Same as instance method deep_format_keys! except sets the default.
+  def self.deep_format_keys(value = true)
+    @@deep_format_keys = value
+  end
+
   # Turns the current element into an array and yields a builder to add a hash.
   #
   # Example:
@@ -190,10 +217,10 @@ class Jbuilder
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
-      collection.to_a
+      _format_keys(collection.to_a)
     end
 
-    merge! array
+    @attributes = _merge_values(@attributes, array)
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -244,7 +271,7 @@ class Jbuilder
   # Merges hash, array, or Jbuilder instance into current builder.
   def merge!(object)
     hash_or_array = ::Jbuilder === object ? object.attributes! : object
-    @attributes = _merge_values(@attributes, hash_or_array)
+    @attributes = _merge_values(@attributes, _format_keys(hash_or_array))
   end
 
   # Encodes the current builder as JSON.
@@ -255,11 +282,11 @@ class Jbuilder
   private
 
   def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.fetch(key) }
+    attributes.each{ |key| _set_value key, _format_keys(object.fetch(key)) }
   end
 
   def _extract_method_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.public_send(key) }
+    attributes.each{ |key| _set_value key, _format_keys(object.public_send(key)) }
   end
 
   def _merge_block(key)
@@ -273,11 +300,11 @@ class Jbuilder
     if _blank?(updates)
       current_value
     elsif _blank?(current_value) || updates.nil? || current_value.empty? && ::Array === updates
-      _format_keys(updates)
+      updates
     elsif ::Array === current_value && ::Array === updates
-      current_value + _format_keys(updates)
+      current_value + updates
     elsif ::Hash === current_value && ::Hash === updates
-      current_value.deep_merge(_format_keys(updates))
+      current_value.deep_merge(updates)
     else
       raise MergeError.build(current_value, updates)
     end
@@ -288,6 +315,8 @@ class Jbuilder
   end
 
   def _format_keys(hash_or_array)
+    return hash_or_array unless @deep_format_keys
+
     if ::Array === hash_or_array
       hash_or_array.map { |value| _format_keys(value) }
     elsif ::Hash === hash_or_array
@@ -312,12 +341,12 @@ class Jbuilder
   end
 
   def _scope
-    parent_attributes, parent_formatter = @attributes, @key_formatter
+    parent_attributes, parent_formatter, parent_deep_format_keys = @attributes, @key_formatter, @deep_format_keys
     @attributes = BLANK
     yield
     @attributes
   ensure
-    @attributes, @key_formatter = parent_attributes, parent_formatter
+    @attributes, @key_formatter, @deep_format_keys = parent_attributes, parent_formatter, parent_deep_format_keys
   end
 
   def _is_collection?(object)
