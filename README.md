@@ -274,6 +274,25 @@ environment.rb for example):
 Jbuilder.key_format camelize: :lower
 ```
 
+By default, key format is not applied to keys of hashes that are
+passed to methods like `set!`, `array!` or `merge!`. You can opt into
+deeply transforming these as well:
+
+``` ruby
+json.key_format! camelize: :lower
+json.deep_format_keys!
+json.settings([{some_value: "abc"}])
+
+# => { "settings": [{ "someValue": "abc" }]}
+```
+
+You can set this globally with the class method `deep_format_keys` (from inside your
+environment.rb for example):
+
+``` ruby
+Jbuilder.deep_format_keys true
+```
+
 ## Contributing to Jbuilder
 
 Jbuilder is the work of many contributors. You're encouraged to submit pull requests, propose

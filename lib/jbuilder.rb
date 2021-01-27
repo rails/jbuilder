@@ -9,12 +9,14 @@ require 'active_support/core_ext/hash/deep_merge'
 class Jbuilder
   @@key_formatter = nil
   @@ignore_nil    = false
+  @@deep_format_keys = false
 
   def initialize(options = {})
     @attributes = {}
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
+    @deep_format_keys = options.fetch(:deep_format_keys, @@deep_format_keys)
 
     yield self if ::Kernel.block_given?
   end
@@ -129,6 +131,31 @@ class Jbuilder
   # Same as instance method ignore_nil! except sets the default.
   def self.ignore_nil(value = true)
     @@ignore_nil = value
+  end
+
+  # Deeply apply key format to nested hashes and arrays passed to
+  # methods like set!, merge! or array!.
+  #
+  # Example:
+  #
+  #   json.key_format! camelize: :lower
+  #   json.settings({some_value: "abc"})
+  #
+  #   { "settings": { "some_value": "abc" }}
+  #
+  #   json.key_format! camelize: :lower
+  #   json.deep_format_keys!
+  #   json.settings({some_value: "abc"})
+  #
+  #   { "settings": { "someValue": "abc" }}
+  #
+  def deep_format_keys!(value = true)
+    @deep_format_keys = value
+  end
+
+  # Same as instance method deep_format_keys! except sets the default.
+  def self.deep_format_keys(value = true)
+    @@deep_format_keys = value
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
@@ -288,6 +315,8 @@ class Jbuilder
   end
 
   def _format_keys(hash_or_array)
+    return hash_or_array unless @deep_format_keys
+
     if ::Array === hash_or_array
       hash_or_array.map { |value| _format_keys(value) }
     elsif ::Hash === hash_or_array
@@ -312,12 +341,12 @@ class Jbuilder
   end
 
   def _scope
-    parent_attributes, parent_formatter = @attributes, @key_formatter
+    parent_attributes, parent_formatter, parent_deep_format_keys = @attributes, @key_formatter, @deep_format_keys
     @attributes = BLANK
     yield
     @attributes
   ensure
-    @attributes, @key_formatter = parent_attributes, parent_formatter
+    @attributes, @key_formatter, @deep_format_keys = parent_attributes, parent_formatter, parent_deep_format_keys
   end
 
   def _is_collection?(object)
