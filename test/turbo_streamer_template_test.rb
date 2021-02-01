@@ -436,7 +436,7 @@ class TurboStreamerTemplateTest < ActionView::TestCase
   end
 
   test 'fragment caching works with current cache digests' do
-    view.expects(:cache_fragment_name).with('cachekey', {})
+    view.expects(:cache_fragment_name).with('cachekey')
 
     json = render_streamer <<-STREAMER
       json.object! do

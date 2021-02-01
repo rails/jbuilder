@@ -215,7 +215,7 @@ class TurboStreamer::Template < TurboStreamer
     if @context.respond_to?(:cache_fragment_name)
       # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
       # should be used instead.
-      @context.cache_fragment_name(key, options)
+      @context.cache_fragment_name(key, **options)
     elsif @context.respond_to?(:fragment_name_with_digest)
       # Backwards compatibility for period of time when fragment_name_with_digest was made public.
       @context.fragment_name_with_digest(key)
