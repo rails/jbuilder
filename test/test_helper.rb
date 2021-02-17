@@ -21,7 +21,13 @@ class << Rails
   end
 end
 
-class Post < Struct.new(:id, :body, :author_name); end
+Jbuilder::CollectionRenderer.collection_cache = Rails.cache
+
+class Post < Struct.new(:id, :body, :author_name)
+  def cache_key
+    "post-#{id}"
+  end
+end
 
 class Racer < Struct.new(:id, :name)
   extend ActiveModel::Naming
@@ -29,5 +35,3 @@ class Racer < Struct.new(:id, :name)
 end
 
 ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
-
-ActionView::Base.remove_possible_method :cache_fragment_name
