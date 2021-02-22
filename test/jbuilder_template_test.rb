@@ -290,7 +290,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
 
     def render_without_parsing(source, assigns = {})
       view = build_view(fixtures: PARTIALS.merge("source.json.jbuilder" => source), assigns: assigns)
-      view.render(template: "source.json.jbuilder")
+      view.render(template: "source")
     end
 
     def build_view(options = {})
