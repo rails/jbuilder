@@ -135,7 +135,10 @@ class JbuilderTemplate < Jbuilder
 
   def _read_fragment_cache(key, options = nil)
     @context.controller.instrument_fragment_cache :read_fragment, key do
-      ::Rails.cache.read(key, options)
+      result = ::Rails.cache.read(key, options)
+      if !result.nil? && ::Rails.cache.is_a?(::ActiveSupport::Cache::MemoryStore)
+        result.clone
+      end
     end
   end
 
