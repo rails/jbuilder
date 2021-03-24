@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  sunstone:
+    name: TurboStremaer Test
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['2.7', '3.0']
+        encoder: [oj, wankel]
+        rails: ['~> 6.0.0', '~> 6.1.0']
+        
+    steps:
+      - name: Install YAJL
+        run: |
+          wget 'https://github.com/lloyd/yajl/archive/2.1.0.tar.gz'
+          tar -xvf '2.1.0.tar.gz'
+          cd 'yajl-2.1.0' && ./configure && make && sudo make install
+          sudo ldconfig
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          
+      - uses: actions/checkout@v2
+
+      - name: Setup Gemfile
+        run: |
+          echo 'source "https://rubygems.org"' > Gemfile
+          echo 'gem "rails", "${{ matrix.rails }}"' >> Gemfile
+          echo 'gemspec' >> Gemfile
+          
+      - name: Run tests
+        run: |
+          bundle install
+          bundle exec rake test:${{ matrix.encoder }}
