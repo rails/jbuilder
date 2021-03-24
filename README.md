@@ -1,4 +1,4 @@
-# TurboStreamer [![Build Status](https://api.travis-ci.org/malomalo/turbostreamer.svg)](https://travis-ci.org/malomalo/turbostreamer)
+# TurboStreamer
 
 TurboStreamer gives you a simple DSL for generating JSON that beats massaging giant
 hash structures. This is particularly helpful when the generation process is
