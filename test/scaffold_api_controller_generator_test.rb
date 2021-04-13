@@ -47,7 +47,7 @@ if Rails::VERSION::MAJOR > 4
       end
     end
 
-    test 'dont use require and permit if there are no attributes' do
+    test "don't use require and permit if there are no attributes" do
       run_generator %w(Post --api)
 
       assert_file 'app/controllers/posts_controller.rb' do |content|
