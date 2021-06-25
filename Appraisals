@@ -20,6 +20,6 @@ if RUBY_VERSION >= "2.5.0"
   end
 
   appraise "rails-head" do
-    gem "rails", github: "rails/rails"
+    gem "rails", github: "rails/rails", branch: "main"
   end
 end
