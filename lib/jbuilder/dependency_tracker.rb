@@ -1,4 +1,5 @@
 require 'jbuilder/jbuilder'
+require 'jbuilder/jbuilder_dependency_tracker'
 
 dependency_tracker = false
 
@@ -54,8 +55,5 @@ if dependency_tracker
       end
     end
   end
-
-  ::Jbuilder::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
-  ::Jbuilder::DependencyTracker.send :include, ::Jbuilder::DependencyTrackerMethods
-  dependency_tracker.register_tracker :jbuilder, ::Jbuilder::DependencyTracker
+  dependency_tracker.register_tracker :jbuilder, Jbuilder::DependencyTracker
 end
