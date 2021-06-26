@@ -283,6 +283,58 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "David", result["firstName"]
   end
 
+  if JbuilderTemplate::CollectionRenderer.supported?
+    test "returns an empty array for an empty collection" do
+      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: [])
+
+      # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
+      assert_equal [], result
+    end
+
+    test "supports the cached: true option" do
+      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
+
+      assert_equal 10, result.count
+      assert_equal "Post #5", result[4]["body"]
+      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+      assert_equal "Pavel", result[5]["author"]["first_name"]
+
+      expected = {
+        "id" => 1,
+        "body" => "Post #1",
+        "author" => {
+          "first_name" => "David",
+          "last_name" => "Heinemeier Hansson"
+        }
+      }
+
+      assert_equal expected, Rails.cache.read("post-1")
+
+      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
+
+      assert_equal 10, result.count
+      assert_equal "Post #5", result[4]["body"]
+      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+      assert_equal "Pavel", result[5]["author"]["first_name"]
+    end
+
+    test "raises an error on a render call with the :layout option" do
+      error = assert_raises NotImplementedError do
+        render('json.array! @posts, partial: "post", as: :post, layout: "layout"', posts: POSTS)
+      end
+
+      assert_equal "The `:layout' option is not supported in collection rendering.", error.message
+    end
+
+    test "raises an error on a render call with the :spacer_template option" do
+      error = assert_raises NotImplementedError do
+        render('json.array! @posts, partial: "post", as: :post, spacer_template: "template"', posts: POSTS)
+      end
+
+      assert_equal "The `:spacer_template' option is not supported in collection rendering.", error.message
+    end
+  end
+
   private
     def render(*args)
       JSON.load render_without_parsing(*args)
@@ -306,6 +358,9 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       end
 
       def view.view_cache_dependencies; []; end
+      def view.combined_fragment_cache_key(key) [ key ] end
+      def view.cache_fragment_name(key, *) key end
+      def view.fragment_name_with_digest(key) key end
 
       view
     end
