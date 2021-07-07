@@ -108,6 +108,16 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
+To make a plain array without keys, construct and pass in a standard Ruby array.
+
+``` ruby
+my_array = %w(David Jamie)
+
+json.people my_array
+
+# => "people": [ "David", "Jamie" ]
+```
+
 Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
 
 ``` ruby
