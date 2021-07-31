@@ -73,8 +73,8 @@ class JbuilderTemplate < Jbuilder
   #   json.cache_if! !admin?, @person, expires_in: 10.minutes do
   #     json.extract! @person, :name, :age
   #   end
-  def cache_if!(condition, *args)
-    condition ? cache!(*args, &::Proc.new) : yield
+  def cache_if!(condition, *args, &block)
+    condition ? cache!(*args, &block) : yield
   end
 
   def target!
@@ -104,7 +104,7 @@ class JbuilderTemplate < Jbuilder
   private
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: {}
+    options.reverse_merge! locals: options.except(:partial, :as, :collection)
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
@@ -151,8 +151,8 @@ class JbuilderTemplate < Jbuilder
     name_options = options.slice(:skip_digest, :virtual_path)
     key = _fragment_name_with_digest(key, name_options)
 
-    if @context.respond_to?(:fragment_cache_key)
-      key = @context.fragment_cache_key(key)
+    if @context.respond_to?(:combined_fragment_cache_key)
+      key = @context.combined_fragment_cache_key(key)
     else
       key = url_for(key).split('://', 2).last if ::Hash === key
     end
@@ -164,7 +164,7 @@ class JbuilderTemplate < Jbuilder
     if @context.respond_to?(:cache_fragment_name)
       # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
       # should be used instead.
-      @context.cache_fragment_name(key, options)
+      @context.cache_fragment_name(key, **options)
     elsif @context.respond_to?(:fragment_name_with_digest)
       # Backwards compatibility for period of time when fragment_name_with_digest was made public.
       @context.fragment_name_with_digest(key)
@@ -188,7 +188,7 @@ class JbuilderTemplate < Jbuilder
       _scope{ _render_partial_with_options options.merge(collection: object) }
     else
       locals = ::Hash[options[:as], object]
-      _scope{ _render_partial options.merge(locals: locals) }
+      _scope{ _render_partial_with_options options.merge(locals: locals) }
     end
 
     set! name, value
@@ -222,11 +222,12 @@ end
 
 class JbuilderHandler
   cattr_accessor :default_format
-  self.default_format = Mime[:json]
+  self.default_format = :json
 
-  def self.call(template)
+  def self.call(template, source = nil)
+    source ||= template.source
     # this juggling is required to keep line numbers right in the error
-    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{template.source}
+    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{source}
       json.target! unless (__already_defined && __already_defined != "method")}
   end
 end

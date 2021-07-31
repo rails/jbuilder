@@ -67,6 +67,19 @@ end
 # => {"author": { "name": "David" }}
 ```
 
+
+To merge existing hash or array to current context:
+
+``` ruby
+hash = { author: { name: "David" } }
+json.post do
+  json.title "Merge HOWTO"
+  json.merge! hash
+end
+
+# => "post": { "title": "Merge HOWTO", "author": { "name": "David" } }
+```
+
 Top level arrays can be handled directly.  Useful for index and other collection actions.
 
 ``` ruby
@@ -143,7 +156,6 @@ if current_user.admin?
 end
 ```
 
-
 You can use partials as well. The following will render the file
 `views/comments/_comments.json.jbuilder`, and set a local variable
 `comments` with all this message's comments, which you can use inside
@@ -169,6 +181,25 @@ json.partial! partial: 'posts/post', collection: @posts, as: :post
 # or
 
 json.comments @post.comments, partial: 'comments/comment', as: :comment
+```
+
+The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`.
+
+Be sure not to confuse the `as:` option to mean nesting of the partial. For example:
+
+```ruby
+ # Use the default `views/comments/_comment.json.jbuilder`, putting @comment as the comment local variable.
+ # Note, `comment` attributes are "inlined".
+ json.partial! @comment, as: :comment
+```
+
+is quite different than:
+
+```ruby
+ # comment attributes are nested under a "comment" property
+json.comment do
+  json.partial! "/comments/comment.json.jbuilder", comment: @comment
+end
 ```
 
 You can pass any objects into partial templates with or without `:locals` option.
@@ -243,20 +274,24 @@ environment.rb for example):
 Jbuilder.key_format camelize: :lower
 ```
 
-Faster JSON backends
---------------------
-
-Jbuilder uses MultiJson, which by default will use the JSON gem. That gem is
-currently tangled with ActiveSupport's all-Ruby `#to_json` implementation,
-which is slow (fixed in Rails >= 4.1). For faster Jbuilder rendering, you can
-specify something like the Yajl JSON generator instead. You'll need to include
-the `yajl-ruby` gem in your Gemfile and then set the following configuration
-for MultiJson:
+By default, key format is not applied to keys of hashes that are
+passed to methods like `set!`, `array!` or `merge!`. You can opt into
+deeply transforming these as well:
 
 ``` ruby
-require 'multi_json'
-MultiJson.use :yajl
- ```
+json.key_format! camelize: :lower
+json.deep_format_keys!
+json.settings([{some_value: "abc"}])
+
+# => { "settings": [{ "someValue": "abc" }]}
+```
+
+You can set this globally with the class method `deep_format_keys` (from inside your
+environment.rb for example):
+
+``` ruby
+Jbuilder.deep_format_keys true
+```
 
 ## Contributing to Jbuilder
 

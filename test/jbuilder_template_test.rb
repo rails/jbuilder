@@ -1,441 +1,312 @@
 require "test_helper"
-require "mocha/setup"
-require "active_model"
-require "action_view"
 require "action_view/testing/resolvers"
-require "active_support/cache"
-require "jbuilder/jbuilder_template"
 
-BLOG_POST_PARTIAL = <<-JBUILDER
-  json.extract! blog_post, :id, :body
-  json.author do
-    first_name, last_name = blog_post.author_name.split(nil, 2)
-    json.first_name first_name
-    json.last_name last_name
-  end
-JBUILDER
-
-COLLECTION_PARTIAL = <<-JBUILDER
-  json.extract! collection, :id, :name
-JBUILDER
-
-RACER_PARTIAL = <<-JBUILDER
-  json.extract! racer, :id, :name
-JBUILDER
-
-class Racer
-  extend ActiveModel::Naming
-  include ActiveModel::Conversion
-
-  def initialize(id, name)
-    @id, @name = id, name
-  end
-
-  attr_reader :id, :name
-end
-
-
-BlogPost = Struct.new(:id, :body, :author_name)
-Collection = Struct.new(:id, :name)
-blog_authors = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
-BLOG_POST_COLLECTION = Array.new(10){ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
-COLLECTION_COLLECTION = Array.new(5){ |i| Collection.new(i+1, "collection #{i+1}") }
-
-ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
-
-PARTIALS = {
-  "_partial.json.jbuilder"  => "foo ||= 'hello'; json.content foo",
-  "_blog_post.json.jbuilder" => BLOG_POST_PARTIAL,
-  "racers/_racer.json.jbuilder" => RACER_PARTIAL,
-  "_collection.json.jbuilder" => COLLECTION_PARTIAL
-}
-
-module Rails
-  def self.cache
-    @cache ||= ActiveSupport::Cache::MemoryStore.new
-  end
-end
-
-class JbuilderTemplateTest < ActionView::TestCase
-  setup do
-    @context = self
-    Rails.cache.clear
-  end
-
-  def jbuild(source)
-    @rendered = []
-    partials = PARTIALS.clone
-    partials["test.json.jbuilder"] = source
-    resolver = ActionView::FixtureResolver.new(partials)
-    lookup_context.view_paths = [resolver]
-    template = ActionView::Template.new(source, "test", JbuilderHandler, virtual_path: "test")
-    json = template.render(self, {}).strip
-    MultiJson.load(json)
-  end
-
-  def undef_context_methods(*names)
-    self.class_eval do
-      names.each do |name|
-        undef_method name.to_sym if method_defined?(name.to_sym)
-      end
+class JbuilderTemplateTest < ActiveSupport::TestCase
+  POST_PARTIAL = <<-JBUILDER
+    json.extract! post, :id, :body
+    json.author do
+      first_name, last_name = post.author_name.split(nil, 2)
+      json.first_name first_name
+      json.last_name last_name
     end
+  JBUILDER
+
+  COLLECTION_PARTIAL = <<-JBUILDER
+    json.extract! collection, :id, :name
+  JBUILDER
+
+  RACER_PARTIAL = <<-JBUILDER
+    json.extract! racer, :id, :name
+  JBUILDER
+
+  PARTIALS = {
+    "_partial.json.jbuilder"      => "json.content content",
+    "_post.json.jbuilder"         => POST_PARTIAL,
+    "racers/_racer.json.jbuilder" => RACER_PARTIAL,
+    "_collection.json.jbuilder"   => COLLECTION_PARTIAL,
+
+    # Ensure we find only Jbuilder partials from within Jbuilder templates.
+    "_post.html.erb" => "Hello world!"
+  }
+
+  AUTHORS = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
+  POSTS   = (1..10).collect { |i| Post.new(i, "Post ##{i}", AUTHORS.next) }
+
+  setup { Rails.cache.clear }
+
+  test "basic template" do
+    result = render('json.content "hello"')
+    assert_equal "hello", result["content"]
   end
 
-  def assert_collection_rendered(result, context = nil)
-    result = result.fetch(context) if context
+  test "partial by name with top-level locals" do
+    result = render('json.partial! "partial", content: "hello"')
+    assert_equal "hello", result["content"]
+  end
 
-    assert_equal 10, result.length
-    assert_equal Array, result.class
-    assert_equal "post body 5",        result[4]["body"]
+  test "partial by name with nested locals" do
+    result = render('json.partial! "partial", locals: { content: "hello" }')
+    assert_equal "hello", result["content"]
+  end
+
+  test "partial by options containing nested locals" do
+    result = render('json.partial! partial: "partial", locals: { content: "hello" }')
+    assert_equal "hello", result["content"]
+  end
+
+  test "partial by options containing top-level locals" do
+    result = render('json.partial! partial: "partial", content: "hello"')
+    assert_equal "hello", result["content"]
+  end
+
+  test "partial for Active Model" do
+    result = render('json.partial! @racer', racer: Racer.new(123, "Chris Harris"))
+    assert_equal 123, result["id"]
+    assert_equal "Chris Harris", result["name"]
+  end
+
+  test "partial collection by name with symbol local" do
+    result = render('json.partial! "post", collection: @posts, as: :post', posts: POSTS)
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
     assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
-    assert_equal "Pavel",              result[5]["author"]["first_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
   end
 
-  test "rendering" do
-    result = jbuild(<<-JBUILDER)
-      json.content "hello"
-    JBUILDER
-
-    assert_equal "hello", result["content"]
+  test "partial collection by name with string local" do
+    result = render('json.partial! "post", collection: @posts, as: "post"', posts: POSTS)
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
   end
 
-  test "key_format! with parameter" do
-    result = jbuild(<<-JBUILDER)
-      json.key_format! camelize: [:lower]
-      json.camel_style "for JS"
-    JBUILDER
-
-    assert_equal ["camelStyle"], result.keys
+  test "partial collection by options" do
+    result = render('json.partial! partial: "post", collection: @posts, as: :post', posts: POSTS)
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
   end
 
-  test "key_format! propagates to child elements" do
-    result = jbuild(<<-JBUILDER)
-      json.key_format! :upcase
-      json.level1 "one"
-      json.level2 do
-        json.value "two"
-      end
-    JBUILDER
-
-    assert_equal "one", result["LEVEL1"]
-    assert_equal "two", result["LEVEL2"]["VALUE"]
+  test "nil partial collection by name" do
+    assert_equal [], render('json.partial! "post", collection: @posts, as: :post', posts: nil)
   end
 
-  test "partial! renders partial" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "partial"
-    JBUILDER
-
-    assert_equal "hello", result["content"]
+  test "nil partial collection by options" do
+    assert_equal [], render('json.partial! partial: "post", collection: @posts, as: :post', posts: nil)
   end
 
-  test "partial! + locals via :locals option" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "partial", locals: { foo: "howdy" }
-    JBUILDER
-
-    assert_equal "howdy", result["content"]
+  test "array of partials" do
+    result = render('json.array! @posts, partial: "post", as: :post', posts: POSTS)
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
   end
 
-  test "partial! + locals without :locals key" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "partial", foo: "goodbye"
-    JBUILDER
-
-    assert_equal "goodbye", result["content"]
+  test "empty array of partials from nil collection" do
+    assert_equal [], render('json.array! @posts, partial: "post", as: :post', posts: nil)
   end
 
-  test "partial! renders collections" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "blog_post", collection: BLOG_POST_COLLECTION, as: :blog_post
-    JBUILDER
-
-    assert_collection_rendered result
+  test "array of partials under key" do
+    result = render('json.posts @posts, partial: "post", as: :post', posts: POSTS)
+    assert_equal 10, result["posts"].count
+    assert_equal "Post #5", result["posts"][4]["body"]
+    assert_equal "Heinemeier Hansson", result["posts"][2]["author"]["last_name"]
+    assert_equal "Pavel", result["posts"][5]["author"]["first_name"]
   end
 
-  test "partial! renders collections when as argument is a string" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "blog_post", collection: BLOG_POST_COLLECTION, as: "blog_post"
-    JBUILDER
-
-    assert_collection_rendered result
-  end
-
-  test "partial! renders collections as collections" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "collection", collection: COLLECTION_COLLECTION, as: :collection
-    JBUILDER
-
-    assert_equal 5, result.length
-  end
-
-  test "partial! renders as empty array for nil-collection" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! "blog_post", collection: nil, as: :blog_post
-    JBUILDER
-
-    assert_equal [], result
-  end
-
-  test "partial! renders collection (alt. syntax)" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! partial: "blog_post", collection: BLOG_POST_COLLECTION, as: :blog_post
-    JBUILDER
-
-    assert_collection_rendered result
-  end
-
-  test "partial! renders as empty array for nil-collection (alt. syntax)" do
-    result = jbuild(<<-JBUILDER)
-      json.partial! partial: "blog_post", collection: nil, as: :blog_post
-    JBUILDER
-
-    assert_equal [], result
-  end
-
-  test "render array of partials" do
-    result = jbuild(<<-JBUILDER)
-      json.array! BLOG_POST_COLLECTION, partial: "blog_post", as: :blog_post
-    JBUILDER
-
-    assert_collection_rendered result
-  end
-
-  test "render array of partials as empty array with nil-collection" do
-    result = jbuild(<<-JBUILDER)
-      json.array! nil, partial: "blog_post", as: :blog_post
-    JBUILDER
-
-    assert_equal [], result
-  end
-
-  test "render array of partials as a value" do
-    result = jbuild(<<-JBUILDER)
-      json.posts BLOG_POST_COLLECTION, partial: "blog_post", as: :blog_post
-    JBUILDER
-
-    assert_collection_rendered result, "posts"
-  end
-
-  test "render as empty array if partials as a nil value" do
-    result = jbuild <<-JBUILDER
-      json.posts nil, partial: "blog_post", as: :blog_post
-    JBUILDER
-
+  test "empty array of partials under key from nil collection" do
+    result = render('json.posts @posts, partial: "post", as: :post', posts: nil)
     assert_equal [], result["posts"]
   end
 
-  test "cache an empty block" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    jbuild <<-JBUILDER
-      json.cache! "nothing" do
-      end
-    JBUILDER
-
-    result = nil
-
-    assert_nothing_raised do
-      result = jbuild(<<-JBUILDER)
-        json.foo "bar"
-        json.cache! "nothing" do
-        end
-      JBUILDER
-    end
-
-    assert_equal "bar", result["foo"]
-  end
-
-  test "fragment caching a JSON object" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.name "Cache"
-      end
-    JBUILDER
-
-    result = jbuild(<<-JBUILDER)
-      json.cache! "cachekey" do
-        json.name "Miss"
-      end
-    JBUILDER
-
-    assert_equal "Cache", result["name"]
-  end
-
-  test "conditionally fragment caching a JSON object" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    jbuild <<-JBUILDER
-      json.cache_if! true, "cachekey" do
-        json.test1 "Cache"
-      end
-      json.cache_if! false, "cachekey" do
-        json.test2 "Cache"
-      end
-    JBUILDER
-
-    result = jbuild(<<-JBUILDER)
-      json.cache_if! true, "cachekey" do
-        json.test1 "Miss"
-      end
-      json.cache_if! false, "cachekey" do
-        json.test2 "Miss"
-      end
-    JBUILDER
-
-    assert_equal "Cache", result["test1"]
-    assert_equal "Miss", result["test2"]
-  end
-
-  test "fragment caching deserializes an array" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.array! %w[a b c]
-      end
-    JBUILDER
-
-    result = jbuild(<<-JBUILDER)
-      json.cache! "cachekey" do
-        json.array! %w[1 2 3]
-      end
-    JBUILDER
-
-    assert_equal %w[a b c], result
-  end
-
-  test "fragment caching works with current cache digests" do
-    undef_context_methods :fragment_name_with_digest
-
-    @context.expects :cache_fragment_name
-    ActiveSupport::Cache.expects :expand_cache_key
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.name "Cache"
-      end
-    JBUILDER
-  end
-
-  test "fragment caching uses fragment_cache_key" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    @context.expects(:fragment_cache_key).with("cachekey")
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.name "Cache"
-      end
-    JBUILDER
-  end
-
-  test "fragment caching instrumentation" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    payloads = {}
-    ActiveSupport::Notifications.subscribe("read_fragment.action_controller") { |*args| payloads[:read_fragment] = args.last }
-    ActiveSupport::Notifications.subscribe("write_fragment.action_controller") { |*args| payloads[:write_fragment] = args.last }
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
-        json.name "Cache"
-      end
-    JBUILDER
-
-    assert_equal "jbuilder/cachekey", payloads[:read_fragment][:key]
-    assert_equal "jbuilder/cachekey", payloads[:write_fragment][:key]
-  end
-
-  test "current cache digest option accepts options" do
-    undef_context_methods :fragment_name_with_digest
-
-    @context.expects(:cache_fragment_name).with("cachekey", skip_digest: true)
-    ActiveSupport::Cache.expects :expand_cache_key
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey", skip_digest: true do
-        json.name "Cache"
-      end
-    JBUILDER
-  end
-
-  test "fragment caching accepts expires_in option" do
-    undef_context_methods :fragment_name_with_digest
-
-    @context.expects(:cache_fragment_name).with("cachekey", {})
-
-    jbuild <<-JBUILDER
-      json.cache! "cachekey", expires_in: 1.minute do
-        json.name "Cache"
-      end
-    JBUILDER
-  end
-
-  test "caching root structure" do
-    undef_context_methods :fragment_name_with_digest, :cache_fragment_name
-
-    cache_miss_result = jbuild <<-JBUILDER
-      json.cache_root! "cachekey" do
-        json.name "Miss"
-      end
-    JBUILDER
-
-    cache_hit_result = jbuild <<-JBUILDER
-      json.cache_root! "cachekey" do
+  test "object fragment caching" do
+    render(<<-JBUILDER)
+      json.cache! "cache-key" do
         json.name "Hit"
       end
     JBUILDER
 
-    assert_equal cache_miss_result, cache_hit_result
+    hit = render('json.cache! "cache-key" do; end')
+    assert_equal "Hit", hit["name"]
   end
 
-  test "failing to cache root after attributes have been defined" do
+  test "conditional object fragment caching" do
+    render(<<-JBUILDER)
+      json.cache_if! true, "cache-key" do
+        json.a "Hit"
+      end
+
+      json.cache_if! false, "cache-key" do
+        json.b "Hit"
+      end
+    JBUILDER
+
+    result = render(<<-JBUILDER)
+      json.cache_if! true, "cache-key" do
+        json.a "Miss"
+      end
+
+      json.cache_if! false, "cache-key" do
+        json.b "Miss"
+      end
+    JBUILDER
+
+    assert_equal "Hit", result["a"]
+    assert_equal "Miss", result["b"]
+  end
+
+  test "object fragment caching with expiry" do
+    travel_to "2018-05-12 11:29:00 -0400"
+
+    render <<-JBUILDER
+      json.cache! "cache-key", expires_in: 1.minute do
+        json.name "Hit"
+      end
+    JBUILDER
+
+    travel 30.seconds
+
+    result = render(<<-JBUILDER)
+      json.cache! "cache-key", expires_in: 1.minute do
+        json.name "Miss"
+      end
+    JBUILDER
+
+    assert_equal "Hit", result["name"]
+
+    travel 31.seconds
+
+    result = render(<<-JBUILDER)
+      json.cache! "cache-key", expires_in: 1.minute do
+        json.name "Miss"
+      end
+    JBUILDER
+
+    assert_equal "Miss", result["name"]
+  end
+
+  test "object root caching" do
+    render <<-JBUILDER
+      json.cache_root! "cache-key" do
+        json.name "Hit"
+      end
+    JBUILDER
+
+    assert_equal JSON.dump(name: "Hit"), Rails.cache.read("jbuilder/root/cache-key")
+
+    result = render(<<-JBUILDER)
+      json.cache_root! "cache-key" do
+        json.name "Miss"
+      end
+    JBUILDER
+
+    assert_equal "Hit", result["name"]
+  end
+
+  test "array fragment caching" do
+    render <<-JBUILDER
+      json.cache! "cache-key" do
+        json.array! %w[ a b c ]
+      end
+    JBUILDER
+
+    assert_equal %w[ a b c ], render('json.cache! "cache-key" do; end')
+  end
+
+  test "array root caching" do
+    render <<-JBUILDER
+      json.cache_root! "cache-key" do
+        json.array! %w[ a b c ]
+      end
+    JBUILDER
+
+    assert_equal JSON.dump(%w[ a b c ]), Rails.cache.read("jbuilder/root/cache-key")
+
+    assert_equal %w[ a b c ], render(<<-JBUILDER)
+      json.cache_root! "cache-key" do
+        json.array! %w[ d e f ]
+      end
+    JBUILDER
+  end
+
+  test "failing to cache root after JSON structures have been defined" do
     assert_raises ActionView::Template::Error, "cache_root! can't be used after JSON structures have been defined" do
-      jbuild <<-JBUILDER
+      render <<-JBUILDER
         json.name "Kaboom"
-        json.cache_root! "cachekey" do
+        json.cache_root! "cache-key" do
           json.name "Miss"
         end
       JBUILDER
     end
   end
 
-  test "does not perform caching when controller.perform_caching is false" do
-    controller.perform_caching = false
+  test "empty fragment caching" do
+    render 'json.cache! "nothing" do; end'
 
-    jbuild <<-JBUILDER
-      json.cache! "cachekey" do
+    result = nil
+
+    assert_nothing_raised do
+      result = render(<<-JBUILDER)
+        json.foo "bar"
+        json.cache! "nothing" do; end
+      JBUILDER
+    end
+
+    assert_equal "bar", result["foo"]
+  end
+
+  test "cache instrumentation" do
+    payloads = {}
+
+    ActiveSupport::Notifications.subscribe("read_fragment.action_controller") { |*args| payloads[:read] = args.last }
+    ActiveSupport::Notifications.subscribe("write_fragment.action_controller") { |*args| payloads[:write] = args.last }
+
+    render <<-JBUILDER
+      json.cache! "cache-key" do
         json.name "Cache"
       end
     JBUILDER
 
-    assert_equal Rails.cache.inspect[/entries=(\d+)/, 1], "0"
+    assert_equal "jbuilder/cache-key", payloads[:read][:key]
+    assert_equal "jbuilder/cache-key", payloads[:write][:key]
   end
 
-  test "invokes templates via params via set!" do
-    @post = BLOG_POST_COLLECTION.first
-
-    result = jbuild(<<-JBUILDER)
-      json.post @post, partial: "blog_post", as: :blog_post
+  test "camelized keys" do
+    result = render(<<-JBUILDER)
+      json.key_format! camelize: [:lower]
+      json.first_name "David"
     JBUILDER
 
-    assert_equal 1, result["post"]["id"]
-    assert_equal "post body 1", result["post"]["body"]
-    assert_equal "David", result["post"]["author"]["first_name"]
+    assert_equal "David", result["firstName"]
   end
 
-  test "invokes templates implicitly for ActiveModel objects" do
-    @racer = Racer.new(123, "Chris Harris")
+  private
+    def render(*args)
+      JSON.load render_without_parsing(*args)
+    end
 
-    result = jbuild(<<-JBUILDER)
-      json.partial! @racer
-    JBUILDER
+    def render_without_parsing(source, assigns = {})
+      view = build_view(fixtures: PARTIALS.merge("source.json.jbuilder" => source), assigns: assigns)
+      view.render(template: "source")
+    end
 
-    assert_equal %w[id name], result.keys
-    assert_equal 123, result["id"]
-    assert_equal "Chris Harris", result["name"]
-  end
+    def build_view(options = {})
+      resolver = ActionView::FixtureResolver.new(options.fetch(:fixtures))
+      lookup_context = ActionView::LookupContext.new([ resolver ], {}, [""])
+      controller = ActionView::TestCase::TestController.new
+
+      # TODO: Use with_empty_template_cache unconditionally after dropping support for Rails <6.0.
+      view = if ActionView::Base.respond_to?(:with_empty_template_cache)
+        ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
+      else
+        ActionView::Base.new(lookup_context, options.fetch(:assigns, {}), controller)
+      end
+
+      def view.view_cache_dependencies; []; end
+
+      view
+    end
 end

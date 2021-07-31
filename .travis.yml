@@ -1,66 +1,80 @@
 language: ruby
 
-sudo: false
 cache: bundler
 
+before_install:
+  - "gem install bundler -v '<2'"
+
 rvm:
-  - 1.9
-  - 2.0
-  - 2.1
-  - 2.2.5
-  - 2.3.1
-  - 2.4.0
+  - 2.2.10
+  - 2.3.8
+  - 2.4.10
+  - 2.5.8
+  - 2.6.6
+  - 2.7.1
+  - 3.0.0
   - ruby-head
-  - jruby-19mode
-  - rbx
 
 gemfile:
-  - gemfiles/rails_3_0.gemfile
-  - gemfiles/rails_3_1.gemfile
-  - gemfiles/rails_3_2.gemfile
-  - gemfiles/rails_4_0.gemfile
-  - gemfiles/rails_4_1.gemfile
-  - gemfiles/rails_4_2.gemfile
   - gemfiles/rails_5_0.gemfile
   - gemfiles/rails_5_1.gemfile
+  - gemfiles/rails_5_2.gemfile
+  - gemfiles/rails_6_0.gemfile
+  - gemfiles/rails_6_1.gemfile
+  - gemfiles/rails_head.gemfile
 
 matrix:
-  allow_failures:
-    - rvm: jruby-19mode
-    - rvm: rbx
-    - rvm: ruby-head
-  fast_finish: true
   exclude:
-    - rvm: 1.9
+    - rvm: 2.7.1
       gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: 1.9
-      gemfile: gemfiles/rails_5_1.gemfile
-    - rvm: 2.0
+    - rvm: 3.0.0
       gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: 2.0
-      gemfile: gemfiles/rails_5_1.gemfile
-    - rvm: 2.1
+    - rvm: ruby-head
       gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: 2.1
+    - rvm: 2.7.1
       gemfile: gemfiles/rails_5_1.gemfile
-    - rvm: jruby-19mode
-      gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: jruby-19mode
+    - rvm: 3.0.0
       gemfile: gemfiles/rails_5_1.gemfile
-    - rvm: rbx
-      gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: rbx
+    - rvm: ruby-head
       gemfile: gemfiles/rails_5_1.gemfile
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails_3_0.gemfile
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails_3_1.gemfile
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails_3_2.gemfile
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails_4_0.gemfile
-    - rvm: 2.4.0
-      gemfile: gemfiles/rails_4_1.gemfile
+    - rvm: 2.2.10
+      gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: 2.7.1
+      gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: 3.0.0
+      gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: 2.2.10
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.3.8
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.4.10
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 3.0.0
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: ruby-head
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.2.10
+      gemfile: gemfiles/rails_6_1.gemfile
+    - rvm: 2.3.8
+      gemfile: gemfiles/rails_6_1.gemfile
+    - rvm: 2.4.10
+      gemfile: gemfiles/rails_6_1.gemfile
+    - rvm: 2.2.10
+      gemfile: gemfiles/rails_head.gemfile
+    - rvm: 2.3.8
+      gemfile: gemfiles/rails_head.gemfile
+    - rvm: 2.4.10
+      gemfile: gemfiles/rails_head.gemfile
+    - rvm: 2.5.8
+      gemfile: gemfiles/rails_head.gemfile
+    - rvm: 2.6.6
+      gemfile: gemfiles/rails_head.gemfile
+  allow_failures:
+    - rvm: ruby-head
+    - gemfile: gemfiles/rails_head.gemfile
+  fast_finish: true
 
 notifications:
   email: false

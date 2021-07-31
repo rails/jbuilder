@@ -2,18 +2,21 @@ require 'jbuilder/jbuilder'
 require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
-require 'multi_json'
+require 'json'
 require 'ostruct'
+require 'active_support/core_ext/hash/deep_merge'
 
 class Jbuilder
   @@key_formatter = nil
   @@ignore_nil    = false
+  @@deep_format_keys = false
 
   def initialize(options = {})
     @attributes = {}
 
     @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
     @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
+    @deep_format_keys = options.fetch(:deep_format_keys, @@deep_format_keys)
 
     yield self if ::Kernel.block_given?
   end
@@ -26,12 +29,12 @@ class Jbuilder
   BLANK = Blank.new
   NON_ENUMERABLES = [ ::Struct, ::OpenStruct ].to_set
 
-  def set!(key, value = BLANK, *args)
+  def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &::Proc.new }
+        _scope{ array! value, &block }
       else
         # json.comments { ... }
         # { "comments": ... }
@@ -42,11 +45,11 @@ class Jbuilder
         # json.age 32
         # json.person another_jbuilder
         # { "age": 32, "person": { ...  }
-        value.attributes!
+        _format_keys(value.attributes!)
       else
         # json.age 32
         # { "age": 32 }
-        value
+        _format_keys(value)
       end
     elsif _is_collection?(value)
       # json.comments @post.comments, :content, :created_at
@@ -61,9 +64,9 @@ class Jbuilder
     _set_value key, result
   end
 
-  def method_missing(*args)
+  def method_missing(*args, &block)
     if ::Kernel.block_given?
-      set!(*args, &::Proc.new)
+      set!(*args, &block)
     else
       set!(*args)
     end
@@ -130,6 +133,31 @@ class Jbuilder
     @@ignore_nil = value
   end
 
+  # Deeply apply key format to nested hashes and arrays passed to
+  # methods like set!, merge! or array!.
+  #
+  # Example:
+  #
+  #   json.key_format! camelize: :lower
+  #   json.settings({some_value: "abc"})
+  #
+  #   { "settings": { "some_value": "abc" }}
+  #
+  #   json.key_format! camelize: :lower
+  #   json.deep_format_keys!
+  #   json.settings({some_value: "abc"})
+  #
+  #   { "settings": { "someValue": "abc" }}
+  #
+  def deep_format_keys!(value = true)
+    @deep_format_keys = value
+  end
+
+  # Same as instance method deep_format_keys! except sets the default.
+  def self.deep_format_keys(value = true)
+    @@deep_format_keys = value
+  end
+
   # Turns the current element into an array and yields a builder to add a hash.
   #
   # Example:
@@ -163,7 +191,7 @@ class Jbuilder
   #
   #   [ { "name": David", "age": 32 }, { "name": Jamie", "age": 31 } ]
   #
-  # If you are using Ruby 1.9+, you can use the call syntax instead of an explicit extract! call:
+  # You can use the call syntax instead of an explicit extract! call:
   #
   #   json.(@people) { |person| ... }
   #
@@ -181,18 +209,18 @@ class Jbuilder
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection = [], *attributes)
+  def array!(collection = [], *attributes, &block)
     array = if collection.nil?
       []
     elsif ::Kernel.block_given?
-      _map_collection(collection, &::Proc.new)
+      _map_collection(collection, &block)
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
-      collection.to_a
+      _format_keys(collection.to_a)
     end
 
-    merge! array
+    @attributes = _merge_values(@attributes, array)
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -220,9 +248,9 @@ class Jbuilder
     end
   end
 
-  def call(object, *attributes)
+  def call(object, *attributes, &block)
     if ::Kernel.block_given?
-      array! object, &::Proc.new
+      array! object, &block
     else
       extract! object, *attributes
     end
@@ -240,24 +268,25 @@ class Jbuilder
     @attributes
   end
 
-  # Merges hash or array into current builder.
-  def merge!(hash_or_array)
-    @attributes = _merge_values(@attributes, hash_or_array)
+  # Merges hash, array, or Jbuilder instance into current builder.
+  def merge!(object)
+    hash_or_array = ::Jbuilder === object ? object.attributes! : object
+    @attributes = _merge_values(@attributes, _format_keys(hash_or_array))
   end
 
   # Encodes the current builder as JSON.
   def target!
-    ::MultiJson.dump(@attributes)
+    @attributes.to_json
   end
 
   private
 
   def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.fetch(key) }
+    attributes.each{ |key| _set_value key, _format_keys(object.fetch(key)) }
   end
 
   def _extract_method_values(object, attributes)
-    attributes.each{ |key| _set_value key, object.public_send(key) }
+    attributes.each{ |key| _set_value key, _format_keys(object.public_send(key)) }
   end
 
   def _merge_block(key)
@@ -275,7 +304,7 @@ class Jbuilder
     elsif ::Array === current_value && ::Array === updates
       current_value + updates
     elsif ::Hash === current_value && ::Hash === updates
-      current_value.merge(updates)
+      current_value.deep_merge(updates)
     else
       raise MergeError.build(current_value, updates)
     end
@@ -283,6 +312,18 @@ class Jbuilder
 
   def _key(key)
     @key_formatter ? @key_formatter.format(key) : key.to_s
+  end
+
+  def _format_keys(hash_or_array)
+    return hash_or_array unless @deep_format_keys
+
+    if ::Array === hash_or_array
+      hash_or_array.map { |value| _format_keys(value) }
+    elsif ::Hash === hash_or_array
+      ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+    else
+      hash_or_array
+    end
   end
 
   def _set_value(key, value)
@@ -300,12 +341,12 @@ class Jbuilder
   end
 
   def _scope
-    parent_attributes, parent_formatter = @attributes, @key_formatter
+    parent_attributes, parent_formatter, parent_deep_format_keys = @attributes, @key_formatter, @deep_format_keys
     @attributes = BLANK
     yield
     @attributes
   ensure
-    @attributes, @key_formatter = parent_attributes, parent_formatter
+    @attributes, @key_formatter, @deep_format_keys = parent_attributes, parent_formatter, parent_deep_format_keys
   end
 
   def _is_collection?(object)

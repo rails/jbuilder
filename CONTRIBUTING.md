@@ -4,18 +4,16 @@ Contributing to Jbuilder
 [![Build Status](https://api.travis-ci.org/rails/jbuilder.svg?branch=master)][travis]
 [![Gem Version](https://badge.fury.io/rb/jbuilder.svg)][gem]
 [![Code Climate](https://codeclimate.com/github/rails/jbuilder/badges/gpa.svg)][codeclimate]
-[![Dependencies Status](https://gemnasium.com/rails/jbuilder.svg)][gemnasium]
 
 [travis]: https://travis-ci.org/rails/jbuilder
 [gem]: https://rubygems.org/gems/jbuilder
 [codeclimate]: https://codeclimate.com/github/rails/jbuilder
-[gemnasium]: https://gemnasium.com/rails/jbuilder
 
 Jbuilder is work of [many contributors](https://github.com/rails/jbuilder/graphs/contributors). You're encouraged to submit [pull requests](https://github.com/rails/jbuilder/pulls), [propose features and discuss issues](https://github.com/rails/jbuilder/issues).
 
 #### Fork the Project
 
-Fork the [project on Github](https://github.com/rails/jbuilder) and check out your copy.
+Fork the [project on GitHub](https://github.com/rails/jbuilder) and check out your copy.
 
 ```
 git clone https://github.com/contributor/jbuilder.git

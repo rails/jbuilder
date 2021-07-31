@@ -1,10 +1,10 @@
 <% if namespaced? -%>
-require_dependency "<%= namespaced_file_path %>/application_controller"
+require_dependency "<%= namespaced_path %>/application_controller"
 
 <% end -%>
 <% module_namespacing do -%>
 class <%= controller_class_name %>Controller < ApplicationController
-  before_action :set_<%= singular_table_name %>, only: [:show, :update, :destroy]
+  before_action :set_<%= singular_table_name %>, only: %i[ show update destroy ]
 
   # GET <%= route_url %>
   # GET <%= route_url %>.json
@@ -51,12 +51,12 @@ class <%= controller_class_name %>Controller < ApplicationController
       @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
     end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
+    # Only allow a list of trusted parameters through.
     def <%= "#{singular_table_name}_params" %>
       <%- if attributes_names.empty? -%>
       params.fetch(<%= ":#{singular_table_name}" %>, {})
       <%- else -%>
-      params.require(<%= ":#{singular_table_name}" %>).permit(<%= attributes_names.map { |name| ":#{name}" }.join(', ') %>)
+      params.require(<%= ":#{singular_table_name}" %>).permit(<%= permitted_params %>)
       <%- end -%>
     end
 end

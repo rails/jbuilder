@@ -5,10 +5,6 @@ source "https://rubygems.org"
 gem "rake"
 gem "mocha", :require => false
 gem "appraisal"
-gem "pry"
-gem "test-unit"
-gem "railties", "~> 3.1.0"
-gem "actionpack", "~> 3.1.0"
-gem "activemodel", "~> 3.1.0"
+gem "rails", "~> 6.1.0"
 
 gemspec :path => "../"

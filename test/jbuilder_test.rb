@@ -49,7 +49,7 @@ end
 
 
 class JbuilderTest < ActiveSupport::TestCase
-  setup do
+  teardown do
     Jbuilder.send :class_variable_set, '@@key_formatter', nil
   end
 
@@ -75,7 +75,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert result.has_key?('content')
-    assert_equal nil, result['content']
+    assert_nil result['content']
   end
 
   test 'multiple keys' do
@@ -99,7 +99,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['age']
   end
 
-  test 'extracting from object using call style for 1.9' do
+  test 'extracting from object using call style' do
     person = Struct.new(:name, :age).new('David', 32)
 
     result = jbuild do |json|
@@ -159,6 +159,25 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 32, result['author']['age']
   end
 
+  test 'nested blocks are additive' do
+    result = jbuild do |json|
+      json.author do
+        json.name do
+          json.first 'David'
+        end
+      end
+
+      json.author do
+        json.name do
+          json.last 'Heinemeier Hansson'
+        end
+      end
+    end
+
+    assert_equal 'David', result['author']['name']['first']
+    assert_equal 'Heinemeier Hansson', result['author']['name']['last']
+  end
+
   test 'support merge! method' do
     result = jbuild do |json|
       json.merge! 'foo' => 'bar'
@@ -175,6 +194,18 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal 'Pavel', result['author']['name']
+  end
+
+  test 'support merge! method with Jbuilder instance' do
+    obj = jbuild do |json|
+      json.foo 'bar'
+    end
+
+    result = jbuild do |json|
+      json.merge! obj
+    end
+
+    assert_equal 'bar', result['foo']
   end
 
   test 'blocks are additive via extract syntax' do
@@ -535,6 +566,36 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'one', result['level1']
   end
 
+  test 'key_format! can be changed in child elements' do
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+
+      json.level_one do
+        json.key_format! :upcase
+        json.value 'two'
+      end
+    end
+
+    assert_equal ['levelOne'], result.keys
+    assert_equal ['VALUE'], result['levelOne'].keys
+  end
+
+  test 'key_format! can be changed in array!' do
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+
+      json.level_one do
+        json.array! [{value: 'two'}] do |object|
+          json.key_format! :upcase
+          json.value object[:value]
+        end
+      end
+    end
+
+    assert_equal ['levelOne'], result.keys
+    assert_equal ['VALUE'], result['levelOne'][0].keys
+  end
+
   test 'key_format! with no parameter' do
     result = jbuild do |json|
       json.key_format! :upcase
@@ -560,6 +621,161 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal ['oats and friends'], result.keys
+  end
+
+  test 'key_format! is not applied deeply by default' do
+    names = { first_name: 'camel', last_name: 'case' }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.set! :all_names, names
+    end
+
+    assert_equal %i[first_name last_name], result['allNames'].keys
+  end
+
+  test 'applying key_format! deeply can be enabled per scope' do
+    names = { first_name: 'camel', last_name: 'case' }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.scope do
+        json.deep_format_keys!
+        json.set! :all_names, names
+      end
+      json.set! :all_names, names
+    end
+
+    assert_equal %w[firstName lastName], result['scope']['allNames'].keys
+    assert_equal %i[first_name last_name], result['allNames'].keys
+  end
+
+  test 'applying key_format! deeply can be disabled per scope' do
+    names = { first_name: 'camel', last_name: 'case' }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.set! :all_names, names
+      json.scope do
+        json.deep_format_keys! false
+        json.set! :all_names, names
+      end
+    end
+
+    assert_equal %w[firstName lastName], result['allNames'].keys
+    assert_equal %i[first_name last_name], result['scope']['allNames'].keys
+  end
+
+  test 'applying key_format! deeply can be enabled globally' do
+    names = { first_name: 'camel', last_name: 'case' }
+
+    Jbuilder.deep_format_keys true
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.set! :all_names, names
+    end
+
+    assert_equal %w[firstName lastName], result['allNames'].keys
+    Jbuilder.send(:class_variable_set, '@@deep_format_keys', false)
+  end
+
+  test 'deep key_format! with merge!' do
+    hash = { camel_style: 'for JS' }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.merge! hash
+    end
+
+    assert_equal ['camelStyle'], result.keys
+  end
+
+  test 'deep key_format! with merge! deep' do
+    hash = { camel_style: { sub_attr: 'for JS' } }
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.merge! hash
+    end
+
+    assert_equal ['subAttr'], result['camelStyle'].keys
+  end
+
+  test 'deep key_format! with set! array of hashes' do
+    names = [{ first_name: 'camel', last_name: 'case' }]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.set! :names, names
+    end
+
+    assert_equal %w[firstName lastName], result['names'][0].keys
+  end
+
+  test 'deep key_format! with set! extracting hash from object' do
+    comment = Struct.new(:author).new({ first_name: 'camel', last_name: 'case' })
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.set! :comment, comment, :author
+    end
+
+    assert_equal %w[firstName lastName], result['comment']['author'].keys
+  end
+
+  test 'deep key_format! with array! of hashes' do
+    names = [{ first_name: 'camel', last_name: 'case' }]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.array! names
+    end
+
+    assert_equal %w[firstName lastName], result[0].keys
+  end
+
+  test 'deep key_format! with merge! array of hashes' do
+    names = [{ first_name: 'camel', last_name: 'case' }]
+    new_names = [{ first_name: 'snake', last_name: 'case' }]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.array! names
+      json.merge! new_names
+    end
+
+    assert_equal %w[firstName lastName], result[1].keys
+  end
+
+  test 'deep key_format! is applied to hash extracted from object' do
+    comment = Struct.new(:author).new({ first_name: 'camel', last_name: 'case' })
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.extract! comment, :author
+    end
+
+    assert_equal %w[firstName lastName], result['author'].keys
+  end
+
+  test 'deep key_format! is applied to hash extracted from hash' do
+    comment = {author: { first_name: 'camel', last_name: 'case' }}
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.extract! comment, :author
+    end
+
+    assert_equal %w[firstName lastName], result['author'].keys
+  end
+
+  test 'deep key_format! is applied to hash extracted directly from array' do
+    comments = [Struct.new(:author).new({ first_name: 'camel', last_name: 'case' })]
+    result = jbuild do |json|
+      json.key_format! camelize: :lower
+      json.deep_format_keys!
+      json.array! comments, :author
+    end
+
+    assert_equal %w[firstName lastName], result[0]['author'].keys
   end
 
   test 'default key_format!' do
@@ -711,6 +927,15 @@ class JbuilderTest < ActiveSupport::TestCase
         json.name "Daniel"
         json.merge! "Nope"
       end
+    end
+  end
+
+  if RUBY_VERSION >= "2.2.10"
+    test "respects JSON encoding customizations" do
+      # Active Support overrides Time#as_json for custom formatting.
+      # Ensure we call #to_json on the final attributes instead of JSON.dump.
+      result = JSON.load(Jbuilder.encode { |json| json.time Time.parse("2018-05-13 11:51:00.485 -0400") })
+      assert_equal "2018-05-13T11:51:00.485-04:00", result["time"]
     end
   end
 end

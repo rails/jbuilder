@@ -10,6 +10,8 @@ module Rails
 
       argument :attributes, type: :array, default: [], banner: 'field:type field:type'
 
+      class_option :timestamps, type: :boolean, default: true
+
       def create_root_folder
         path = File.join('app/views', controller_file_path)
         empty_directory path unless File.directory?(path)
@@ -33,8 +35,12 @@ module Rails
           [name, :json, :jbuilder] * '.'
         end
 
-        def attributes_list_with_timestamps
-          attributes_list(attributes_names + %w(created_at updated_at))
+        def full_attributes_list
+          if options[:timestamps]
+            attributes_list(attributes_names + %w(created_at updated_at))
+          else
+            attributes_list(attributes_names)
+          end
         end
 
         def attributes_list(attributes = attributes_names)
@@ -43,6 +49,10 @@ module Rails
           end
 
           attributes.map { |a| ":#{a}"} * ', '
+        end
+
+        def virtual_attributes
+          attributes.select {|name| name.respond_to?(:virtual?) && name.virtual? }
         end
     end
   end

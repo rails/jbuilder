@@ -1,5 +1,72 @@
 # Changelog
 
+2.11.2
+------
+
+* [Improve key formatting for nested hashes and disable by default](https://github.com/rails/jbuilder/pull/497)
+
+2.11.1
+------
+
+* Use symbols instead of strings for before_action filters [DHH]
+* Slim down comments in generated scaffold code [DHH]
+
+2.11.0
+------
+
+* [Allow jbuilder instance to be passed to #merge!](https://github.com/rails/jbuilder/pull/485)
+* [Fix for key_format! when using nested hashes](https://github.com/rails/jbuilder/pull/486)
+* [Include rich_text, attachment, and attachments fields in json partial](https://github.com/rails/jbuilder/pull/459)
+
+2.10.2
+------
+
+* Update scaffold generator to use double quotes, 422 form error responds, and modern string-of-arrays syntax [DHH]
+
+2.10.1
+------
+
+* Fix keyword arguments warning on Ruby 2.7
+
+2.10.0
+------
+
+* Requires Rails 5+ and Ruby 2.2+
+* Nested hashes are deep-merged
+
+2.9.1
+-----
+
+* [Respect JSON encoding customizations](https://github.com/rails/jbuilder/commit/e2e8623b08078ad6a2323ce8ecaf642b7afe1166)
+
+2.9.0
+-----
+
+* [Fix passing object with partial without locals](https://github.com/rails/jbuilder/pull/435)
+* [Fix deprecation warning in Rails 6.0](https://github.com/rails/jbuilder/pull/453)
+* [Use quotes consistently in generated templates](https://github.com/rails/jbuilder/pull/455)
+* [Allow omitting timestamps from generated partials](https://github.com/rails/jbuilder/pull/448)
+* [Respect changing scaffold generator](https://github.com/rails/jbuilder/pull/458)
+* [Use a symbolic default format for Rails 6.0 forward compatibility](https://github.com/rails/jbuilder/commit/3895a7243f3db292b0bf15513fc05494e6e50576)
+* [Drop MultiJSON in favor of Ruby standard library JSON](https://github.com/rails/jbuilder/commit/b952ae096eb1828b0fcfde06e6ba62311494ec49)
+
+2.8.0
+-----
+
+* [Replace deprecated fragment_cache_key for Rails 5.2 support](https://github.com/rails/jbuilder/pull/430)
+
+2.7.0
+-----
+
+* [Requires Rails 4+](https://github.com/rails/jbuilder/commit/5207ff394533177fffdd768bfaa6413a0cd16dc8)
+* [Fix implicitly rendering a JSON partial with the same name as an
+   HTML partial](https://github.com/rails/jbuilder/pull/400)
+
+2.6.4
+-----
+
+* Drop the pessimistic upper-bound restriction on Active Support and MultiJSON to prevent future gemfile resolution deadlocks *DHH*
+
 2.6.3
 -----
 
