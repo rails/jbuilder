@@ -108,6 +108,23 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
+You don't always have or need a collection when building an array.
+
+```ruby
+json.people do
+  json.child! do
+    json.id 1
+    json.name 'David'
+  end
+  json.child! do
+    json.id 2
+    json.name 'Jamie'
+  end
+end
+
+# => { "people": [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ] }
+```
+
 Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
 
 ``` ruby
