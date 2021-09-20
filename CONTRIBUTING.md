@@ -1,11 +1,11 @@
 Contributing to Jbuilder
 =====================
 
-[![Build Status](https://api.travis-ci.org/rails/jbuilder.svg?branch=master)][travis]
+[![Build Status](https://github.com/rails/jbuilder/workflows/Ruby%20test/badge.svg)][test]
 [![Gem Version](https://badge.fury.io/rb/jbuilder.svg)][gem]
 [![Code Climate](https://codeclimate.com/github/rails/jbuilder/badges/gpa.svg)][codeclimate]
 
-[travis]: https://travis-ci.org/rails/jbuilder
+[test]: https://github.com/rails/jbuilder/actions?query=branch%3Amaster
 [gem]: https://rubygems.org/gems/jbuilder
 [codeclimate]: https://codeclimate.com/github/rails/jbuilder
 
@@ -95,7 +95,7 @@ git push origin my-feature-branch -f
 
 #### Check on Your Pull Request
 
-Go back to your pull request after a few minutes and see whether it passed muster with Travis-CI. Everything should look green, otherwise fix issues and amend your commit as described above.
+Go back to your pull request after a few minutes and see whether it passed muster with GitHub Actions. Everything should look green, otherwise fix issues and amend your commit as described above.
 
 #### Be Patient
 
