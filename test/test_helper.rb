@@ -30,5 +30,4 @@ end
 
 ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
 
-ActionView::Base.remove_possible_method :fragment_name_with_digest
 ActionView::Base.remove_possible_method :cache_fragment_name
