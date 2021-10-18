@@ -299,7 +299,8 @@ TurboStreamer.encode(encoder: TurboStreamer::WankelEncoder)
 TurboStreamer.encode(encoder: MyEncoder)
 ```
 
-# Setting the default encoder and options
+Setting the default encoder and options
+---------------------------------------
 If you need explicitly set the default:
 
 ```ruby
@@ -338,6 +339,20 @@ All backends must have the following functions:
 - `flush` Flush any buffers
 - `inject(string)` Inject a (usually cached) string into the output; instering any delimiters as needed.
 - `capture(&block)` Capture the output of the block (w/o any delimiters)
+
+Benchmark
+---------
+`gnuplot` is required to run benchmark, to install:
+- `brew install gnuplot` (MacOS)
+
+`yajl` is required to install a development dependency [`wankel`](https://github.com/malomalo/wankel), to install:
+- `brew install yajl` (MacOS)
+
+To run benchmark: `bundle exec rake performance`
+
+This will produce 2 graph images on in folders
+- `performance/dirk`
+- `performance/rolftimmermans`
 
 Special Thanks & Contributors
 -----------------------------
