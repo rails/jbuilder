@@ -59,6 +59,25 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  if Rails::VERSION::MAJOR >= 6
+    test 'controller with namespace' do
+      run_generator %w(Admin::Post --model-name=Post)
+      assert_file 'app/controllers/admin/posts_controller.rb' do |content|
+        assert_instance_method :create, content do |m|
+          assert_match %r{format\.html \{ redirect_to admin_post_url\(@post\), notice: "Post was successfully created\." \}}, m
+        end
+
+        assert_instance_method :update, content do |m|
+          assert_match %r{format\.html \{ redirect_to admin_post_url\(@post\), notice: "Post was successfully updated\." \}}, m
+        end
+
+        assert_instance_method :destroy, content do |m|
+          assert_match %r{format\.html \{ redirect_to admin_posts_url, notice: "Post was successfully destroyed\." \}}, m
+        end
+      end
+    end
+  end
+
   test 'dont use require and permit if there are no attributes' do
     run_generator %w(Post)
 
