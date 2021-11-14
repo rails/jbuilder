@@ -159,7 +159,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   end
 
   test "object fragment caching with expiry" do
-    travel_to "2018-05-12 11:29:00 -0400"
+    travel_to Time.iso8601("2018-05-12T11:29:00-04:00")
 
     render <<-JBUILDER
       json.cache! "cache-key", expires_in: 1.minute do
