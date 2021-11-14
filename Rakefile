@@ -2,7 +2,7 @@ require "bundler/setup"
 require "bundler/gem_tasks"
 require "rake/testtask"
 
-if !ENV["APPRAISAL_INITIALIZED"] && !ENV["TRAVIS"]
+if !ENV["APPRAISAL_INITIALIZED"] && !ENV["CI"]
   require "appraisal/task"
   Appraisal::Task.new
   task default: :appraisal

@@ -1,4 +1,5 @@
 require 'jbuilder/jbuilder'
+require 'jbuilder/collection_renderer'
 require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
@@ -15,6 +16,38 @@ class JbuilderTemplate < Jbuilder
     super(*args)
   end
 
+  # Generates JSON using the template specified with the `:partial` option. For example, the code below will render
+  # the file `views/comments/_comments.json.jbuilder`, and set a local variable comments with all this message's
+  # comments, which can be used inside the partial.
+  #
+  # Example:
+  #
+  #   json.partial! 'comments/comments', comments: @message.comments
+  #
+  # There are multiple ways to generate a collection of elements as JSON, as ilustrated below:
+  #
+  # Example:
+  #
+  #   json.array! @posts, partial: 'posts/post', as: :post
+  #
+  #   # or:
+  #   json.partial! 'posts/post', collection: @posts, as: :post
+  #
+  #   # or:
+  #   json.partial! partial: 'posts/post', collection: @posts, as: :post
+  #
+  #   # or:
+  #   json.comments @post.comments, partial: 'comments/comment', as: :comment
+  #
+  # Aside from that, the `:cached` options is available on Rails >= 6.0. This will cache the rendered results
+  # effectively using the multi fetch feature.
+  #
+  # Example:
+  #
+  #   json.array! @posts, partial: "posts/post", as: :post, cached: true
+  #
+  #   json.comments @post.comments, partial: "comments/comment", as: :comment, cached: true
+  #
   def partial!(*args)
     if args.one? && _is_active_model?(args.first)
       _render_active_model_partial args.first
@@ -104,11 +137,30 @@ class JbuilderTemplate < Jbuilder
   private
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: options.except(:partial, :as, :collection)
+    options.reverse_merge! locals: options.except(:partial, :as, :collection, :cached)
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
-    if as && options.key?(:collection)
+    if options.key?(:collection) && (options[:collection].nil? || options[:collection].empty?)
+      array!
+    elsif as && options.key?(:collection) && CollectionRenderer.supported?
+      collection = options.delete(:collection) || []
+      partial = options.delete(:partial)
+      options[:locals].merge!(json: self)
+
+      if options.has_key?(:layout)
+        raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
+      end
+
+      if options.has_key?(:spacer_template)
+        raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
+      end
+
+      CollectionRenderer
+        .new(@context.lookup_context, options) { |&block| _scope(&block) }
+        .render_collection_with_partial(collection, partial, @context, nil)
+    elsif as && options.key?(:collection) && !CollectionRenderer.supported?
+      # For Rails <= 5.2:
       as = as.to_sym
       collection = options.delete(:collection)
       locals = options.delete(:locals)
@@ -162,12 +214,7 @@ class JbuilderTemplate < Jbuilder
 
   def _fragment_name_with_digest(key, options)
     if @context.respond_to?(:cache_fragment_name)
-      # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
-      # should be used instead.
       @context.cache_fragment_name(key, **options)
-    elsif @context.respond_to?(:fragment_name_with_digest)
-      # Backwards compatibility for period of time when fragment_name_with_digest was made public.
-      @context.fragment_name_with_digest(key)
     else
       key
     end
