@@ -110,12 +110,13 @@ json.array! @people, :id, :name
 
 To make a plain array without keys, construct and pass in a standard Ruby array.
 
-``` ruby
+```ruby
 my_array = %w(David Jamie)
 
 json.people my_array
 
 # => "people": [ "David", "Jamie" ]
+```
 
 You don't always have or need a collection when building an array.
 
