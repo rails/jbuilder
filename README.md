@@ -163,7 +163,7 @@ company.to_builder.target!
 ```
 
 You can either use Jbuilder stand-alone or directly as an ActionView template
-language. When required in Rails, you can create views a la show.json.jbuilder
+language. When required in Rails, you can create views à la show.json.jbuilder
 (the json is already yielded):
 
 ``` ruby
@@ -207,7 +207,7 @@ json.comments @post.comments, partial: 'comments/comment', as: :comment
 ```
 
 The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the
-partial. If the value is a collection (either implicitly or explicitly by using the `collection:` option, then each
+partial. If the value is a collection either implicitly or explicitly by using the `collection:` option, then each
 value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object,
 then the object is passed to the partial as the variable `some_symbol`.
 
@@ -219,7 +219,7 @@ Be sure not to confuse the `as:` option to mean nesting of the partial. For exam
  json.partial! @comment, as: :comment
 ```
 
-is quite different than:
+is quite different from:
 
 ```ruby
  # comment attributes are nested under a "comment" property

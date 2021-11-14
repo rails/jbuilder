@@ -312,7 +312,7 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'world', result['comments'].second['content']
   end
 
-  test 'nesting multiple chilren from a non-Enumerable that responds to #map with inline loop' do
+  test 'nesting multiple children from a non-Enumerable that responds to #map with inline loop' do
     comments = NonEnumerable.new([ Comment.new('hello', 1), Comment.new('world', 2) ])
 
     result = jbuild do |json|
