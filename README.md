@@ -108,6 +108,32 @@ json.array! @people, :id, :name
 # => [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ]
 ```
 
+To make a plain array without keys, construct and pass in a standard Ruby array.
+
+``` ruby
+my_array = %w(David Jamie)
+
+json.people my_array
+
+# => "people": [ "David", "Jamie" ]
+
+You don't always have or need a collection when building an array.
+
+```ruby
+json.people do
+  json.child! do
+    json.id 1
+    json.name 'David'
+  end
+  json.child! do
+    json.id 2
+    json.name 'Jamie'
+  end
+end
+
+# => { "people": [ { "id": 1, "name": "David" }, { "id": 2, "name": "Jamie" } ] }
+```
+
 Jbuilder objects can be directly nested inside each other.  Useful for composing objects.
 
 ``` ruby
@@ -171,19 +197,19 @@ It's also possible to render collections of partials:
 json.array! @posts, partial: 'posts/post', as: :post
 
 # or
-
 json.partial! 'posts/post', collection: @posts, as: :post
 
 # or
-
 json.partial! partial: 'posts/post', collection: @posts, as: :post
 
 # or
-
 json.comments @post.comments, partial: 'comments/comment', as: :comment
 ```
 
-The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the partial. If the value is a collection either implicitly or explicitly by using the `collection:` option, then each value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object, then the object is passed to the partial as the variable `some_symbol`.
+The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the
+partial. If the value is a collection either implicitly or explicitly by using the `collection:` option, then each
+value of the collection is passed to the partial as the variable `some_symbol`. If the value is a singular object,
+then the object is passed to the partial as the variable `some_symbol`.
 
 Be sure not to confuse the `as:` option to mean nesting of the partial. For example:
 
@@ -236,6 +262,8 @@ json.bar "bar"
 # => { "bar": "bar" }
 ```
 
+## Caching
+
 Fragment caching is supported, it uses `Rails.cache` and works like caching in
 HTML templates:
 
@@ -253,9 +281,17 @@ json.cache_if! !admin?, ['v1', @person], expires_in: 10.minutes do
 end
 ```
 
-If you are rendering fragments for a collection of objects, have a look at
-`jbuilder_cache_multi` gem. It uses fetch_multi (>= Rails 4.1) to fetch
-multiple keys at once.
+Aside from that, the `:cached` options on collection rendering is available on Rails >= 6.0. This will cache the
+rendered results effectively using the multi fetch feature.
+
+```
+json.array! @posts, partial: "posts/post", as: :post, cached: true
+
+# or:
+json.comments @post.comments, partial: "comments/comment", as: :comment, cached: true
+```
+
+## Formatting Keys
 
 Keys can be auto formatted using `key_format!`, this can be used to convert
 keynames from the standard ruby_format to camelCase:
