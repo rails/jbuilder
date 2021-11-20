@@ -317,6 +317,33 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
       assert_equal "Pavel", result[5]["author"]["first_name"]
     end
+    
+    test "supports the cached: ->() {} option" do
+      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
+
+      assert_equal 10, result.count
+      assert_equal "Post #5", result[4]["body"]
+      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+      assert_equal "Pavel", result[5]["author"]["first_name"]
+
+      expected = {
+        "id" => 1,
+        "body" => "Post #1",
+        "author" => {
+          "first_name" => "David",
+          "last_name" => "Heinemeier Hansson"
+        }
+      }
+
+      assert_equal expected, Rails.cache.read("post-1/foo")
+
+      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
+
+      assert_equal 10, result.count
+      assert_equal "Post #5", result[4]["body"]
+      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+      assert_equal "Pavel", result[5]["author"]["first_name"]
+    end
 
     test "raises an error on a render call with the :layout option" do
       error = assert_raises NotImplementedError do

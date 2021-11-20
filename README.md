@@ -285,12 +285,20 @@ end
 Aside from that, the `:cached` options on collection rendering is available on Rails >= 6.0. This will cache the
 rendered results effectively using the multi fetch feature.
 
-```
+```ruby
 json.array! @posts, partial: "posts/post", as: :post, cached: true
 
 # or:
 json.comments @post.comments, partial: "comments/comment", as: :comment, cached: true
 ```
+
+If your collection cache depends on multiple sources (try to avoid this to keep things simple), you can name all these dependencies as part of a block that returns an array:
+
+```ruby
+json.array! @posts, partial: "posts/post", as: :post, cached: -> post { [post, current_user] }
+```
+
+This will include both records as part of the cache key and updating either of them will expire the cache.
 
 ## Formatting Keys
 
