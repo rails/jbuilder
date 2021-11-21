@@ -285,7 +285,7 @@ end
 Aside from that, the `:cached` options on collection rendering is available on Rails >= 6.0. This will cache the
 rendered results effectively using the multi fetch feature.
 
-```
+```ruby
 json.array! @posts, partial: "posts/post", as: :post, cached: true
 
 # or:
