@@ -292,6 +292,14 @@ json.array! @posts, partial: "posts/post", as: :post, cached: true
 json.comments @post.comments, partial: "comments/comment", as: :comment, cached: true
 ```
 
+If your collection cache depends on multiple sources (try to avoid this to keep things simple), you can name all these dependencies as part of a block that returns an array:
+
+```ruby
+json.array! @posts, partial: "posts/post", as: :post, cached: -> post { [post, current_user] }
+```
+
+This will include both records as part of the cache key and updating either of them will expire the cache.
+
 ## Formatting Keys
 
 Keys can be auto formatted using `key_format!`, this can be used to convert
