@@ -291,6 +291,22 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       assert_equal [], result
     end
 
+    test "works with an enumerable object" do
+      enumerable_class = Class.new do
+        include Enumerable
+        alias length count # Rails 6.1 requires this.
+
+        def each(&block)
+          [].each(&block)
+        end
+      end
+
+      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: enumerable_class.new)
+
+      # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
+      assert_equal [], result
+    end
+
     test "supports the cached: true option" do
       result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
 
@@ -317,7 +333,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
       assert_equal "Pavel", result[5]["author"]["first_name"]
     end
-    
+
     test "supports the cached: ->() {} option" do
       result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
 
