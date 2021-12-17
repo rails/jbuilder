@@ -141,9 +141,7 @@ class JbuilderTemplate < Jbuilder
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
-    if options.key?(:collection) && (options[:collection].nil? || options[:collection].empty?)
-      array!
-    elsif as && options.key?(:collection) && CollectionRenderer.supported?
+    if as && options.key?(:collection) && CollectionRenderer.supported?
       collection = options.delete(:collection) || []
       partial = options.delete(:partial)
       options[:locals].merge!(json: self)
@@ -156,9 +154,11 @@ class JbuilderTemplate < Jbuilder
         raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
       end
 
-      CollectionRenderer
+      results = CollectionRenderer
         .new(@context.lookup_context, options) { |&block| _scope(&block) }
         .render_collection_with_partial(collection, partial, @context, nil)
+
+      array! if results.respond_to?(:body) && results.body.nil?
     elsif as && options.key?(:collection) && !CollectionRenderer.supported?
       # For Rails <= 5.2:
       as = as.to_sym
