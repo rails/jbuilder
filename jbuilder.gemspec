@@ -23,9 +23,9 @@ Gem::Specification.new do |s|
 
   s.metadata = {
     "bug_tracker_uri"       => "https://github.com/rails/jbuilder/issues",
-    "changelog_uri"         => "https://github.com/rails/jbuilder/releases/tag/v#{version}",
+    "changelog_uri"         => "https://github.com/rails/jbuilder/releases/tag/v#{s.version}",
     "mailing_list_uri"      => "https://discuss.rubyonrails.org/c/rubyonrails-talk",
-    "source_code_uri"       => "https://github.com/rails/jbuilder/tree/v#{version}",
+    "source_code_uri"       => "https://github.com/rails/jbuilder/tree/v#{s.version}",
     "rubygems_mfa_required" => "true",
   }
 end
