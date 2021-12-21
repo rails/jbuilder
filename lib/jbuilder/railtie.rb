@@ -1,4 +1,4 @@
-require 'rails/railtie'
+require 'rails'
 require 'jbuilder/jbuilder_template'
 
 class Jbuilder

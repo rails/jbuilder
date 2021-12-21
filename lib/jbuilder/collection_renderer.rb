@@ -1,5 +1,6 @@
 require 'delegate'
 require 'active_support/concern'
+require 'action_view'
 
 begin
   require 'action_view/renderer/collection_renderer'

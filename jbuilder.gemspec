@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.2.2'
 
   s.add_dependency 'activesupport', '>= 5.0.0'
+  s.add_dependency 'actionview', '>= 5.0.0'
 
   if RUBY_ENGINE == 'rbx'
     s.add_development_dependency('racc')

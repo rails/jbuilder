@@ -1,14 +1,11 @@
 require "bundler/setup"
 
-require "active_support"
+require "jbuilder"
+
 require "active_support/core_ext/array/access"
 require "active_support/cache/memory_store"
 require "active_support/json"
 require "active_model"
-require "action_view"
-require "rails/version"
-
-require "jbuilder"
 
 require "active_support/testing/autorun"
 require "mocha/minitest"

@@ -1,3 +1,4 @@
+require 'active_support'
 require 'jbuilder/jbuilder'
 require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
