@@ -3,8 +3,8 @@
 source "https://rubygems.org"
 
 gem "rake"
-gem "mocha", :require => false
+gem "mocha", require: false
 gem "appraisal"
 gem "rails", "~> 6.1.0"
 
-gemspec :path => "../"
+gemspec path: "../"

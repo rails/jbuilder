@@ -1,5 +1,7 @@
 require "bundler/setup"
 
+require "rails"
+
 require "jbuilder"
 
 require "active_support/core_ext/array/access"
