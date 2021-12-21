@@ -20,4 +20,12 @@ Gem::Specification.new do |s|
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- test/*`.split("\n")
+
+  s.metadata = {
+    "bug_tracker_uri"       => "https://github.com/rails/jbuilder/issues",
+    "changelog_uri"         => "https://github.com/rails/jbuilder/releases/tag/v#{version}",
+    "mailing_list_uri"      => "https://discuss.rubyonrails.org/c/rubyonrails-talk",
+    "source_code_uri"       => "https://github.com/rails/jbuilder/tree/v#{version}",
+    "rubygems_mfa_required" => "true",
+  }
 end
