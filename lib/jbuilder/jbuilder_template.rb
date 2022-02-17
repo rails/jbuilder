@@ -145,6 +145,7 @@ class JbuilderTemplate < Jbuilder
       collection = options.delete(:collection) || []
       partial = options.delete(:partial)
       options[:locals].merge!(json: self)
+      collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
 
       if options.has_key?(:layout)
         raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
