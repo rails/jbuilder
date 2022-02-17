@@ -294,7 +294,6 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     test "works with an enumerable object" do
       enumerable_class = Class.new do
         include Enumerable
-        alias length count # Rails 6.1 requires this.
 
         def each(&block)
           [].each(&block)

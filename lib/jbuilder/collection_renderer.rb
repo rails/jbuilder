@@ -106,4 +106,11 @@ class Jbuilder
         end
     end
   end
+
+  class EnumerableCompat < ::SimpleDelegator
+    # Rails 6.1 requires this.
+    def size(*args, &block)
+      __getobj__.count(*args, &block)
+    end
+  end
 end
