@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: 
+        ruby:
           - "2.2"
           - "2.3"
           - "2.4"
@@ -29,8 +29,9 @@ jobs:
           - "rails_5_2"
           - "rails_6_0"
           - "rails_6_1"
+          - "rails_7_0"
           - "rails_head"
-        
+
         experimental: [false]
         exclude:
           - ruby: 2.7
@@ -69,6 +70,16 @@ jobs:
             gemfile: rails_6_1
           - ruby: 2.4
             gemfile: rails_6_1
+          - ruby: 2.2
+            gemfile: rails_7_0
+          - ruby: 2.3
+            gemfile: rails_7_0
+          - ruby: 2.4
+            gemfile: rails_7_0
+          - ruby: 2.5
+            gemfile: rails_7_0
+          - ruby: 2.6
+            gemfile: rails_7_0
           - ruby: 2.2
             gemfile: rails_head
           - ruby: 2.3
