@@ -22,6 +22,7 @@ jobs:
           - "2.6"
           - "2.7"
           - "3.0"
+          - "3.1"
 
         gemfile:
           - "rails_5_0"
@@ -38,12 +39,16 @@ jobs:
             gemfile: rails_5_0
           - ruby: '3.0'
             gemfile: rails_5_0
+          - ruby: '3.1'
+            gemfile: rails_5_0
           - ruby: head
             gemfile: rails_5_0
           - ruby: 2.7
             gemfile: rails_5_1
           - ruby: '3.0'
             gemfile: rails_5_1
+          - ruby: '3.1'
+            gemfile: rails_5_1
           - ruby: head
             gemfile: rails_5_1
           - ruby: 2.2
@@ -52,6 +57,8 @@ jobs:
             gemfile: rails_5_2
           - ruby: '3.0'
             gemfile: rails_5_2
+          - ruby: '3.1'
+            gemfile: rails_5_2
           - ruby: head
             gemfile: rails_5_2
           - ruby: 2.2
@@ -62,6 +69,8 @@ jobs:
             gemfile: rails_6_0
           - ruby: '3.0'
             gemfile: rails_6_0
+          - ruby: '3.1'
+            gemfile: rails_6_0
           - ruby: head
             gemfile: rails_6_0
           - ruby: 2.2
@@ -96,11 +105,18 @@ jobs:
           - ruby: '3.0'
             gemfile: rails_head
             experimental: false
+          - ruby: '3.1'
+            gemfile: rails_head
+            experimental: false
+
         include:
           - ruby: 2.7
             gemfile: rails_head
             experimental: true
           - ruby: '3.0'
+            gemfile: rails_head
+            experimental: true
+          - ruby: '3.1'
             gemfile: rails_head
             experimental: true
           - ruby: head
