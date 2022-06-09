@@ -903,6 +903,27 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
+
+  test "doesn't throw an error if null is in separate block" do
+    refute_raise Jbuilder::NullError do
+      jbuild do |json|
+        json.authors do
+          json.child! do
+            json.name "Gavin"
+          end
+
+          json.child! do
+            json.null!
+          end
+
+          json.child! do
+            json.name "Roberto"
+          end
+        end
+      end
+    end
+  end
+
   test "throws MergeError when trying to merge array with non-empty hash" do
     assert_raise Jbuilder::MergeError do
       jbuild do |json|
