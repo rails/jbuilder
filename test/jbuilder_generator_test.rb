@@ -44,6 +44,18 @@ class JbuilderGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  test 'namespaced views are generated correctly for index' do
+    run_generator %w(Admin::Post --model-name=Post)
+
+    assert_file 'app/views/admin/posts/index.json.jbuilder' do |content|
+      assert_match %r{json\.array! @posts, partial: "admin/posts/post", as: :post}, content
+    end
+
+    assert_file 'app/views/admin/posts/show.json.jbuilder' do |content|
+      assert_match %r{json\.partial! "admin/posts/post", post: @post}, content
+    end
+  end
+
   if Rails::VERSION::MAJOR >= 6
     test 'handles virtual attributes' do
       run_generator %w(Message content:rich_text video:attachment photos:attachments)

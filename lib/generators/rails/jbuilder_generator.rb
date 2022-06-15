@@ -54,6 +54,10 @@ module Rails
         def virtual_attributes
           attributes.select {|name| name.respond_to?(:virtual?) && name.virtual? }
         end
+
+        def partial_path_name
+          [controller_file_path, singular_table_name].join("/")
+        end
     end
   end
 end
