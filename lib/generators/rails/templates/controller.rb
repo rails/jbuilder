@@ -57,7 +57,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     @<%= orm_instance.destroy %>
 
     respond_to do |format|
-      format.html { redirect_to <%= index_helper %>_url, notice: <%= %("#{human_name} was successfully destroyed.") %> }
+      format.html { redirect_to <%= index_helper %>_url, status: :see_other, notice: <%= %("#{human_name} was successfully destroyed.") %> }
       format.json { head :no_content }
     end
   end
