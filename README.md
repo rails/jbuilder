@@ -1,5 +1,10 @@
 # TurboStreamer
 
+[![GitHub Build Status](https://img.shields.io/github/workflow/status/malomalo/turbostreamer/CI?style=flat-square)](https://github.com/malomalo/turbostreamer/actions?query=workflow%3ACI)
+
+[![Gem Version](http://img.shields.io/gem/v/turbostreamer.svg?style=flat-square)](http://badge.fury.io/rb/turbostreamer)
+[![License](https://img.shields.io/github/license/malomalo/turbostreamer.svg?style=flat-square)](http://badge.fury.io/rb/turbostreamer)
+
 TurboStreamer gives you a simple DSL for generating JSON that beats massaging giant
 hash structures. This is particularly helpful when the generation process is
 fraught with conditionals and loops.
@@ -31,7 +36,7 @@ json.object! do
   if current_user.admin?
     json.visitors calculate_visitors(@message)
   end
-  
+
   json.tags do
     json.array! do
       @message.tags.each { |tag| json.child! tag }
@@ -66,7 +71,7 @@ This will build the following structure:
   "visitors": 15,
 
   "tags": ['public'],
-  
+
   "comments": [
     { "content": "Hello everyone!", "created_at": "2011-10-29T20:45:28-05:00" },
     { "content": "To you my good sir!", "created_at": "2011-10-29T20:47:28-05:00" }
@@ -151,7 +156,7 @@ json.object! do
       json.url url_for(@message.creator, format: :json)
     end
   end
-  
+
   if current_user.admin?
     json.visitors calculate_visitors(@message)
   end

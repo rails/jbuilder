@@ -1,5 +1,9 @@
 # Changelog
 
+1.10.0
+-----
+* Fixed Rails 6.1 & Ruby 3.0 Compatibility
+
 1.9.0
 -----
 * Fixed deprecation of using `Proc.new` to capture block; replaced with `&block`
