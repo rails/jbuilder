@@ -340,7 +340,7 @@ Jbuilder.deep_format_keys true
 
 ## Testing JBuilder Response body with RSpec
 
-For `rspec-rails` users, to test the response body of your controller spec, enable `render_views` in your RSpec context. This [configuration](https://relishapp.com/rspec/rspec-rails/v/5-1/docs/controller-specs/render-views) renders the views in a controller test.
+To test the response body of your controller spec, enable `render_views` in your RSpec context. This [configuration](https://relishapp.com/rspec/rspec-rails/v/5-1/docs/controller-specs/render-views) renders the views in a controller test.
 
 ## Contributing to Jbuilder
 
