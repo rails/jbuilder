@@ -26,12 +26,12 @@ class Jbuilder
   BLANK = Blank.new
   NON_ENUMERABLES = [ ::Struct, ::OpenStruct ].to_set
 
-  def set!(key, value = BLANK, *args)
+  def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &::Proc.new }
+        _scope{ array! value, &block }
       else
         # json.comments { ... }
         # { "comments": ... }
@@ -61,9 +61,9 @@ class Jbuilder
     _set_value key, result
   end
 
-  def method_missing(*args)
+  def method_missing(*args, &block)
     if ::Kernel.block_given?
-      set!(*args, &::Proc.new)
+      set!(*args, &block)
     else
       set!(*args)
     end
@@ -181,11 +181,11 @@ class Jbuilder
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection = [], *attributes)
+  def array!(collection = [], *attributes, &block)
     array = if collection.nil?
       []
     elsif ::Kernel.block_given?
-      _map_collection(collection, &::Proc.new)
+      _map_collection(collection, &block)
     elsif attributes.any?
       _map_collection(collection) { |element| extract! element, *attributes }
     else
@@ -220,9 +220,9 @@ class Jbuilder
     end
   end
 
-  def call(object, *attributes)
+  def call(object, *attributes, &block)
     if ::Kernel.block_given?
-      array! object, &::Proc.new
+      array! object, &block
     else
       extract! object, *attributes
     end
