@@ -1,6 +1,5 @@
 require 'test_helper'
-require 'jbuilder/dependency_tracker'
-
+require 'jbuilder/jbuilder_dependency_tracker'
 
 class FakeTemplate
     attr_reader :source, :handler
