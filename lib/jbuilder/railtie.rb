@@ -6,7 +6,7 @@ class Jbuilder
     initializer :jbuilder do
       ActiveSupport.on_load :action_view do
         ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
-        require 'jbuilder/dependency_tracker'
+        require 'jbuilder/jbuilder_dependency_tracker'
       end
 
       if Rails::VERSION::MAJOR >= 5
