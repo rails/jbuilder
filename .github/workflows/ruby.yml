@@ -32,6 +32,7 @@ jobs:
           - "rails_6_0"
           - "rails_6_1"
           - "rails_7_0"
+          - "rails_7_1"
           - "rails_head"
 
         experimental: [false]
@@ -99,6 +100,16 @@ jobs:
           - ruby: 2.6
             gemfile: rails_7_0
           - ruby: 2.2
+            gemfile: rails_7_1
+          - ruby: 2.3
+            gemfile: rails_7_1
+          - ruby: 2.4
+            gemfile: rails_7_1
+          - ruby: 2.5
+            gemfile: rails_7_1
+          - ruby: 2.6
+            gemfile: rails_7_1
+          - ruby: 2.2
             gemfile: rails_head
           - ruby: 2.3
             gemfile: rails_head
@@ -133,7 +144,7 @@ jobs:
             experimental: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
