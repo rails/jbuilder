@@ -364,3 +364,4 @@ class Jbuilder
 end
 
 require 'jbuilder/railtie' if defined?(Rails)
+require 'jbuilder/turbine' if defined?(::Jets::Turbine)
