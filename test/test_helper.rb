@@ -14,6 +14,8 @@ require "mocha/minitest"
 
 ActiveSupport.test_order = :random
 
+ENV["RAILS_ENV"] ||= "test"
+
 class << Rails
   def cache
     @cache ||= ActiveSupport::Cache::MemoryStore.new
