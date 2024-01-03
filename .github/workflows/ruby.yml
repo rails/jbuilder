@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - "2.3"
           - "2.4"
           - "2.5"
           - "2.6"
@@ -65,8 +64,6 @@ jobs:
             gemfile: rails_5_2
           - ruby: head
             gemfile: rails_5_2
-          - ruby: 2.3
-            gemfile: rails_6_0
           - ruby: 2.4
             gemfile: rails_6_0
           - ruby: '3.0'
@@ -77,28 +74,20 @@ jobs:
             gemfile: rails_6_0
           - ruby: head
             gemfile: rails_6_0
-          - ruby: 2.3
-            gemfile: rails_6_1
           - ruby: 2.4
             gemfile: rails_6_1
-          - ruby: 2.3
-            gemfile: rails_7_0
           - ruby: 2.4
             gemfile: rails_7_0
           - ruby: 2.5
             gemfile: rails_7_0
           - ruby: 2.6
             gemfile: rails_7_0
-          - ruby: 2.3
-            gemfile: rails_7_1
           - ruby: 2.4
             gemfile: rails_7_1
           - ruby: 2.5
             gemfile: rails_7_1
           - ruby: 2.6
             gemfile: rails_7_1
-          - ruby: 2.3
-            gemfile: rails_head
           - ruby: 2.4
             gemfile: rails_head
           - ruby: 2.5
@@ -119,6 +108,12 @@ jobs:
             gemfile: rails_5_0
           - ruby: 2.2
             gemfile: rails_5_1
+          - ruby: 2.3
+            gemfile: rails_5_0
+          - ruby: 2.3
+            gemfile: rails_5_1
+          - ruby: 2.3
+            gemfile: rails_5_2
 
           - ruby: '3.1'
             gemfile: rails_head
