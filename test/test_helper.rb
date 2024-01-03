@@ -35,3 +35,11 @@ class Racer < Struct.new(:id, :name)
   include ActiveModel::Conversion
 end
 
+# Instantiate an Application in order to trigger the initializers
+Class.new(Rails::Application) do
+  config.secret_key_base = 'secret'
+  config.eager_load = false
+end.initialize!
+
+# Touch AV::Base in order to trigger :action_view on_load hook before running the tests
+ActionView::Base.inspect
