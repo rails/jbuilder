@@ -21,21 +21,12 @@ jobs:
           - "3.2"
 
         gemfile:
-          - "rails_6_0"
           - "rails_6_1"
           - "rails_7_0"
           - "rails_7_1"
           - "rails_head"
 
         exclude:
-          - ruby: '3.0'
-            gemfile: rails_6_0
-          - ruby: '3.1'
-            gemfile: rails_6_0
-          - ruby: '3.2'
-            gemfile: rails_6_0
-          - ruby: head
-            gemfile: rails_6_0
           - ruby: 2.7
             gemfile: rails_head
           - ruby: '3.0'
@@ -78,6 +69,8 @@ jobs:
             gemfile: rails_6_0
           - ruby: 2.6
             gemfile: rails_6_1
+          - ruby: 2.7
+            gemfile: rails_6_0
 
           - ruby: '3.1'
             gemfile: rails_head
