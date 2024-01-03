@@ -54,10 +54,6 @@ jobs:
             gemfile: rails_head
           - ruby: '3.0'
             gemfile: rails_head
-          - ruby: '3.1'
-            gemfile: rails_head
-          - ruby: '3.2'
-            gemfile: rails_head
 
         include:
           - ruby: 2.2
