@@ -6,7 +6,7 @@ jobs:
   test:
     name: Ruby ${{ matrix.ruby }} (${{ matrix.gemfile }})
     runs-on: ubuntu-20.04
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.gemfile == 'rails_head' }}
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
       BUNDLE_JOBS: 4
@@ -35,7 +35,6 @@ jobs:
           - "rails_7_1"
           - "rails_head"
 
-        experimental: [false]
         exclude:
           - ruby: 2.7
             gemfile: rails_5_0
@@ -121,27 +120,20 @@ jobs:
             gemfile: rails_head
           - ruby: 2.7
             gemfile: rails_head
-            experimental: false
           - ruby: '3.0'
             gemfile: rails_head
-            experimental: false
           - ruby: '3.1'
             gemfile: rails_head
-            experimental: false
           - ruby: '3.2'
             gemfile: rails_head
-            experimental: false
 
         include:
           - ruby: '3.1'
             gemfile: rails_head
-            experimental: true
           - ruby: '3.2'
             gemfile: rails_head
-            experimental: true
           - ruby: head
             gemfile: rails_head
-            experimental: true
 
     steps:
       - uses: actions/checkout@v4
