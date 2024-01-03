@@ -35,4 +35,3 @@ class Racer < Struct.new(:id, :name)
   include ActiveModel::Conversion
 end
 
-ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
