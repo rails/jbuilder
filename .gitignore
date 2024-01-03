@@ -1,4 +1,5 @@
 tmp
+/log
 gemfiles/.bundle
 gemfiles/*.lock
 Gemfile.lock
