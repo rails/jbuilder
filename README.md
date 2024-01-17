@@ -338,6 +338,10 @@ environment.rb for example):
 Jbuilder.deep_format_keys true
 ```
 
+## Testing JBuilder Response body with RSpec
+
+To test the response body of your controller spec, enable `render_views` in your RSpec context. This [configuration](https://rspec.info/features/6-0/rspec-rails/controller-specs/render-views) renders the views in a controller test.
+
 ## Contributing to Jbuilder
 
 Jbuilder is the work of many contributors. You're encouraged to submit pull requests, propose
