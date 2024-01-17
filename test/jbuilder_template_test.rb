@@ -141,6 +141,24 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "Hit", hit["name"]
   end
 
+  test "fragment caching an array" do
+    result = render(<<-JBUILDER)
+      json.array! [1, 2, 3] do |i|
+        json.cache! "cachekey" do
+          json.name "Cache#{1}"
+        end
+        json.id i
+      end
+    JBUILDER
+
+    assert_equal "Cache1", result[0]["name"]
+    assert_equal "Cache1", result[1]["name"]
+    assert_equal "Cache1", result[2]["name"]
+    assert_equal 1, result[0]["id"]
+    assert_equal 2, result[1]["id"]
+    assert_equal 3, result[2]["id"]
+  end
+
   test "conditional object fragment caching" do
     render(<<-JBUILDER)
       json.cache_if! true, "cache-key" do
