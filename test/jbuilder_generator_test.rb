@@ -29,6 +29,7 @@ class JbuilderGeneratorTest < Rails::Generators::TestCase
     end
 
     assert_file 'app/views/posts/_post.json.jbuilder' do |content|
+      assert_match %r{# locals: \(post:\)}, content
       assert_match %r{json\.extract! post, :id, :title, :body}, content
       assert_match %r{:created_at, :updated_at}, content
       assert_match %r{json\.url post_url\(post, format: :json\)}, content
