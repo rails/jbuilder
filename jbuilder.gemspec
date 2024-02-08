@@ -1,11 +1,10 @@
 Gem::Specification.new do |s|
-  s.name     = 'jbuilder'
-  s.version  = '2.11.5'
-  s.authors  = 'David Heinemeier Hansson'
-  s.email    = 'david@basecamp.com'
-  s.summary  = 'Create JSON structures via a Builder-style DSL'
-  s.homepage = 'https://github.com/rails/jbuilder'
-  s.license  = 'MIT'
+  s.name    = 'jbuilder'
+  s.version = '1.5.1'
+  s.author  = 'David Heinemeier Hansson'
+  s.email   = 'david@37signals.com'
+  s.summary = 'Create JSON structures via a Builder-style DSL'
+  s.license = 'MIT'
 
   s.required_ruby_version = '>= 2.2.2'
 
