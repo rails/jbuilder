@@ -53,7 +53,7 @@ class JbuilderTemplateTest < ActionView::TestCase
   end
 
   def assert_collection_rendered(json, context = nil)
-    result = MultiJson.load(json)
+    result = JSON.load(json)
     result = result.fetch(context) if context
 
     assert_equal 10, result.length
@@ -68,7 +68,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.content 'hello'
     JBUILDER
 
-    assert_equal 'hello', MultiJson.load(json)['content']
+    assert_equal 'hello', JSON.load(json)['content']
   end
 
   test 'key_format! with parameter' do
@@ -77,7 +77,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.camel_style 'for JS'
     JBUILDER
 
-    assert_equal ['camelStyle'], MultiJson.load(json).keys
+    assert_equal ['camelStyle'], JSON.load(json).keys
   end
 
   test 'key_format! propagates to child elements' do
@@ -89,7 +89,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    result = MultiJson.load(json)
+    result = JSON.load(json)
     assert_equal 'one', result['LEVEL1']
     assert_equal 'two', result['LEVEL2']['VALUE']
   end
@@ -99,7 +99,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       json.partial! 'partial'
     JBUILDER
 
-    assert_equal 'hello', MultiJson.load(json)['content']
+    assert_equal 'hello', JSON.load(json)['content']
   end
 
   test 'partial! renders collections' do
@@ -181,7 +181,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'Cache', parsed['name']
   end
 
@@ -200,7 +200,7 @@ class JbuilderTemplateTest < ActionView::TestCase
       end
     JBUILDER
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal %w(a b c), parsed
   end
 

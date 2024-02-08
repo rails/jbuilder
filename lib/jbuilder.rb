@@ -3,7 +3,7 @@ require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash'
 require 'active_support/cache'
-require 'multi_json'
+require 'json'
 
 begin
   require 'active_support/proxy_object'
@@ -280,7 +280,7 @@ class Jbuilder < JbuilderProxy
 
   # Encodes the current builder as JSON.
   def target!
-    ::MultiJson.dump @attributes
+    JSON.dump @attributes
   end
 
   private

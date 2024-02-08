@@ -30,7 +30,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.content 'hello'
     end
 
-    assert_equal 'hello', MultiJson.load(json)['content']
+    assert_equal 'hello', JSON.load(json)['content']
   end
 
   test 'single key with false value' do
@@ -38,7 +38,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.content false
     end
 
-    assert_equal false, MultiJson.load(json)['content']
+    assert_equal false, JSON.load(json)['content']
   end
 
   test 'single key with nil value' do
@@ -46,8 +46,8 @@ class JbuilderTest < ActiveSupport::TestCase
       json.content nil
     end
 
-    assert MultiJson.load(json).has_key?('content')
-    assert_equal nil, MultiJson.load(json)['content']
+    assert JSON.load(json).has_key?('content')
+    assert_equal nil, JSON.load(json)['content']
   end
 
   test 'multiple keys' do
@@ -56,7 +56,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.content 'world'
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed['title']
     assert_equal 'world', parsed['content']
   end
@@ -68,7 +68,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.extract! person, :name, :age
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'David', parsed['name']
     assert_equal 32, parsed['age']
   end
@@ -101,7 +101,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'David', parsed['name']
     assert_equal 32, parsed['age']
   end
@@ -113,7 +113,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.extract! person, :name, :age
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'Jim', parsed['name']
     assert_equal 34, parsed['age']
   end
@@ -126,7 +126,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'David', parsed['author']['name']
     assert_equal 32, parsed['author']['age']
   end
@@ -139,7 +139,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
   end
@@ -157,7 +157,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.author person, :name, :age
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'David', parsed['author']['name']
     assert_equal 32,      parsed['author']['age']
   end
@@ -169,7 +169,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.comments comments, :content
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal ['content'], parsed['comments'].first.keys
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
@@ -183,7 +183,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.comments comments, :content
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'Parent', parsed['name']
     assert_equal [], parsed['comments']
   end
@@ -197,7 +197,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal ['content'], parsed['comments'].first.keys
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
@@ -210,7 +210,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal [], MultiJson.load(json)['comments']
+    assert_equal [], JSON.load(json)['comments']
   end
 
   test 'nesting multiple children from a non-Enumerable that responds to #map' do
@@ -220,7 +220,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.comments comments, :content
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal ['content'], parsed['comments'].first.keys
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
@@ -235,7 +235,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal ['content'], parsed['comments'].first.keys
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
@@ -252,7 +252,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal ['content'], parsed['comments'].first.keys
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
@@ -267,7 +267,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed.first['content']
     assert_equal 'world', parsed.second['content']
   end
@@ -283,7 +283,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed.first['content']
     assert_equal 'world', parsed.second['content']
   end
@@ -301,7 +301,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed['author']['comments'].first['content']
     assert_equal 'world', parsed['author']['comments'].second['content']
   end
@@ -319,7 +319,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal 'david', MultiJson.load(json)['comments'].first['authors'].first['name']
+    assert_equal 'david', JSON.load(json)['comments'].first['authors'].first['name']
   end
 
   test 'directly set an array nested in another array' do
@@ -333,8 +333,8 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal 'David', MultiJson.load(json)[0]['names'].last
-    assert_not_equal 'hello', MultiJson.load(json)[0]['not_in_json']
+    assert_equal 'David', JSON.load(json)[0]['names'].last
+    assert_not_equal 'hello', JSON.load(json)[0]['not_in_json']
   end
 
   test 'directly set an array nested in another array with old api' do
@@ -350,7 +350,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'David', parsed.first['names'].last
     assert_not_equal 'hello', parsed.first['not_in_json']
   end
@@ -364,7 +364,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     result = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
-    assert_equal result, MultiJson.load(json)
+    assert_equal result, JSON.load(json)
   end
 
   test 'nested jbuilder object via set!' do
@@ -376,7 +376,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     result = {'value' => 'Test', 'nested' => {'nested_value' => 'Nested Test'}}
-    assert_equal result, MultiJson.load(json)
+    assert_equal result, JSON.load(json)
   end
 
   test 'top-level array' do
@@ -388,7 +388,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed.first['content']
     assert_equal 'world', parsed.second['content']
   end
@@ -400,7 +400,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.array! comments, :content, :id
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'hello', parsed.first['content']
     assert_equal       1, parsed.first['id']
     assert_equal 'world', parsed.second['content']
@@ -416,7 +416,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal [], MultiJson.load(json)
+    assert_equal [], JSON.load(json)
   end
 
   test 'dynamically set a key/value' do
@@ -424,7 +424,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.set! :each, 'stuff'
     end
 
-    assert_equal 'stuff', MultiJson.load(json)['each']
+    assert_equal 'stuff', JSON.load(json)['each']
   end
 
   test 'dynamically set a key/nested child with block' do
@@ -435,7 +435,7 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal 'David', parsed['author']['name']
     assert_equal 32, parsed['author']['age']
   end
@@ -447,7 +447,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.set! :comments, comments, :content
     end
 
-    parsed = MultiJson.load(json)
+    parsed = JSON.load(json)
     assert_equal ['content'], parsed['comments'].first.keys
     assert_equal 'hello', parsed['comments'].first['content']
     assert_equal 'world', parsed['comments'].second['content']
@@ -476,7 +476,7 @@ class JbuilderTest < ActiveSupport::TestCase
       json.relations RelationMock.new, :name, :age
     end
 
-    parsed = MultiJson.load(result)
+    parsed = JSON.load(result)
     assert_equal 2, parsed['relations'].length
     assert_equal 'Bob', parsed['relations'][0]['name']
     assert_equal 50, parsed['relations'][1]['age']
