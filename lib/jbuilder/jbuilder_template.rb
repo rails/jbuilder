@@ -147,6 +147,8 @@ class JbuilderTemplate < Jbuilder
       options[:locals].merge!(json: self)
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
 
+      return array! if collection.blank?
+
       if options.has_key?(:layout)
         raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
       end
@@ -164,6 +166,9 @@ class JbuilderTemplate < Jbuilder
       # For Rails <= 5.2:
       as = as.to_sym
       collection = options.delete(:collection)
+
+      return array! if collection.blank?
+
       locals = options.delete(:locals)
       array! collection do |member|
         member_locals = locals.clone
