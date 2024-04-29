@@ -4,8 +4,11 @@ require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'json'
-require 'ostruct'
 require 'active_support/core_ext/hash/deep_merge'
+begin
+  require 'ostruct'
+rescue LoadError
+end
 
 class Jbuilder
   @@key_formatter = nil
@@ -28,7 +31,7 @@ class Jbuilder
   end
 
   BLANK = Blank.new
-  NON_ENUMERABLES = [ ::Struct, ::OpenStruct ].to_set
+  NON_ENUMERABLES = defined?(::OpenStruct) ? [::Struct, ::OpenStruct].to_set : [::Struct].to_set
 
   def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
