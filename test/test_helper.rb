@@ -17,7 +17,6 @@ require File.expand_path('../../ext/actionview/streaming_template_renderer', __F
 
 require "active_support/testing/autorun"
 require 'mocha/minitest'
-require 'wankel'
 
 if ENV["TSENCODER"]
   TurboStreamer.set_default_encoder(:json, ENV["TSENCODER"].to_sym)
@@ -26,7 +25,7 @@ end
 class ActiveSupport::TestCase
 
   def jbuild(*args, &block)
-    ::Wankel.parse(TurboStreamer.encode(*args, &block))
+    ::JSON.parse(TurboStreamer.encode(*args, &block))
   end
 
   def assert_json(json, &block)
