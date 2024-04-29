@@ -89,7 +89,7 @@ class JbuilderTemplate < Jbuilder
   #   # json.extra 'This will not work either, the root must be exclusive'
   def cache_root!(key=nil, options={})
     if @context.controller.perform_caching
-      raise "cache_root! can't be used after JSON structures have been defined" if @attributes.present?
+      ::Kernel.raise "cache_root! can't be used after JSON structures have been defined" if @attributes.present?
 
       @cached_root = _cache_fragment_for([ :root, key ], options) { yield; target! }
     else
@@ -148,11 +148,11 @@ class JbuilderTemplate < Jbuilder
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
 
       if options.has_key?(:layout)
-        raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
+        ::Kernel.raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
       end
 
       if options.has_key?(:spacer_template)
-        raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
+        ::Kernel.raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
       end
 
       results = CollectionRenderer
