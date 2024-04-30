@@ -98,10 +98,12 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   end
 
   test "nil partial collection by name" do
+    Jbuilder::CollectionRenderer.expects(:new).never
     assert_equal [], render('json.partial! "post", collection: @posts, as: :post', posts: nil)
   end
 
   test "nil partial collection by options" do
+    Jbuilder::CollectionRenderer.expects(:new).never
     assert_equal [], render('json.partial! partial: "post", collection: @posts, as: :post', posts: nil)
   end
 
@@ -113,7 +115,13 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "Pavel", result[5]["author"]["first_name"]
   end
 
+  test "empty array of partials from empty collection" do
+    Jbuilder::CollectionRenderer.expects(:new).never
+    assert_equal [], render('json.array! @posts, partial: "post", as: :post', posts: [])
+  end
+
   test "empty array of partials from nil collection" do
+    Jbuilder::CollectionRenderer.expects(:new).never
     assert_equal [], render('json.array! @posts, partial: "post", as: :post', posts: nil)
   end
 
@@ -126,7 +134,14 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   end
 
   test "empty array of partials under key from nil collection" do
+    Jbuilder::CollectionRenderer.expects(:new).never
     result = render('json.posts @posts, partial: "post", as: :post', posts: nil)
+    assert_equal [], result["posts"]
+  end
+
+  test "empty array of partials under key from an empy collection" do
+    Jbuilder::CollectionRenderer.expects(:new).never
+    result = render('json.posts @posts, partial: "post", as: :post', posts: [])
     assert_equal [], result["posts"]
   end
 
@@ -293,6 +308,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
 
   if JbuilderTemplate::CollectionRenderer.supported?
     test "returns an empty array for an empty collection" do
+      Jbuilder::CollectionRenderer.expects(:new).never
       result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: [])
 
       # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
