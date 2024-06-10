@@ -239,8 +239,20 @@ json.partial! 'sub_template', locals: { user: user }
 json.partial! 'sub_template', user: user
 ```
 
+You can explicitly make Jbuilder object return a primitive value:
 
-You can explicitly make Jbuilder object return null if you want:
+``` ruby
+json.extract! @post, :id, :title, :content, :published_at
+json.author do
+  if @post.pseudonymous?
+    json.primitive! @post.author_pseudonym
+  else
+    json.first_name @post.author_first_name
+    json.last_name @post.author_last_name
+  end
+```
+
+Returning null is also possible:
 
 ``` ruby
 json.extract! @post, :id, :title, :content, :published_at

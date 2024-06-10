@@ -831,6 +831,57 @@ class JbuilderTest < ActiveSupport::TestCase
     Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
   end
 
+  test 'primitive! with String value' do
+    result = jbuild do |json|
+      json.primitive! 'hello'
+    end
+
+    assert_equal 'hello', result
+  end
+
+  test 'primitive! with Numeric value' do
+    result = jbuild do |json|
+      json.primitive! 13.37
+    end
+
+    assert_equal 13.37, result
+  end
+
+  test 'primitive! with true value' do
+    result = jbuild do |json|
+      json.primitive! true
+    end
+
+    assert_equal true, result
+  end
+  
+  test 'primitive! with false value' do
+    result = jbuild do |json|
+      json.primitive! false
+    end
+
+    assert_equal false, result
+  end
+  
+  test 'primitive! with nil value' do
+    result = jbuild do |json|
+      json.primitive! nil
+    end
+
+    assert_equal nil, result
+  end
+
+  test 'primitive! in an empty block' do
+    result = jbuild do |json|
+      json.author do
+        json.primitive! 'David Heinemeier Hansson'
+      end
+    end
+
+    assert result.key?('author')
+    assert_equal 'David Heinemeier Hansson', result['author']
+  end  
+
   test 'nil!' do
     result = jbuild do |json|
       json.key 'value'
@@ -869,6 +920,14 @@ class JbuilderTest < ActiveSupport::TestCase
     assert attributes.empty?
     assert attributes.blank?
     assert !attributes.present?
+  end
+
+  test 'throws PrimitiveError when trying to use hash as primitive' do
+    assert_raise Jbuilder::PrimitiveError do
+      jbuild do |json|
+        json.primitive!({})
+      end
+    end
   end
 
   test 'throws ArrayError when trying to add a key to an array' do
@@ -929,6 +988,20 @@ class JbuilderTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "throws MergeError when trying to replace non-empty block with primitive" do
+    assert_raise Jbuilder::MergeError do
+      jbuild do |json|
+        json.author do
+          json.name 'David'
+        end
+
+        json.author do
+          json.primitive! 'David Heinemeier Hansson'
+        end
+      end
+    end
+  end 
 
   if RUBY_VERSION >= "2.2.10"
     test "respects JSON encoding customizations" do
