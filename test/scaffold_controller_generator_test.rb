@@ -72,7 +72,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
         end
 
         assert_instance_method :destroy, content do |m|
-          assert_match %r{format\.html \{ redirect_to admin_posts_path, status: :see_other, xnotice: "Post was successfully destroyed\." \}}, m
+          assert_match %r{format\.html \{ redirect_to admin_posts_path, status: :see_other, notice: "Post was successfully destroyed\." \}}, m
         end
       end
     end
