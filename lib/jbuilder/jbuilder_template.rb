@@ -156,14 +156,6 @@ class JbuilderTemplate < Jbuilder
       end
 
       if collection.present?
-        if options.has_key?(:layout)
-          raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
-        end
-
-        if options.has_key?(:spacer_template)
-          raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
-        end
-  
         results = CollectionRenderer
           .new(@context.lookup_context, options) { |&block| _scope(&block) }
           .render_collection_with_partial(collection, partial, @context, nil)
