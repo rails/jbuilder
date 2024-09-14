@@ -141,19 +141,19 @@ class JbuilderTemplate < Jbuilder
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
-    if options.has_key?(:layout)
-      ::Kernel.raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
-    end
-
-    if options.has_key?(:spacer_template)
-      ::Kernel.raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
-    end
-
     if as && options.key?(:collection) && CollectionRenderer.supported?
       collection = options.delete(:collection) || []
       partial = options.delete(:partial)
       options[:locals].merge!(json: self)
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
+
+      if options.has_key?(:layout)
+        ::Kernel.raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
+      end
+  
+      if options.has_key?(:spacer_template)
+        ::Kernel.raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
+      end
 
       if collection.present?
         if options.has_key?(:layout)
