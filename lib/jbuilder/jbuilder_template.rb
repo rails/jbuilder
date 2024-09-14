@@ -150,7 +150,7 @@ class JbuilderTemplate < Jbuilder
       if options.has_key?(:layout)
         ::Kernel.raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
       end
-  
+
       if options.has_key?(:spacer_template)
         ::Kernel.raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
       end
