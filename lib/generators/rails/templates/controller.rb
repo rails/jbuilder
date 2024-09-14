@@ -65,13 +65,19 @@ class <%= controller_class_name %>Controller < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_<%= singular_table_name %>
+      <%- if Rails::VERSION::MAJOR >= 8 -%>
+      @<%= singular_table_name %> = <%= orm_class.find(class_name, "params.expect(:id)") %>
+      <%- else -%>
       @<%= singular_table_name %> = <%= orm_class.find(class_name, "params[:id]") %>
+      <%- end -%>
     end
 
     # Only allow a list of trusted parameters through.
     def <%= "#{singular_table_name}_params" %>
       <%- if attributes_names.empty? -%>
       params.fetch(<%= ":#{singular_table_name}" %>, {})
+      <%- elsif Rails::VERSION::MAJOR >= 8 -%>
+      params.expect(<%= singular_table_name %>: [ <%= permitted_params %> ])
       <%- else -%>
       params.require(<%= ":#{singular_table_name}" %>).permit(<%= permitted_params %>)
       <%- end -%>
