@@ -155,21 +155,30 @@ class JbuilderTemplate < Jbuilder
         ::Kernel.raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
       end
 
-      results = CollectionRenderer
-        .new(@context.lookup_context, options) { |&block| _scope(&block) }
-        .render_collection_with_partial(collection, partial, @context, nil)
-
-      array! if results.respond_to?(:body) && results.body.nil?
+      if collection.present?
+        results = CollectionRenderer
+          .new(@context.lookup_context, options) { |&block| _scope(&block) }
+          .render_collection_with_partial(collection, partial, @context, nil)
+  
+        array! if results.respond_to?(:body) && results.body.nil?
+      else
+        array!
+      end
     elsif as && options.key?(:collection) && !CollectionRenderer.supported?
       # For Rails <= 5.2:
       as = as.to_sym
       collection = options.delete(:collection)
-      locals = options.delete(:locals)
-      array! collection do |member|
-        member_locals = locals.clone
-        member_locals.merge! collection: collection
-        member_locals.merge! as => member
-        _render_partial options.merge(locals: member_locals)
+
+      if collection.present?
+        locals = options.delete(:locals)
+        array! collection do |member|
+          member_locals = locals.clone
+          member_locals.merge! collection: collection
+          member_locals.merge! as => member
+          _render_partial options.merge(locals: member_locals)
+        end
+      else
+        array!
       end
     else
       _render_partial options
