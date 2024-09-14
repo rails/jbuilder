@@ -147,34 +147,38 @@ class JbuilderTemplate < Jbuilder
       options[:locals].merge!(json: self)
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
 
-      return array! if collection.blank?
+      if collection.present?
+        if options.has_key?(:layout)
+          raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
+        end
 
-      if options.has_key?(:layout)
-        raise ::NotImplementedError, "The `:layout' option is not supported in collection rendering."
+        if options.has_key?(:spacer_template)
+          raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
+        end
+  
+        results = CollectionRenderer
+          .new(@context.lookup_context, options) { |&block| _scope(&block) }
+          .render_collection_with_partial(collection, partial, @context, nil)
+  
+        array! if results.respond_to?(:body) && results.body.nil?
+      else
+        array!
       end
-
-      if options.has_key?(:spacer_template)
-        raise ::NotImplementedError, "The `:spacer_template' option is not supported in collection rendering."
-      end
-
-      results = CollectionRenderer
-        .new(@context.lookup_context, options) { |&block| _scope(&block) }
-        .render_collection_with_partial(collection, partial, @context, nil)
-
-      array! if results.respond_to?(:body) && results.body.nil?
     elsif as && options.key?(:collection) && !CollectionRenderer.supported?
       # For Rails <= 5.2:
       as = as.to_sym
       collection = options.delete(:collection)
 
-      return array! if collection.blank?
-
-      locals = options.delete(:locals)
-      array! collection do |member|
-        member_locals = locals.clone
-        member_locals.merge! collection: collection
-        member_locals.merge! as => member
-        _render_partial options.merge(locals: member_locals)
+      if collection.present?
+        locals = options.delete(:locals)
+        array! collection do |member|
+          member_locals = locals.clone
+          member_locals.merge! collection: collection
+          member_locals.merge! as => member
+          _render_partial options.merge(locals: member_locals)
+        end
+      else
+        array!
       end
     else
       _render_partial options
