@@ -4,8 +4,11 @@ require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'json'
-require 'ostruct'
 require 'active_support/core_ext/hash/deep_merge'
+begin
+  require 'ostruct'
+rescue LoadError
+end
 
 class Jbuilder
   @@key_formatter = nil
@@ -28,7 +31,7 @@ class Jbuilder
   end
 
   BLANK = Blank.new
-  NON_ENUMERABLES = [ ::Struct, ::OpenStruct ].to_set
+  NON_ENUMERABLES = defined?(::OpenStruct) ? [::Struct, ::OpenStruct].to_set : [::Struct].to_set
 
   def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
@@ -292,7 +295,7 @@ class Jbuilder
 
   def _merge_block(key)
     current_value = _blank? ? BLANK : @attributes.fetch(_key(key), BLANK)
-    raise NullError.build(key) if current_value.nil?
+    ::Kernel.raise NullError.build(key) if current_value.nil?
     new_value = _scope{ yield self }
     _merge_values(current_value, new_value)
   end
@@ -307,7 +310,7 @@ class Jbuilder
     elsif ::Hash === current_value && ::Hash === updates
       current_value.deep_merge(updates)
     else
-      raise MergeError.build(current_value, updates)
+      ::Kernel.raise MergeError.build(current_value, updates)
     end
   end
 
@@ -328,8 +331,8 @@ class Jbuilder
   end
 
   def _set_value(key, value)
-    raise NullError.build(key) if @attributes.nil?
-    raise ArrayError.build(key) if ::Array === @attributes
+    ::Kernel.raise NullError.build(key) if @attributes.nil?
+    ::Kernel.raise ArrayError.build(key) if ::Array === @attributes
     return if @ignore_nil && value.nil? or _blank?(value)
     @attributes = {} if _blank?
     @attributes[_key(key)] = value

@@ -31,14 +31,14 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
       assert_instance_method :create, content do |m|
         assert_match %r{@post = Post\.new\(post_params\)}, m
         assert_match %r{@post\.save}, m
-        assert_match %r{format\.html \{ redirect_to post_url\(@post\), notice: "Post was successfully created\." \}}, m
+        assert_match %r{format\.html \{ redirect_to @post, notice: "Post was successfully created\." \}}, m
         assert_match %r{format\.json \{ render :show, status: :created, location: @post \}}, m
         assert_match %r{format\.html \{ render :new, status: :unprocessable_entity \}}, m
         assert_match %r{format\.json \{ render json: @post\.errors, status: :unprocessable_entity \}}, m
       end
 
       assert_instance_method :update, content do |m|
-        assert_match %r{format\.html \{ redirect_to post_url\(@post\), notice: "Post was successfully updated\." \}}, m
+        assert_match %r{format\.html \{ redirect_to @post, notice: "Post was successfully updated\." \}}, m
         assert_match %r{format\.json \{ render :show, status: :ok, location: @post \}}, m
         assert_match %r{format\.html \{ render :edit, status: :unprocessable_entity \}}, m
         assert_match %r{format\.json \{ render json: @post.errors, status: :unprocessable_entity \}}, m
@@ -46,7 +46,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
 
       assert_instance_method :destroy, content do |m|
         assert_match %r{@post\.destroy}, m
-        assert_match %r{format\.html \{ redirect_to posts_url, status: :see_other, notice: "Post was successfully destroyed\." \}}, m
+        assert_match %r{format\.html \{ redirect_to posts_path, status: :see_other, notice: "Post was successfully destroyed\." \}}, m
         assert_match %r{format\.json \{ head :no_content \}}, m
       end
 
@@ -64,15 +64,15 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
       run_generator %w(Admin::Post --model-name=Post)
       assert_file 'app/controllers/admin/posts_controller.rb' do |content|
         assert_instance_method :create, content do |m|
-          assert_match %r{format\.html \{ redirect_to admin_post_url\(@post\), notice: "Post was successfully created\." \}}, m
+          assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully created\." \}}, m
         end
 
         assert_instance_method :update, content do |m|
-          assert_match %r{format\.html \{ redirect_to admin_post_url\(@post\), notice: "Post was successfully updated\." \}}, m
+          assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully updated\." \}}, m
         end
 
         assert_instance_method :destroy, content do |m|
-          assert_match %r{format\.html \{ redirect_to admin_posts_url, status: :see_other, notice: "Post was successfully destroyed\." \}}, m
+          assert_match %r{format\.html \{ redirect_to admin_posts_path, status: :see_other, xnotice: "Post was successfully destroyed\." \}}, m
         end
       end
     end
