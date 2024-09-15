@@ -50,8 +50,17 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
         assert_match %r{format\.json \{ head :no_content \}}, m
       end
 
+      assert_match %r{def set_post}, content
+      if Rails::VERSION::MAJOR >= 8
+        assert_match %r{params\.expect\(:id\)}, content
+      else
+        assert_match %r{params\[:id\]}, content
+      end
+
       assert_match %r{def post_params}, content
-      if Rails::VERSION::MAJOR >= 6
+      if Rails::VERSION::MAJOR >= 8
+        assert_match %r{params\.expect\(post: \[ :title, :body, images: \[\] \]\)}, content
+      elsif Rails::VERSION::MAJOR >= 6
         assert_match %r{params\.require\(:post\)\.permit\(:title, :body, images: \[\]\)}, content
       else
         assert_match %r{params\.require\(:post\)\.permit\(:title, :body, :images\)}, content
@@ -92,7 +101,11 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
       run_generator %w(Message content:rich_text video:attachment photos:attachments)
 
       assert_file 'app/controllers/messages_controller.rb' do |content|
-        assert_match %r{params\.require\(:message\)\.permit\(:content, :video, photos: \[\]\)}, content
+        if Rails::VERSION::MAJOR >= 8
+          assert_match %r{params\.expect\(message: \[ :content, :video, photos: \[\] \]\)}, content
+        else
+          assert_match %r{params\.require\(:message\)\.permit\(:content, :video, photos: \[\]\)}, content
+        end
       end
     end
   end
