@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+VERSION=$1
+
+printf "class Jbuilder\n  VERSION = \"$VERSION\"\nend\n" > ./lib/jbuilder/version.rb
+bundle
+git add Gemfile.lock lib/jbuilder/version.rb
+git commit -m "Bump version for $VERSION"
+git push
+git tag v$VERSION
+git push --tags
+gem build jbuilder.gemspec
+gem push "jbuilder-$VERSION.gem" --host https://rubygems.org
+rm "jbuilder-$VERSION.gem"
