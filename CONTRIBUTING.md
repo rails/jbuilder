@@ -33,13 +33,7 @@ git checkout -b my-feature-branch
 
 #### Bundle Install and Test
 
-Ensure that you can build the project and run tests.
-
-```
-bundle install
-appraisal install
-appraisal rake test
-```
+Ensure that you can build the project and run tests using `bin/test`.
 
 #### Write Tests
 
