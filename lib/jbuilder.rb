@@ -256,6 +256,17 @@ class Jbuilder
     end
   end
 
+  # Returns a primitive JSON
+  # Example:
+  #
+  #   json.primitive! "hello"
+  #
+  #   "hello"
+  def primitive!(value)
+    raise PrimitiveError.build(value) unless _is_primitive?(value)
+    @attributes = value
+  end   
+
   # Returns the nil JSON.
   def nil!
     @attributes = nil
@@ -352,6 +363,10 @@ class Jbuilder
   def _is_collection?(object)
     _object_respond_to?(object, :map, :count) && !(::Struct === object)
   end
+
+  def _is_primitive?(value)
+    (value.is_a? ::String) || (value.is_a? ::Numeric) || value == true || value == false || value.nil?
+  end  
 
   def _blank?(value=@attributes)
     BLANK == value
