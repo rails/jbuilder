@@ -4,7 +4,7 @@ require 'generators/rails/scaffold_controller_generator'
 
 class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
   tests Rails::Generators::ScaffoldControllerGenerator
-  arguments %w(Post title body:text images:attachments)
+  arguments %w(Post title body:text images:attachments --skip-routes)
   destination File.expand_path('../tmp', __FILE__)
   setup :prepare_destination
 
@@ -67,7 +67,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
   end
 
   test 'controller with namespace' do
-    run_generator %w(Admin::Post --model-name=Post)
+    run_generator %w(Admin::Post --model-name=Post --skip-routes)
     assert_file 'app/controllers/admin/posts_controller.rb' do |content|
       assert_instance_method :create, content do |m|
         assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully created\." \}}, m
@@ -84,7 +84,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
   end
 
   test "don't use require and permit if there are no attributes" do
-    run_generator %w(Post)
+    run_generator %w(Post --skip-routes)
 
     assert_file 'app/controllers/posts_controller.rb' do |content|
       assert_match %r{def post_params}, content
@@ -93,7 +93,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
   end
 
   test 'handles virtual attributes' do
-    run_generator %w(Message content:rich_text video:attachment photos:attachments)
+    run_generator %w(Message content:rich_text video:attachment photos:attachments --skip-routes)
 
     assert_file 'app/controllers/messages_controller.rb' do |content|
       if Rails::VERSION::MAJOR >= 8
