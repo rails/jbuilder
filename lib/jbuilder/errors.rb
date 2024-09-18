@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'jbuilder/jbuilder'
+require 'jbuilder/version'
 
 class Jbuilder
   class NullError < ::NoMethodError

@@ -5,7 +5,6 @@ require 'jbuilder/jbuilder'
 require 'jbuilder/blank'
 require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
-require 'jbuilder/version'
 require 'json'
 require 'active_support/core_ext/hash/deep_merge'
 
