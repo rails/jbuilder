@@ -6,7 +6,7 @@ if Rails::VERSION::MAJOR > 4
 
   class ScaffoldApiControllerGeneratorTest < Rails::Generators::TestCase
     tests Rails::Generators::ScaffoldControllerGenerator
-    arguments %w(Post title body:text images:attachments --api)
+    arguments %w(Post title body:text images:attachments --api --skip-routes)
     destination File.expand_path('../tmp', __FILE__)
     setup :prepare_destination
 
@@ -57,7 +57,7 @@ if Rails::VERSION::MAJOR > 4
     end
 
     test "don't use require and permit if there are no attributes" do
-      run_generator %w(Post --api)
+      run_generator %w(Post --api --skip-routes)
 
       assert_file 'app/controllers/posts_controller.rb' do |content|
         assert_match %r{def post_params}, content
@@ -68,7 +68,7 @@ if Rails::VERSION::MAJOR > 4
 
     if Rails::VERSION::MAJOR >= 6
       test 'handles virtual attributes' do
-        run_generator ["Message", "content:rich_text", "video:attachment", "photos:attachments"]
+        run_generator %w(Message content:rich_text video:attachment photos:attachments --skip-routes)
 
         assert_file 'app/controllers/messages_controller.rb' do |content|
           if Rails::VERSION::MAJOR >= 8

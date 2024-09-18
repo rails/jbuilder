@@ -1,4 +1,4 @@
-require 'jbuilder/jbuilder'
+require 'jbuilder/version'
 
 class Jbuilder
   class NullError < ::NoMethodError

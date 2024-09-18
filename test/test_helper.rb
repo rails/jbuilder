@@ -19,7 +19,7 @@ ActiveSupport.test_order = :random
 ENV["RAILS_ENV"] ||= "test"
 
 class << Rails
-  def cache
+  redefine_method :cache do
     @cache ||= ActiveSupport::Cache::MemoryStore.new
   end
 end

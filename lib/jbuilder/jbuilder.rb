@@ -1,1 +1,1 @@
-Jbuilder = Class.new(BasicObject)
+require 'jbuilder/version'
