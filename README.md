@@ -269,7 +269,7 @@ Fragment caching is supported, it uses `Rails.cache` and works like caching in
 HTML templates:
 
 ```ruby
-json.cache! ['v1', @person], expires_in: 10.minutes do
+json.cache! ['v1', @person], expires_in: 10.minutes, force: true do
   json.extract! @person, :name, :age
 end
 ```
