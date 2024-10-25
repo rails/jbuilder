@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rails-app
+  labels:
+    app: teimas
+spec:
+  replicas: 3  
+  selector:
+    matchLabels:
+      app: teimas
+  template:
+    metadata:
+      labels:
+        app: teimas
+    spec:
+      containers:
+      - name: teimas-rails-app
+        image: your-docker-repo/teimas-rails-app:latest 
+        ports:
+        - containerPort: 3000  
+        env:
+        - name: DATABASE_URL
+          value: "postgres://user:password@postgres:5432/database_name"    
