@@ -1,3 +1,46 @@
+# Conceptos Básicos
+
+1. ¿Qué es DevOps y por qué es importante en el desarrollo de software?
+
+    DevOps es una metodología en el desarrollo de software que utiliza herramientas para resolver problemas entre los equipos de desarrollo (Dev) y operaciones (Ops). Promueve la colaboración entre estos equipos y automatiza los procesos para hacer el desarrollo y la implementación de software más eficientes, rápidos y confiables. Antes de DevOps, los equipos de desarrollo y operaciones trabajaban por separado, lo que generaba barreras en el flujo de trabajo. DevOps permite una cultura en la que el equipo de desarrollo entiende cómo su software se ejecuta en el hardware y el equipo de operaciones comprende cómo se crea el software. Esto mejora significativamente la colaboración y los resultados.
+
+2. ¿Cuáles son los beneficios clave de usar servicios en la nube como AWS?
+
+    Creo que uno de los principales beneficios de utilizar servicios en la nube es la escalabilidad, lo que significa que pagas solo por el uso que haces. Esto se traduce en eficiencia de costos y flexibilidad, ya que reduce el costo de poseer los recursos y no utilizarlos todo el tiempo.
+
+3. ¿Qué conceptos se deberían de tener en cuenta al desarrollar aplicaciones en la nube?
+
+    - Diseño escalable.
+    - Alta disponibilidad.
+    - Segurida (SSL, MFA...)
+    - Gestionar los gastos en recursos
+
+
+4. ¿Qué es Kubernetes y cómo se diferencia de Docker?
+
+    **Kubernetes** es una plataforma con la cual podemos orquestar nuestros contenedores mediante la generación de clústeres con **Master nodes** y **Worker nodes**. El master se encarga de orquestar el trabajo a realizar por los workers a través de su API server; esta es la conexión con el exterior y la conexión con los workers. En los workers es donde se almacenan los contenedores, dentro de los pods, y cada worker necesita tener su propio container runtime (Docker), que nos permitirá crear, eliminar y ejecutar contenedores.
+
+    - **Docker:** permite crear, ejecutar y eliminar contenedores (entorno virtual).
+    - **Kubernetes:** nos permite controlar y crear las conexiones entre estos contenedores para que sean capaces de trabajar juntos.
+
+    
+
+5. Explica el papel de Helm en Kubernetes.
+
+    El manejo de Kubernetes es mediante archivos .yaml específicos (pod, deployment, service...). Helm nos facilita el manejo de Kubernetes, empaquetando todos los archivos .yaml que necesitamos para nuestra aplicación, y Kubernetes recibe y es capaz de interpretar y ejecutar este paquete.
+
+    No tengo experiencia práctica, pero esto es lo que entiendo sobre Helm.
+
+
+6. ¿Cuáles son los componentes clave de un pipeline de CI/CD?
+
+    Una **Pipeline** de CI/CD (Integración Continua, Entrega Continua) comienza con el código fuente almacenado en un sistema de control de versiones como GitHub, GitLab, Bitbucket, etc. Cuando tenemos el código en un sistema de control de versiones, permite la colaboración entre varios equipos y personas.
+
+    **Integración Continua (CI):** Esta etapa incluye integrar el código e iniciar la pipeline de integración para construir (el código fuente se compila y se transforma en una aplicación ejecutable o artefacto, como una imagen de Docker o un archivo JAR) y la etapa de pruebas (pruebas unitarias, de integración y de extremo a extremo). Luego, se almacena el artefacto generado en un registro de Docker.
+
+    **Entrega Continua (CD):** Esta etapa automatiza el proceso de despliegue utilizando diferentes estrategias como Canary o Blue-Green en entornos como desarrollo, beta y producción. Este paso significa que el artefacto creado en CI queremos desplegarlo en recursos de AWS, Azure.. que construimos usando Terraform. También incluye monitoreo y rollback, entre otros.
+
+---
 # Jbuilder
 
 Jbuilder gives you a simple DSL for declaring JSON structures that beats
