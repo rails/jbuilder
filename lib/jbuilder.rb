@@ -341,12 +341,15 @@ class Jbuilder
   end
 
   def _scope
-    parent_attributes, parent_formatter, parent_deep_format_keys = @attributes, @key_formatter, @deep_format_keys
+    parent_attributes, parent_formatter, parent_deep_format_keys, parent_ignore_nil =
+      @attributes, @key_formatter, @deep_format_keys, @ignore_nil
+
     @attributes = BLANK
     yield
     @attributes
   ensure
-    @attributes, @key_formatter, @deep_format_keys = parent_attributes, parent_formatter, parent_deep_format_keys
+    @attributes, @key_formatter, @deep_format_keys, @ignore_nil =
+      parent_attributes, parent_formatter, parent_deep_format_keys, parent_ignore_nil
   end
 
   def _is_collection?(object)
