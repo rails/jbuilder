@@ -831,6 +831,40 @@ class JbuilderTest < ActiveSupport::TestCase
     Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
   end
 
+  test "ignore_nil! is true within nested array" do
+    result = jbuild do |json|
+      json.ignore_nil!
+      json.array! ["Bob", "Lisa"] do |val|
+        json.name val
+        json.dne nil
+      end
+    end
+
+    assert_equal ["name"], result[0].keys
+  end
+
+  test 'ignore_nil! is true within raw array' do
+    result = jbuild do |json|
+      json.ignore_nil! true
+      json.deep_format_keys!
+
+      json.array! [{ name: 'Bob', dne: nil }]
+    end
+
+    assert_equal ["name"], result[0].keys
+  end
+
+  test "ignore_nil! is false within raw array" do
+    result = jbuild do |json|
+      json.ignore_nil! false
+      json.deep_format_keys!
+
+      json.array! [{ name: 'Bob', dne: nil }]
+    end
+
+    assert_equal ["name", "dne"], result[0].keys
+  end
+
   test 'nil!' do
     result = jbuild do |json|
       json.key 'value'

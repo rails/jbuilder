@@ -318,9 +318,17 @@ class Jbuilder
     return hash_or_array unless @deep_format_keys
 
     if ::Array === hash_or_array
-      hash_or_array.map { |value| _format_keys(value) }
+      if @ignore_nil
+        hash_or_array.map { |value| _format_keys(value) }.compact
+      else
+        hash_or_array.map { |value| _format_keys(value) }
+      end
     elsif ::Hash === hash_or_array
-      ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+      if @ignore_nil
+        ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }.reject { |_, v| v.nil? }]
+      else
+        ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+      end
     else
       hash_or_array
     end
