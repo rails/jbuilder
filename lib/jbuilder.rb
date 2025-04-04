@@ -315,14 +315,31 @@ class Jbuilder
   end
 
   def _format_keys(hash_or_array)
-    return hash_or_array unless @deep_format_keys
 
-    if ::Array === hash_or_array
-      hash_or_array.map { |value| _format_keys(value) }
-    elsif ::Hash === hash_or_array
-      ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+    if @deep_format_keys
+      if ::Array === hash_or_array
+        if @ignore_nil
+          hash_or_array.map { |value| _format_keys(value) }.compact
+        else
+          hash_or_array.map { |value| _format_keys(value) }
+        end
+      elsif ::Hash === hash_or_array
+        if @ignore_nil
+          ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }.reject { |_, v| v.nil? }]
+        else
+          ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+        end
+      else
+        hash_or_array
+      end
     else
-      hash_or_array
+      if ::Array === hash_or_array
+        hash_or_array.map { |value| _format_keys(value) }.compact
+      elsif ::Hash === hash_or_array
+        ::Hash[hash_or_array.reject { |_, v| v.nil? }]
+      else
+        hash_or_array
+      end
     end
   end
 
@@ -341,12 +358,15 @@ class Jbuilder
   end
 
   def _scope
-    parent_attributes, parent_formatter, parent_deep_format_keys = @attributes, @key_formatter, @deep_format_keys
+    parent_attributes, parent_formatter, parent_deep_format_keys, parent_ignore_nil =
+      @attributes, @key_formatter, @deep_format_keys, @ignore_nil
+
     @attributes = BLANK
     yield
     @attributes
   ensure
-    @attributes, @key_formatter, @deep_format_keys = parent_attributes, parent_formatter, parent_deep_format_keys
+    @attributes, @key_formatter, @deep_format_keys, @ignore_nil =
+      parent_attributes, parent_formatter, parent_deep_format_keys, parent_ignore_nil
   end
 
   def _is_collection?(object)
