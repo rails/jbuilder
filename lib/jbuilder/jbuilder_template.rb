@@ -159,7 +159,7 @@ class JbuilderTemplate < Jbuilder
         results = CollectionRenderer
           .new(@context.lookup_context, options) { |&block| _scope(&block) }
           .render_collection_with_partial(collection, partial, @context, nil)
-  
+
         array! if results.respond_to?(:body) && results.body.nil?
       else
         array!
@@ -284,7 +284,7 @@ class JbuilderHandler
   def self.call(template, source = nil)
     source ||= template.source
     # this juggling is required to keep line numbers right in the error
-    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{source}
+    %{__already_defined = defined?(json); json||=JbuilderTemplate.new(self); #{source};
       json.target! unless (__already_defined && __already_defined != "method")}
   end
 end
