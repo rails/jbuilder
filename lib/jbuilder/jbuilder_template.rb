@@ -4,11 +4,7 @@ require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
 class JbuilderTemplate < Jbuilder
-  class << self
-    attr_accessor :template_lookup_options
-  end
-
-  self.template_lookup_options = { handlers: [:jbuilder] }
+  HANDLERS = [:jbuilder].freeze
 
   def initialize(context, *args)
     @context = context
@@ -137,14 +133,14 @@ class JbuilderTemplate < Jbuilder
   private
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: options.except(:partial, :as, :collection, :cached)
-    options.reverse_merge! ::JbuilderTemplate.template_lookup_options
+    options[:locals] ||= options.except(:partial, :as, :collection, :cached)
+    options[:handlers] ||= ::JbuilderTemplate::HANDLERS
     as = options[:as]
 
     if as && options.key?(:collection) && CollectionRenderer.supported?
       collection = options.delete(:collection) || []
       partial = options.delete(:partial)
-      options[:locals].merge!(json: self)
+      options[:locals][:json] = self
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
 
       if options.has_key?(:layout)
@@ -173,8 +169,8 @@ class JbuilderTemplate < Jbuilder
         locals = options.delete(:locals)
         array! collection do |member|
           member_locals = locals.clone
-          member_locals.merge! collection: collection
-          member_locals.merge! as => member
+          member_locals[:collection] = collection
+          member_locals[as] = member
           _render_partial options.merge(locals: member_locals)
         end
       else
@@ -186,7 +182,7 @@ class JbuilderTemplate < Jbuilder
   end
 
   def _render_partial(options)
-    options[:locals].merge! json: self
+    options[:locals][:json] = self
     @context.render options
   end
 
