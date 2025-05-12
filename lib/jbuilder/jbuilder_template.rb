@@ -118,7 +118,8 @@ class JbuilderTemplate < Jbuilder
     options = args.first
 
     if args.one? && _partial_options?(options)
-      partial! options.merge(collection: collection)
+      options[:collection] = collection
+      partial! options
     else
       super
     end
@@ -175,7 +176,8 @@ class JbuilderTemplate < Jbuilder
           member_locals = locals.clone
           member_locals[:collection] = collection
           member_locals[as] = member
-          _render_partial options.merge(locals: member_locals)
+          options[:locals] = member_locals
+          _render_partial options
         end
       else
         array!
@@ -242,10 +244,16 @@ class JbuilderTemplate < Jbuilder
     value = if object.nil?
       []
     elsif _is_collection?(object)
-      _scope{ _render_partial_with_options options.merge(collection: object) }
+      _scope do
+        options[:collection] = object
+        _render_partial_with_options options
+      end
     else
       locals = ::Hash[options[:as], object]
-      _scope{ _render_partial_with_options options.merge(locals: locals) }
+      _scope do
+        options[:locals] = locals
+        _render_partial_with_options options
+      end
     end
 
     _set_value name, value
@@ -259,7 +267,8 @@ class JbuilderTemplate < Jbuilder
     else
       # partial! 'name', locals: {foo: 'bar'}
       if locals.one? && (locals.keys.first == :locals)
-        options = locals.merge(partial: name_or_options)
+        locals[:partial] = name_or_options
+        options = locals
       else
         options = { partial: name_or_options, locals: locals }
       end
