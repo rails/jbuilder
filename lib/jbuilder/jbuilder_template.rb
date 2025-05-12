@@ -4,7 +4,11 @@ require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
 class JbuilderTemplate < Jbuilder
-  HANDLERS = [:jbuilder].freeze
+  class << self
+    attr_accessor :template_lookup_options
+  end
+
+  self.template_lookup_options = { handlers: [:jbuilder] }
 
   def initialize(context, *args)
     @context = context
@@ -134,7 +138,7 @@ class JbuilderTemplate < Jbuilder
 
   def _render_partial_with_options(options)
     options[:locals] ||= options.except(:partial, :as, :collection, :cached)
-    options[:handlers] ||= ::JbuilderTemplate::HANDLERS
+    options[:handlers] ||= ::JbuilderTemplate.template_lookup_options[:handlers]
     as = options[:as]
 
     if as && options.key?(:collection) && CollectionRenderer.supported?
