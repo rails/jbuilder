@@ -189,7 +189,7 @@ class JbuilderTemplate < Jbuilder
 
   def _render_partial(options)
     options[:locals][:json] = self
-    @context.render options
+    @context.render options, nil
   end
 
   def _cache_fragment_for(key, options, &block)
