@@ -1,19 +1,15 @@
-require "bundler/setup"
-require "bundler/gem_tasks"
-require "rake/testtask"
+# frozen_string_literal: true
 
-if !ENV["APPRAISAL_INITIALIZED"] && !ENV["CI"]
-  require "appraisal/task"
-  Appraisal::Task.new
-  task default: :appraisal
-else
-  Rake::TestTask.new do |test|
-    require "rails/version"
+require 'bundler/setup'
+require 'bundler/gem_tasks'
+require 'rake/testtask'
 
-    test.libs << "test"
+Rake::TestTask.new do |test|
+  require 'rails/version'
 
-    test.test_files = FileList["test/*_test.rb"]
-  end
+  test.libs << 'test'
 
-  task default: :test
+  test.test_files = FileList['test/*_test.rb']
 end
+
+task default: :test
