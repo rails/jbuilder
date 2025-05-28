@@ -141,7 +141,7 @@ class JbuilderTemplate < Jbuilder
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
     as = options[:as]
 
-    if as && options.key?(:collection) && CollectionRenderer.supported?
+    if as && options.key?(:collection)
       collection = options.delete(:collection) || []
       partial = options.delete(:partial)
       options[:locals].merge!(json: self)
@@ -161,22 +161,6 @@ class JbuilderTemplate < Jbuilder
           .render_collection_with_partial(collection, partial, @context, nil)
 
         array! if results.respond_to?(:body) && results.body.nil?
-      else
-        array!
-      end
-    elsif as && options.key?(:collection) && !CollectionRenderer.supported?
-      # For Rails <= 5.2:
-      as = as.to_sym
-      collection = options.delete(:collection)
-
-      if collection.present?
-        locals = options.delete(:locals)
-        array! collection do |member|
-          member_locals = locals.clone
-          member_locals.merge! collection: collection
-          member_locals.merge! as => member
-          _render_partial options.merge(locals: member_locals)
-        end
       else
         array!
       end
