@@ -311,7 +311,13 @@ class Jbuilder
   end
 
   def _key(key)
-    @key_formatter ? @key_formatter.format(key) : key.to_s
+    if @key_formatter
+      @key_formatter.format(key)
+    elsif key.is_a?(::Symbol)
+      key.name
+    else
+      key.to_s
+    end
   end
 
   def _format_keys(hash_or_array)
