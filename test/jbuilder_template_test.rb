@@ -425,12 +425,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       lookup_context = ActionView::LookupContext.new([ resolver ], {}, [""])
       controller = ActionView::TestCase::TestController.new
 
-      # TODO: Use with_empty_template_cache unconditionally after dropping support for Rails <6.0.
-      view = if ActionView::Base.respond_to?(:with_empty_template_cache)
-        ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
-      else
-        ActionView::Base.new(lookup_context, options.fetch(:assigns, {}), controller)
-      end
+      view = ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
 
       def view.view_cache_dependencies; []; end
       def view.combined_fragment_cache_key(key) [ key ] end
