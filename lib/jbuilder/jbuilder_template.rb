@@ -136,6 +136,8 @@ class JbuilderTemplate < Jbuilder
 
   private
 
+  alias_method :method_missing, :set!
+
   def _render_partial_with_options(options)
     options.reverse_merge! locals: options.except(:partial, :as, :collection, :cached)
     options.reverse_merge! ::JbuilderTemplate.template_lookup_options
