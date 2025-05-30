@@ -12,7 +12,7 @@ class Jbuilder
   @@ignore_nil    = false
   @@deep_format_keys = false
 
-  def initialize(options = {})
+  def initialize(options = nil)
     @attributes = {}
 
     @key_formatter = options&.[](:key_formatter) || @@key_formatter
@@ -100,13 +100,13 @@ class Jbuilder
   #
   #   { "_first_name": "David" }
   #
-  def key_format!(*args)
-    @key_formatter = KeyFormatter.new(*args)
+  def key_format!(...)
+    @key_formatter = KeyFormatter.new(...)
   end
 
   # Same as the instance method key_format! except sets the default.
-  def self.key_format(*args)
-    @@key_formatter = KeyFormatter.new(*args)
+  def self.key_format(...)
+    @@key_formatter = KeyFormatter.new(...)
   end
 
   # If you want to skip adding nil values to your JSON hash. This is useful

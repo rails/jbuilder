@@ -10,10 +10,10 @@ class JbuilderTemplate < Jbuilder
 
   self.template_lookup_options = { handlers: [:jbuilder] }
 
-  def initialize(context, *args)
+  def initialize(context, options = nil)
     @context = context
     @cached_root = nil
-    super(*args)
+    super(options)
   end
 
   # Generates JSON using the template specified with the `:partial` option. For example, the code below will render
