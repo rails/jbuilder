@@ -15,9 +15,9 @@ class Jbuilder
   def initialize(options = {})
     @attributes = {}
 
-    @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
-    @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
-    @deep_format_keys = options.fetch(:deep_format_keys, @@deep_format_keys)
+    @key_formatter = options&.[](:key_formatter) || @@key_formatter
+    @ignore_nil = options&.[](:ignore_nil) || @@ignore_nil
+    @deep_format_keys = options&.[](:deep_format_keys) || @@deep_format_keys
 
     yield self if ::Kernel.block_given?
   end
