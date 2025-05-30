@@ -58,7 +58,7 @@ class Jbuilder
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _merge_block(key){ extract! value, *args }
+      _merge_block(key){ _extract value, args }
     end
 
     _set_value key, result
@@ -215,7 +215,7 @@ class Jbuilder
     elsif ::Kernel.block_given?
       _map_collection(collection, &block)
     elsif attributes.any?
-      _map_collection(collection) { |element| extract! element, *attributes }
+      _map_collection(collection) { |element| _extract element, attributes }
     else
       _format_keys(collection.to_a)
     end
@@ -241,18 +241,14 @@ class Jbuilder
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    if ::Hash === object
-      _extract_hash_values(object, attributes)
-    else
-      _extract_method_values(object, attributes)
-    end
+    _extract object, attributes
   end
 
   def call(object, *attributes, &block)
     if ::Kernel.block_given?
       array! object, &block
     else
-      extract! object, *attributes
+      _extract object, attributes
     end
   end
 
@@ -281,8 +277,16 @@ class Jbuilder
 
   private
 
+  def _extract(object, attributes)
+    if ::Hash === object
+      _extract_hash_values(object, attributes)
+    else
+      _extract_method_values(object, attributes)
+    end
+  end
+
   def _extract_hash_values(object, attributes)
-    attributes.each{ |key| _set_value key, _format_keys(object.fetch(key)) }
+    attributes.each{ |key| _set_value key, _format_keys(object[key]) }
   end
 
   def _extract_method_values(object, attributes)
