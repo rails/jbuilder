@@ -15,14 +15,14 @@ class Jbuilder
   def initialize(options = nil)
     @attributes = {}
 
-    if options
-      @key_formatter = options[:key_formatter]
-      @ignore_nil = options[:ignore_nil]
-      @deep_format_keys = options[:deep_format_keys]
-    else
+    if options.nil?
       @key_formatter = @@key_formatter
       @ignore_nil = @@ignore_nil
       @deep_format_keys = @@deep_format_keys
+    else
+      @key_formatter = options[:key_formatter]
+      @ignore_nil = options[:ignore_nil]
+      @deep_format_keys = options[:deep_format_keys]
     end
 
     yield self if ::Kernel.block_given?
