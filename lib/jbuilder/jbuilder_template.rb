@@ -13,7 +13,8 @@ class JbuilderTemplate < Jbuilder
   def initialize(context, options = nil)
     @context = context
     @cached_root = nil
-    super(options)
+
+    options.nil? ? super() : super(**options)
   end
 
   # Generates JSON using the template specified with the `:partial` option. For example, the code below will render

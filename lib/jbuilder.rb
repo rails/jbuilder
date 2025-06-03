@@ -12,18 +12,11 @@ class Jbuilder
   @@ignore_nil    = false
   @@deep_format_keys = false
 
-  def initialize(options = nil)
+  def initialize(key_formatter: @@key_formatter, ignore_nil: @@ignore_nil, deep_format_keys: @@deep_format_keys)
     @attributes = {}
-
-    if options.nil?
-      @key_formatter = @@key_formatter
-      @ignore_nil = @@ignore_nil
-      @deep_format_keys = @@deep_format_keys
-    else
-      @key_formatter = options[:key_formatter]
-      @ignore_nil = options[:ignore_nil]
-      @deep_format_keys = options[:deep_format_keys]
-    end
+    @key_formatter = key_formatter
+    @ignore_nil = ignore_nil
+    @deep_format_keys = deep_format_keys
 
     yield self if ::Kernel.block_given?
   end
