@@ -784,6 +784,14 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal ['camelStyle'], result.keys
   end
 
+  test 'use default key formatter when configured' do
+    Jbuilder.key_format
+    jbuild{ |json| json.key 'value' }
+    formatter = Jbuilder.send(:class_variable_get, '@@key_formatter')
+    cache = formatter.instance_variable_get('@cache')
+    assert_includes cache, :key
+  end
+
   test 'ignore_nil! without a parameter' do
     result = jbuild do |json|
       json.ignore_nil!
