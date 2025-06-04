@@ -12,13 +12,18 @@ class Jbuilder
   @@ignore_nil    = false
   @@deep_format_keys = false
 
-  def initialize(key_formatter: @@key_formatter, ignore_nil: @@ignore_nil, deep_format_keys: @@deep_format_keys)
+  def initialize(
+    key_formatter: @@key_formatter,
+    ignore_nil: @@ignore_nil,
+    deep_format_keys: @@deep_format_keys,
+    &block
+  )
     @attributes = {}
     @key_formatter = key_formatter
     @ignore_nil = ignore_nil
     @deep_format_keys = deep_format_keys
 
-    yield self if ::Kernel.block_given?
+    yield self if block
   end
 
   # Yields a builder and automatically turns the result into a JSON string
