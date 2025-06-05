@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'jbuilder/jbuilder'
 require 'jbuilder/collection_renderer'
 require 'action_dispatch/http/mime_type'

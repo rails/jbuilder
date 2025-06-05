@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support'
 require 'jbuilder/jbuilder'
 require 'jbuilder/blank'
