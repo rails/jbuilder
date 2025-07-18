@@ -350,15 +350,11 @@ class Jbuilder
   end
 
   def _is_collection?(object)
-    _object_respond_to?(object, :map, :count) && !(::Struct === object)
+    object.respond_to?(:map) && object.respond_to?(:count) && !(::Struct === object)
   end
 
   def _blank?(value=@attributes)
     BLANK == value
-  end
-
-  def _object_respond_to?(object, *methods)
-    methods.all?{ |m| object.respond_to?(m) }
   end
 end
 
