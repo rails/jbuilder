@@ -60,29 +60,25 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
       assert_match %r{def post_params}, content
       if Rails::VERSION::MAJOR >= 8
         assert_match %r{params\.expect\(post: \[ :title, :body, images: \[\] \]\)}, content
-      elsif Rails::VERSION::MAJOR >= 6
-        assert_match %r{params\.require\(:post\)\.permit\(:title, :body, images: \[\]\)}, content
       else
-        assert_match %r{params\.require\(:post\)\.permit\(:title, :body, :images\)}, content
+        assert_match %r{params\.require\(:post\)\.permit\(:title, :body, images: \[\]\)}, content
       end
     end
   end
 
-  if Rails::VERSION::MAJOR >= 6
-    test 'controller with namespace' do
-      run_generator %w(Admin::Post --model-name=Post)
-      assert_file 'app/controllers/admin/posts_controller.rb' do |content|
-        assert_instance_method :create, content do |m|
-          assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully created\." \}}, m
-        end
+  test 'controller with namespace' do
+    run_generator %w(Admin::Post --model-name=Post)
+    assert_file 'app/controllers/admin/posts_controller.rb' do |content|
+      assert_instance_method :create, content do |m|
+        assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully created\." \}}, m
+      end
 
-        assert_instance_method :update, content do |m|
-          assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully updated\.", status: :see_other \}}, m
-        end
+      assert_instance_method :update, content do |m|
+        assert_match %r{format\.html \{ redirect_to \[:admin, @post\], notice: "Post was successfully updated\.", status: :see_other \}}, m
+      end
 
-        assert_instance_method :destroy, content do |m|
-          assert_match %r{format\.html \{ redirect_to admin_posts_path, notice: "Post was successfully destroyed\.", status: :see_other \}}, m
-        end
+      assert_instance_method :destroy, content do |m|
+        assert_match %r{format\.html \{ redirect_to admin_posts_path, notice: "Post was successfully destroyed\.", status: :see_other \}}, m
       end
     end
   end
@@ -96,16 +92,14 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
     end
   end
 
-  if Rails::VERSION::MAJOR >= 6
-    test 'handles virtual attributes' do
-      run_generator %w(Message content:rich_text video:attachment photos:attachments)
+  test 'handles virtual attributes' do
+    run_generator %w(Message content:rich_text video:attachment photos:attachments)
 
-      assert_file 'app/controllers/messages_controller.rb' do |content|
-        if Rails::VERSION::MAJOR >= 8
-          assert_match %r{params\.expect\(message: \[ :content, :video, photos: \[\] \]\)}, content
-        else
-          assert_match %r{params\.require\(:message\)\.permit\(:content, :video, photos: \[\]\)}, content
-        end
+    assert_file 'app/controllers/messages_controller.rb' do |content|
+      if Rails::VERSION::MAJOR >= 8
+        assert_match %r{params\.expect\(message: \[ :content, :video, photos: \[\] \]\)}, content
+      else
+        assert_match %r{params\.require\(:message\)\.permit\(:content, :video, photos: \[\]\)}, content
       end
     end
   end

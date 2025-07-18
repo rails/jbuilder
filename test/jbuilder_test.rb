@@ -930,12 +930,10 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
-  if RUBY_VERSION >= "2.2.10"
-    test "respects JSON encoding customizations" do
-      # Active Support overrides Time#as_json for custom formatting.
-      # Ensure we call #to_json on the final attributes instead of JSON.dump.
-      result = JSON.load(Jbuilder.encode { |json| json.time Time.parse("2018-05-13 11:51:00.485 -0400") })
-      assert_equal "2018-05-13T11:51:00.485-04:00", result["time"]
-    end
+  test "respects JSON encoding customizations" do
+    # Active Support overrides Time#as_json for custom formatting.
+    # Ensure we call #to_json on the final attributes instead of JSON.dump.
+    result = JSON.load(Jbuilder.encode { |json| json.time Time.parse("2018-05-13 11:51:00.485 -0400") })
+    assert_equal "2018-05-13T11:51:00.485-04:00", result["time"]
   end
 end
