@@ -14,14 +14,18 @@ class Jbuilder
   @@ignore_nil    = false
   @@deep_format_keys = false
 
-  def initialize(options = {})
+  def initialize(
+    key_formatter: @@key_formatter,
+    ignore_nil: @@ignore_nil,
+    deep_format_keys: @@deep_format_keys,
+    &block
+  )
     @attributes = {}
+    @key_formatter = key_formatter
+    @ignore_nil = ignore_nil
+    @deep_format_keys = deep_format_keys
 
-    @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
-    @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
-    @deep_format_keys = options.fetch(:deep_format_keys, @@deep_format_keys)
-
-    yield self if ::Kernel.block_given?
+    yield self if block
   end
 
   # Yields a builder and automatically turns the result into a JSON string
@@ -102,13 +106,13 @@ class Jbuilder
   #
   #   { "_first_name": "David" }
   #
-  def key_format!(*args)
-    @key_formatter = KeyFormatter.new(*args)
+  def key_format!(...)
+    @key_formatter = KeyFormatter.new(...)
   end
 
   # Same as the instance method key_format! except sets the default.
-  def self.key_format(*args)
-    @@key_formatter = KeyFormatter.new(*args)
+  def self.key_format(...)
+    @@key_formatter = KeyFormatter.new(...)
   end
 
   # If you want to skip adding nil values to your JSON hash. This is useful
