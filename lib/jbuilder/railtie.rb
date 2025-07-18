@@ -22,6 +22,8 @@ class Jbuilder
           if name == 'ActionController::API'
             include ActionController::Helpers
             include ActionController::ImplicitRender
+            helper_method :combined_fragment_cache_key
+            helper_method :view_cache_dependencies
           end
         end
       end
