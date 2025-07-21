@@ -24,14 +24,19 @@ jobs:
         gemfile:
           - "rails_7_0"
           - "rails_7_1"
+          - "rails_7_2"
           - "rails_8_0"
           - "rails_head"
 
         exclude:
           - ruby: '3.0'
+            gemfile: rails_7_2
+          - ruby: '3.0'
             gemfile: rails_8_0
           - ruby: '3.0'
             gemfile: rails_head
+          - ruby: '3.1'
+            gemfile: rails_7_2
           - ruby: '3.1'
             gemfile: rails_8_0
           - ruby: '3.1'

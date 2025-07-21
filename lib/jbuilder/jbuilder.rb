@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-Jbuilder = Class.new(BasicObject)
+require 'jbuilder/version'
