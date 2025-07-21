@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support'
 require 'jbuilder/jbuilder'
 require 'jbuilder/blank'
@@ -12,14 +14,18 @@ class Jbuilder
   @@ignore_nil    = false
   @@deep_format_keys = false
 
-  def initialize(options = {})
+  def initialize(
+    key_formatter: @@key_formatter,
+    ignore_nil: @@ignore_nil,
+    deep_format_keys: @@deep_format_keys,
+    &block
+  )
     @attributes = {}
+    @key_formatter = key_formatter
+    @ignore_nil = ignore_nil
+    @deep_format_keys = deep_format_keys
 
-    @key_formatter = options.fetch(:key_formatter){ @@key_formatter ? @@key_formatter.clone : nil}
-    @ignore_nil = options.fetch(:ignore_nil, @@ignore_nil)
-    @deep_format_keys = options.fetch(:deep_format_keys, @@deep_format_keys)
-
-    yield self if ::Kernel.block_given?
+    yield self if block
   end
 
   # Yields a builder and automatically turns the result into a JSON string
@@ -58,7 +64,7 @@ class Jbuilder
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _merge_block(key){ extract! value, *args }
+      _merge_block(key){ _extract value, args }
     end
 
     _set_value key, result
@@ -100,13 +106,13 @@ class Jbuilder
   #
   #   { "_first_name": "David" }
   #
-  def key_format!(*args)
-    @key_formatter = KeyFormatter.new(*args)
+  def key_format!(...)
+    @key_formatter = KeyFormatter.new(...)
   end
 
   # Same as the instance method key_format! except sets the default.
-  def self.key_format(*args)
-    @@key_formatter = KeyFormatter.new(*args)
+  def self.key_format(...)
+    @@key_formatter = KeyFormatter.new(...)
   end
 
   # If you want to skip adding nil values to your JSON hash. This is useful
@@ -215,7 +221,7 @@ class Jbuilder
     elsif ::Kernel.block_given?
       _map_collection(collection, &block)
     elsif attributes.any?
-      _map_collection(collection) { |element| extract! element, *attributes }
+      _map_collection(collection) { |element| _extract element, attributes }
     else
       _format_keys(collection.to_a)
     end
@@ -241,18 +247,14 @@ class Jbuilder
   #
   #   json.(@person, :name, :age)
   def extract!(object, *attributes)
-    if ::Hash === object
-      _extract_hash_values(object, attributes)
-    else
-      _extract_method_values(object, attributes)
-    end
+    _extract object, attributes
   end
 
   def call(object, *attributes, &block)
     if ::Kernel.block_given?
       array! object, &block
     else
-      extract! object, *attributes
+      _extract object, attributes
     end
   end
 
@@ -280,6 +282,14 @@ class Jbuilder
   end
 
   private
+
+  def _extract(object, attributes)
+    if ::Hash === object
+      _extract_hash_values(object, attributes)
+    else
+      _extract_method_values(object, attributes)
+    end
+  end
 
   def _extract_hash_values(object, attributes)
     attributes.each{ |key| _set_value key, _format_keys(object.fetch(key)) }
@@ -311,7 +321,13 @@ class Jbuilder
   end
 
   def _key(key)
-    @key_formatter ? @key_formatter.format(key) : key.to_s
+    if @key_formatter
+      @key_formatter.format(key)
+    elsif key.is_a?(::Symbol)
+      key.name
+    else
+      key.to_s
+    end
   end
 
   def _format_keys(hash_or_array)
@@ -350,15 +366,11 @@ class Jbuilder
   end
 
   def _is_collection?(object)
-    _object_respond_to?(object, :map, :count) && !(::Struct === object)
+    object.respond_to?(:map) && object.respond_to?(:count) && !(::Struct === object)
   end
 
   def _blank?(value=@attributes)
     BLANK == value
-  end
-
-  def _object_respond_to?(object, *methods)
-    methods.all?{ |m| object.respond_to?(m) }
   end
 end
 

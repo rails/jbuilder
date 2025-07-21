@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'delegate'
 require 'action_view'
 require 'action_view/renderer/collection_renderer'

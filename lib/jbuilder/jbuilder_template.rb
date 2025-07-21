@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'jbuilder/jbuilder'
 require 'jbuilder/collection_renderer'
 require 'action_dispatch/http/mime_type'
@@ -10,10 +12,11 @@ class JbuilderTemplate < Jbuilder
 
   self.template_lookup_options = { handlers: [:jbuilder] }
 
-  def initialize(context, *args)
+  def initialize(context, options = nil)
     @context = context
     @cached_root = nil
-    super(*args)
+
+    options.nil? ? super() : super(**options)
   end
 
   # Generates JSON using the template specified with the `:partial` option. For example, the code below will render
