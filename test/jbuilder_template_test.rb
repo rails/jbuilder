@@ -317,99 +317,97 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "David", result["firstName"]
   end
 
-  if JbuilderTemplate::CollectionRenderer.supported?
-    test "returns an empty array for an empty collection" do
-      Jbuilder::CollectionRenderer.expects(:new).never
-      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: [])
+  test "returns an empty array for an empty collection" do
+    Jbuilder::CollectionRenderer.expects(:new).never
+    result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: [])
 
-      # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
-      assert_equal [], result
-    end
+    # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
+    assert_equal [], result
+  end
 
-    test "works with an enumerable object" do
-      enumerable_class = Class.new do
-        include Enumerable
+  test "works with an enumerable object" do
+    enumerable_class = Class.new do
+      include Enumerable
 
-        def each(&block)
-          [].each(&block)
-        end
+      def each(&block)
+        [].each(&block)
       end
-
-      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: enumerable_class.new)
-
-      # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
-      assert_equal [], result
     end
 
-    test "supports the cached: true option" do
-      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
+    result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: enumerable_class.new)
 
-      assert_equal 10, result.count
-      assert_equal "Post #5", result[4]["body"]
-      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
-      assert_equal "Pavel", result[5]["author"]["first_name"]
+    # Do not use #assert_empty as it is important to ensure that the type of the JSON result is an array.
+    assert_equal [], result
+  end
 
-      expected = {
-        "id" => 1,
-        "body" => "Post #1",
-        "author" => {
-          "first_name" => "David",
-          "last_name" => "Heinemeier Hansson"
-        }
+  test "supports the cached: true option" do
+    result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
+
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
+
+    expected = {
+      "id" => 1,
+      "body" => "Post #1",
+      "author" => {
+        "first_name" => "David",
+        "last_name" => "Heinemeier Hansson"
       }
+    }
 
-      assert_equal expected, Rails.cache.read("post-1")
+    assert_equal expected, Rails.cache.read("post-1")
 
-      result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
+    result = render('json.array! @posts, partial: "post", as: :post, cached: true', posts: POSTS)
 
-      assert_equal 10, result.count
-      assert_equal "Post #5", result[4]["body"]
-      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
-      assert_equal "Pavel", result[5]["author"]["first_name"]
-    end
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
+  end
 
-    test "supports the cached: ->() {} option" do
-      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
+  test "supports the cached: ->() {} option" do
+    result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
 
-      assert_equal 10, result.count
-      assert_equal "Post #5", result[4]["body"]
-      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
-      assert_equal "Pavel", result[5]["author"]["first_name"]
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
 
-      expected = {
-        "id" => 1,
-        "body" => "Post #1",
-        "author" => {
-          "first_name" => "David",
-          "last_name" => "Heinemeier Hansson"
-        }
+    expected = {
+      "id" => 1,
+      "body" => "Post #1",
+      "author" => {
+        "first_name" => "David",
+        "last_name" => "Heinemeier Hansson"
       }
+    }
 
-      assert_equal expected, Rails.cache.read("post-1/foo")
+    assert_equal expected, Rails.cache.read("post-1/foo")
 
-      result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
+    result = render('json.array! @posts, partial: "post", as: :post, cached: ->(post) { [post, "foo"] }', posts: POSTS)
 
-      assert_equal 10, result.count
-      assert_equal "Post #5", result[4]["body"]
-      assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
-      assert_equal "Pavel", result[5]["author"]["first_name"]
+    assert_equal 10, result.count
+    assert_equal "Post #5", result[4]["body"]
+    assert_equal "Heinemeier Hansson", result[2]["author"]["last_name"]
+    assert_equal "Pavel", result[5]["author"]["first_name"]
+  end
+
+  test "raises an error on a render call with the :layout option" do
+    error = assert_raises NotImplementedError do
+      render('json.array! @posts, partial: "post", as: :post, layout: "layout"', posts: POSTS)
     end
 
-    test "raises an error on a render call with the :layout option" do
-      error = assert_raises NotImplementedError do
-        render('json.array! @posts, partial: "post", as: :post, layout: "layout"', posts: POSTS)
-      end
+    assert_equal "The `:layout' option is not supported in collection rendering.", error.message
+  end
 
-      assert_equal "The `:layout' option is not supported in collection rendering.", error.message
+  test "raises an error on a render call with the :spacer_template option" do
+    error = assert_raises NotImplementedError do
+      render('json.array! @posts, partial: "post", as: :post, spacer_template: "template"', posts: POSTS)
     end
 
-    test "raises an error on a render call with the :spacer_template option" do
-      error = assert_raises NotImplementedError do
-        render('json.array! @posts, partial: "post", as: :post, spacer_template: "template"', posts: POSTS)
-      end
-
-      assert_equal "The `:spacer_template' option is not supported in collection rendering.", error.message
-    end
+    assert_equal "The `:spacer_template' option is not supported in collection rendering.", error.message
   end
 
   private
@@ -427,12 +425,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
       lookup_context = ActionView::LookupContext.new([ resolver ], {}, [""])
       controller = ActionView::TestCase::TestController.new
 
-      # TODO: Use with_empty_template_cache unconditionally after dropping support for Rails <6.0.
-      view = if ActionView::Base.respond_to?(:with_empty_template_cache)
-        ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
-      else
-        ActionView::Base.new(lookup_context, options.fetch(:assigns, {}), controller)
-      end
+      view = ActionView::Base.with_empty_template_cache.new(lookup_context, options.fetch(:assigns, {}), controller)
 
       def view.view_cache_dependencies; []; end
       def view.combined_fragment_cache_key(key) [ key ] end
