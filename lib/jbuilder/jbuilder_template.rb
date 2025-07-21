@@ -121,8 +121,9 @@ class JbuilderTemplate < Jbuilder
     options = args.first
 
     if args.one? && _partial_options?(options)
+      options = options.dup
       options[:collection] = collection
-      partial! options
+      _render_partial_with_options options
     else
       super
     end
