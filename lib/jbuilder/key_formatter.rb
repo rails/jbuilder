@@ -1,32 +1,30 @@
+# frozen_string_literal: true
+
 require 'jbuilder/jbuilder'
-require 'active_support/core_ext/array'
 
 class Jbuilder
   class KeyFormatter
-    def initialize(*args)
-      @format = {}
-      @cache = {}
-
-      options = args.extract_options!
-      args.each do |name|
-        @format[name] = []
-      end
-      options.each do |name, parameters|
-        @format[name] = parameters
-      end
-    end
-
-    def initialize_copy(original)
+    def initialize(*formats, **formats_with_options)
+      @mutex = Mutex.new
+      @formats = formats
+      @formats_with_options = formats_with_options
       @cache = {}
     end
 
     def format(key)
-      @cache[key] ||= @format.inject(key.to_s) do |result, args|
-        func, args = args
-        if ::Proc === func
-          func.call result, *args
-        else
-          result.send func, *args
+      @mutex.synchronize do
+        @cache[key] ||= begin
+          value = key.is_a?(Symbol) ? key.name : key.to_s
+
+          @formats.each do |func|
+            value = func.is_a?(Proc) ? func.call(value) : value.send(func)
+          end
+
+          @formats_with_options.each do |func, params|
+            value = func.is_a?(Proc) ? func.call(value, *params) : value.send(func, *params)
+          end
+
+          value
         end
       end
     end

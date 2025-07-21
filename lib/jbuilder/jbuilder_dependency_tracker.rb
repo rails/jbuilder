@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Jbuilder::DependencyTracker
   EXPLICIT_DEPENDENCY = /# Template Dependency: (\S+)/
 

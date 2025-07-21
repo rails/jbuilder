@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "lib/jbuilder/version"
 
 Gem::Specification.new do |s|
@@ -9,10 +11,10 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/rails/jbuilder'
   s.license  = 'MIT'
 
-  s.required_ruby_version = '>= 2.2.2'
+  s.required_ruby_version = '>= 3.0.0'
 
-  s.add_dependency 'activesupport', '>= 5.0.0'
-  s.add_dependency 'actionview', '>= 5.0.0'
+  s.add_dependency 'activesupport', '>= 7.0.0'
+  s.add_dependency 'actionview', '>= 7.0.0'
 
   if RUBY_ENGINE == 'rbx'
     s.add_development_dependency('racc')
