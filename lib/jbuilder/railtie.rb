@@ -15,11 +15,9 @@ class Jbuilder
         end
       end
 
-      ActiveSupport.on_load :action_controller do
-        if name == 'ActionController::API'
-          include ActionController::Helpers
-          include ActionController::ImplicitRender
-        end
+      ActiveSupport.on_load :action_controller_api do
+        include ActionController::Helpers
+        include ActionController::ImplicitRender
       end
     end
 
