@@ -240,9 +240,8 @@ class JbuilderTemplate < Jbuilder
         _render_partial_with_options options
       end
     else
-      locals = ::Hash[options[:as], object]
       _scope do
-        options[:locals] = locals
+        options[:locals] = { options[:as] => object }
         _render_partial_with_options options
       end
     end
