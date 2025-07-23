@@ -55,7 +55,9 @@ class JbuilderTemplate < Jbuilder
     if args.one? && _is_active_model?(args.first)
       _render_active_model_partial args.first
     else
-      _render_explicit_partial(*args)
+      options = args.extract_options!.dup
+      options[:partial] = args.first if args.present?
+      _render_partial_with_options options
     end
   end
 
@@ -246,28 +248,6 @@ class JbuilderTemplate < Jbuilder
     end
 
     _set_value name, value
-  end
-
-  def _render_explicit_partial(name_or_options, locals = {})
-    case name_or_options
-    when ::Hash
-      # partial! partial: 'name', foo: 'bar'
-      options = name_or_options
-    else
-      # partial! 'name', locals: {foo: 'bar'}
-      if locals.one? && (locals.keys.first == :locals)
-        locals[:partial] = name_or_options
-        options = locals
-      else
-        options = { partial: name_or_options, locals: locals }
-      end
-      # partial! 'name', foo: 'bar'
-      as = locals.delete(:as)
-      options[:as] = as if as.present?
-      options[:collection] = locals[:collection] if locals.key?(:collection)
-    end
-
-    _render_partial_with_options options
   end
 
   def _render_active_model_partial(object)
