@@ -55,7 +55,9 @@ class JbuilderTemplate < Jbuilder
     if args.one? && _is_active_model?(args.first)
       _render_active_model_partial args.first
     else
-      _render_explicit_partial(*args)
+      options = args.extract_options!.dup
+      options[:partial] = args.first if args.present?
+      _render_partial_with_options options
     end
   end
 
@@ -121,7 +123,9 @@ class JbuilderTemplate < Jbuilder
     options = args.first
 
     if args.one? && _partial_options?(options)
-      partial! options.merge(collection: collection)
+      options = options.dup
+      options[:collection] = collection
+      _render_partial_with_options options
     else
       super
     end
@@ -131,7 +135,7 @@ class JbuilderTemplate < Jbuilder
     options = args.first
 
     if args.one? && _partial_options?(options)
-      _set_inline_partial name, object, options
+      _set_inline_partial name, object, options.dup
     else
       super
     end
@@ -142,14 +146,14 @@ class JbuilderTemplate < Jbuilder
   alias_method :method_missing, :set!
 
   def _render_partial_with_options(options)
-    options.reverse_merge! locals: options.except(:partial, :as, :collection, :cached)
-    options.reverse_merge! ::JbuilderTemplate.template_lookup_options
+    options[:locals] ||= options.except(:partial, :as, :collection, :cached)
+    options[:handlers] ||= ::JbuilderTemplate.template_lookup_options[:handlers]
     as = options[:as]
 
     if as && options.key?(:collection)
       collection = options.delete(:collection) || []
       partial = options.delete(:partial)
-      options[:locals].merge!(json: self)
+      options[:locals][:json] = self
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
 
       if options.has_key?(:layout)
@@ -175,7 +179,7 @@ class JbuilderTemplate < Jbuilder
   end
 
   def _render_partial(options)
-    options[:locals].merge! json: self
+    options[:locals][:json] = self
     @context.render options
   end
 
@@ -231,34 +235,18 @@ class JbuilderTemplate < Jbuilder
     value = if object.nil?
       []
     elsif _is_collection?(object)
-      _scope{ _render_partial_with_options options.merge(collection: object) }
-    else
-      locals = ::Hash[options[:as], object]
-      _scope{ _render_partial_with_options options.merge(locals: locals) }
-    end
-
-    set! name, value
-  end
-
-  def _render_explicit_partial(name_or_options, locals = {})
-    case name_or_options
-    when ::Hash
-      # partial! partial: 'name', foo: 'bar'
-      options = name_or_options
-    else
-      # partial! 'name', locals: {foo: 'bar'}
-      if locals.one? && (locals.keys.first == :locals)
-        options = locals.merge(partial: name_or_options)
-      else
-        options = { partial: name_or_options, locals: locals }
+      _scope do
+        options[:collection] = object
+        _render_partial_with_options options
       end
-      # partial! 'name', foo: 'bar'
-      as = locals.delete(:as)
-      options[:as] = as if as.present?
-      options[:collection] = locals[:collection] if locals.key?(:collection)
+    else
+      _scope do
+        options[:locals] = { options[:as] => object }
+        _render_partial_with_options options
+      end
     end
 
-    _render_partial_with_options options
+    _set_value name, value
   end
 
   def _render_active_model_partial(object)
