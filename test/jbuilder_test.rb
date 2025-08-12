@@ -936,4 +936,11 @@ class JbuilderTest < ActiveSupport::TestCase
     result = JSON.load(Jbuilder.encode { |json| json.time Time.parse("2018-05-13 11:51:00.485 -0400") })
     assert_equal "2018-05-13T11:51:00.485-04:00", result["time"]
   end
+
+  test "encode forwards options to new" do
+    Jbuilder.encode(key_formatter: 1, ignore_nil: 2) do |json|
+      assert_equal 1, json.instance_eval{ @key_formatter }
+      assert_equal 2, json.instance_eval{ @ignore_nil }
+    end
+  end
 end

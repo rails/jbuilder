@@ -28,8 +28,8 @@ class Jbuilder
   end
 
   # Yields a builder and automatically turns the result into a JSON string
-  def self.encode(*args, &block)
-    new(*args, &block).target!
+  def self.encode(...)
+    new(...).target!
   end
 
   BLANK = Blank.new
