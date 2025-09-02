@@ -33,8 +33,8 @@ class <%= controller_class_name %>Controller < ApplicationController
         format.html { redirect_to <%= redirect_resource_name %>, notice: <%= %("#{human_name} was successfully created.") %> }
         format.json { render :show, status: :created, location: <%= "@#{singular_table_name}" %> }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: <%= "@#{orm_instance.errors}" %>, status: :unprocessable_entity }
+        format.html { render :new, status: :<%= status_unprocessable_content.to_s %> }
+        format.json { render json: <%= "@#{orm_instance.errors}" %>, status: :<%= status_unprocessable_content.to_s %> }
       end
     end
   end
@@ -46,8 +46,8 @@ class <%= controller_class_name %>Controller < ApplicationController
         format.html { redirect_to <%= redirect_resource_name %>, notice: <%= %("#{human_name} was successfully updated.") %>, status: :see_other }
         format.json { render :show, status: :ok, location: <%= "@#{singular_table_name}" %> }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: <%= "@#{orm_instance.errors}" %>, status: :unprocessable_entity }
+        format.html { render :edit, status: :<%= status_unprocessable_content.to_s %> }
+        format.json { render json: <%= "@#{orm_instance.errors}" %>, status: :<%= status_unprocessable_content.to_s %> }
       end
     end
   end
