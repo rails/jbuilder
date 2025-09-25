@@ -131,13 +131,13 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
-  def set!(name, object = BLANK, *args)
+  def set!(name, object = BLANK, *args, &block)
     options = args.first
 
-    if args.one? && _partial_options?(options)
+    if _partial_options?(options)
       _set_inline_partial name, object, options.dup
     else
-      super
+      _set name, object, args, &block
     end
   end
 

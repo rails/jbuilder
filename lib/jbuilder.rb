@@ -38,38 +38,7 @@ class Jbuilder
   private_constant :BLANK, :EMPTY_ARRAY
 
   def set!(key, value = BLANK, *args, &block)
-    result = if ::Kernel.block_given?
-      if !_blank?(value)
-        # json.comments @post.comments { |comment| ... }
-        # { "comments": [ { ... }, { ... } ] }
-        _scope{ _array value, &block }
-      else
-        # json.comments { ... }
-        # { "comments": ... }
-        _merge_block(key){ yield self }
-      end
-    elsif args.empty?
-      if ::Jbuilder === value
-        # json.age 32
-        # json.person another_jbuilder
-        # { "age": 32, "person": { ...  }
-        _format_keys(value.attributes!)
-      else
-        # json.age 32
-        # { "age": 32 }
-        _format_keys(value)
-      end
-    elsif _is_collection?(value)
-      # json.comments @post.comments, :content, :created_at
-      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      _scope{ _array value, args }
-    else
-      # json.author @post.creator, :name, :email_address
-      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _merge_block(key){ _extract value, args }
-    end
-
-    _set_value key, result
+    _set(key, value, args, &block)
   end
 
   # Specifies formatting to be applied to the key. Passing in a name of a function
@@ -268,6 +237,41 @@ class Jbuilder
   private
 
   alias_method :method_missing, :set!
+
+  def _set(key, value = BLANK, attributes, &block)
+    result = if block
+      if _blank?(value)
+        # json.comments { ... }
+        # { "comments": ... }
+        _merge_block key, &block
+      else
+        # json.comments @post.comments { |comment| ... }
+        # { "comments": [ { ... }, { ... } ] }
+        _scope { _array value, &block }
+      end
+    elsif attributes.empty?
+      if ::Jbuilder === value
+        # json.age 32
+        # json.person another_jbuilder
+        # { "age": 32, "person": { ...  }
+        _format_keys(value.attributes!)
+      else
+        # json.age 32
+        # { "age": 32 }
+        _format_keys(value)
+      end
+    elsif _is_collection?(value)
+      # json.comments @post.comments, :content, :created_at
+      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
+      _scope { _array value, attributes }
+    else
+      # json.author @post.creator, :name, :email_address
+      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
+      _merge_block(key) { _extract value, attributes }
+    end
+
+    _set_value key, result
+  end
 
   def _array(collection = EMPTY_ARRAY, attributes = nil, &block)
     array = if collection.nil?
