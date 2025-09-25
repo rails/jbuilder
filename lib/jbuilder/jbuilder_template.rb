@@ -52,7 +52,7 @@ class JbuilderTemplate < Jbuilder
   #   json.comments @post.comments, partial: "comments/comment", as: :comment, cached: true
   #
   def partial!(*args)
-    if args.one? && _is_active_model?(args.first)
+    if _is_active_model?(args.first)
       _render_active_model_partial args.first
     else
       options = args.extract_options!.dup
