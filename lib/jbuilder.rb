@@ -204,7 +204,7 @@ class Jbuilder
   end
 
   def call(object, *attributes, &block)
-    if ::Kernel.block_given?
+    if block
       _array object, &block
     else
       _extract object, attributes
