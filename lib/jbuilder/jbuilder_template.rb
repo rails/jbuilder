@@ -119,15 +119,15 @@ class JbuilderTemplate < Jbuilder
     @cached_root || super
   end
 
-  def array!(collection = [], *args)
+  def array!(collection = EMPTY_ARRAY, *args, &block)
     options = args.first
 
-    if args.one? && _partial_options?(options)
+    if _partial_options?(options)
       options = options.dup
       options[:collection] = collection
       _render_partial_with_options options
     else
-      super
+      _array collection, args, &block
     end
   end
 
@@ -151,7 +151,7 @@ class JbuilderTemplate < Jbuilder
     as = options[:as]
 
     if as && options.key?(:collection)
-      collection = options.delete(:collection) || []
+      collection = options.delete(:collection) || EMPTY_ARRAY
       partial = options.delete(:partial)
       options[:locals][:json] = self
       collection = EnumerableCompat.new(collection) if collection.respond_to?(:count) && !collection.respond_to?(:size)
@@ -169,9 +169,9 @@ class JbuilderTemplate < Jbuilder
           .new(@context.lookup_context, options) { |&block| _scope(&block) }
           .render_collection_with_partial(collection, partial, @context, nil)
 
-        array! if results.respond_to?(:body) && results.body.nil?
+        _array if results.respond_to?(:body) && results.body.nil?
       else
-        array!
+        _array
       end
     else
       _render_partial options
@@ -233,7 +233,7 @@ class JbuilderTemplate < Jbuilder
 
   def _set_inline_partial(name, object, options)
     value = if object.nil?
-      []
+      EMPTY_ARRAY
     elsif _is_collection?(object)
       _scope do
         options[:collection] = object

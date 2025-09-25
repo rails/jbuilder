@@ -7,6 +7,7 @@ require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'json'
 require 'active_support/core_ext/hash/deep_merge'
+require 'active_support/core_ext/object/blank'
 
 class Jbuilder
   @@key_formatter = nil
@@ -32,14 +33,16 @@ class Jbuilder
     new(...).target!
   end
 
-  BLANK = Blank.new
+  BLANK = Blank.new.freeze
+  EMPTY_ARRAY = [].freeze
+  private_constant :BLANK, :EMPTY_ARRAY
 
   def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
       if !_blank?(value)
         # json.comments @post.comments { |comment| ... }
         # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &block }
+        _scope{ _array value, &block }
       else
         # json.comments { ... }
         # { "comments": ... }
@@ -59,7 +62,7 @@ class Jbuilder
     elsif _is_collection?(value)
       # json.comments @post.comments, :content, :created_at
       # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      _scope{ array! value, *args }
+      _scope{ _array value, args }
     else
       # json.author @post.creator, :name, :email_address
       # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
@@ -206,18 +209,8 @@ class Jbuilder
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection = [], *attributes, &block)
-    array = if collection.nil?
-      []
-    elsif ::Kernel.block_given?
-      _map_collection(collection, &block)
-    elsif attributes.any?
-      _map_collection(collection) { |element| _extract element, attributes }
-    else
-      _format_keys(collection.to_a)
-    end
-
-    @attributes = _merge_values(@attributes, array)
+  def array!(collection = EMPTY_ARRAY, *attributes, &block)
+    _array collection, attributes, &block
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -243,7 +236,7 @@ class Jbuilder
 
   def call(object, *attributes, &block)
     if ::Kernel.block_given?
-      array! object, &block
+      _array object, &block
     else
       _extract object, attributes
     end
@@ -275,6 +268,20 @@ class Jbuilder
   private
 
   alias_method :method_missing, :set!
+
+  def _array(collection = EMPTY_ARRAY, attributes = nil, &block)
+    array = if collection.nil?
+      EMPTY_ARRAY
+    elsif block
+      _map_collection(collection, &block)
+    elsif attributes.present?
+      _map_collection(collection) { |element| _extract element, attributes }
+    else
+      _format_keys(collection.to_a)
+    end
+
+    @attributes = _merge_values(@attributes, array)
+  end
 
   def _extract(object, attributes)
     if ::Hash === object
