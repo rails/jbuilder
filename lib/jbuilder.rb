@@ -238,7 +238,7 @@ class Jbuilder
 
   alias_method :method_missing, :set!
 
-  def _set(key, value = BLANK, attributes, &block)
+  def _set(key, value = BLANK, attributes = nil, &block)
     result = if block
       if _blank?(value)
         # json.comments { ... }
