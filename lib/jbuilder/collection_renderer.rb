@@ -44,8 +44,8 @@ class Jbuilder
         @options[:locals].fetch(:json)
       end
 
-      def collection_with_template(view, template, layout, collection)
-        super(view, template, layout, ScopedIterator.new(collection, @scope))
+      def collection_with_template(view, template, layout, collection, *args)
+        super(view, template, layout, ScopedIterator.new(collection, @scope), *args)
       end
   end
 
