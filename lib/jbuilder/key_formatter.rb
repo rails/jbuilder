@@ -12,7 +12,7 @@ class Jbuilder
     end
 
     def format(key)
-      @mutex.synchronize do
+      @cache[key] || @mutex.synchronize do
         @cache[key] ||= begin
           value = key.is_a?(Symbol) ? key.name : key.to_s
 
