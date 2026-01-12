@@ -19,7 +19,7 @@ class Jbuilder
     deep_format_keys: @@deep_format_keys,
     &block
   )
-    @attributes = BLANK
+    @attributes = {}
     @key_formatter = key_formatter
     @ignore_nil = ignore_nil
     @deep_format_keys = deep_format_keys
