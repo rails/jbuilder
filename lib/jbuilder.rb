@@ -19,7 +19,7 @@ class Jbuilder
     deep_format_keys: @@deep_format_keys,
     &block
   )
-    @attributes = {}
+    @attributes = BLANK
     @key_formatter = key_formatter
     @ignore_nil = ignore_nil
     @deep_format_keys = deep_format_keys
@@ -32,7 +32,7 @@ class Jbuilder
     new(...).target!
   end
 
-  BLANK = Blank.new
+  BLANK = Blank.new.freeze
 
   def set!(key, value = BLANK, *args, &block)
     result = if ::Kernel.block_given?
@@ -302,7 +302,7 @@ class Jbuilder
   def _merge_values(current_value, updates)
     if _blank?(updates)
       current_value
-    elsif _blank?(current_value) || updates.nil? || current_value.empty? && ::Array === updates
+    elsif _blank?(current_value) || updates.nil? || (current_value.respond_to?(:empty?) && current_value.empty? && ::Array === updates)
       updates
     elsif ::Array === current_value && ::Array === updates
       current_value + updates
@@ -316,20 +316,25 @@ class Jbuilder
   def _key(key)
     if @key_formatter
       @key_formatter.format(key)
-    elsif key.is_a?(::Symbol)
-      key.name
     else
-      key.to_s
+      key.is_a?(::Symbol) ? key.name : key.to_s
     end
   end
 
   def _format_keys(hash_or_array)
     return hash_or_array unless @deep_format_keys
 
-    if ::Array === hash_or_array
+    case hash_or_array
+    when ::Array
+      # Use map! when possible to avoid creating new array
       hash_or_array.map { |value| _format_keys(value) }
-    elsif ::Hash === hash_or_array
-      ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+    when ::Hash
+      # Use transform_keys when available (Ruby 2.5+) for better performance
+      if hash_or_array.respond_to?(:transform_keys)
+        hash_or_array.transform_keys { |k| _key(k) }.transform_values { |v| _format_keys(v) }
+      else
+        ::Hash[hash_or_array.collect { |k, v| [_key(k), _format_keys(v)] }]
+      end
     else
       hash_or_array
     end
@@ -344,9 +349,17 @@ class Jbuilder
   end
 
   def _map_collection(collection)
-    collection.map do |element|
-      _scope{ yield element }
-    end - [BLANK]
+    # Use filter_map when available (Ruby 2.7+) for better performance
+    if collection.respond_to?(:filter_map)
+      collection.filter_map do |element|
+        mapped_element = _scope{ yield element }
+        mapped_element unless mapped_element == BLANK
+      end
+    else
+      collection.map do |element|
+        _scope{ yield element }
+      end - [BLANK]
+    end
   end
 
   def _scope
@@ -363,7 +376,7 @@ class Jbuilder
   end
 
   def _blank?(value=@attributes)
-    BLANK == value
+    value == BLANK
   end
 end
 
