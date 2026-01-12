@@ -27,7 +27,7 @@ class JbuilderTemplate < Jbuilder
   #
   #   json.partial! 'comments/comments', comments: @message.comments
   #
-  # There are multiple ways to generate a collection of elements as JSON, as ilustrated below:
+  # There are multiple ways to generate a collection of elements as JSON, as illustrated below:
   #
   # Example:
   #
