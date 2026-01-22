@@ -12,6 +12,11 @@ class Jbuilder
     end
 
     def format(key)
+      # Check cache without mutex for common case (reading)
+      cached_value = @cache[key]
+      return cached_value if cached_value
+
+      # Only use mutex when writing to cache
       @mutex.synchronize do
         @cache[key] ||= begin
           value = key.is_a?(Symbol) ? key.name : key.to_s
