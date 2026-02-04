@@ -344,9 +344,11 @@ class Jbuilder
   end
 
   def _map_collection(collection)
-    collection.map do |element|
+    collection = collection.map do |element|
       _scope{ yield element }
-    end - [BLANK]
+    end
+    collection.delete(BLANK)
+    collection
   end
 
   def _scope
