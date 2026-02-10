@@ -25,7 +25,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     if @<%= orm_instance.save %>
       render :show, status: :created, location: <%= "@#{singular_table_name}" %>
     else
-      render json: <%= "@#{orm_instance.errors}" %>, status: :unprocessable_entity
+      render json: <%= "@#{orm_instance.errors}" %>, status: :<%= status_unprocessable_content.to_s %>
     end
   end
 
@@ -35,7 +35,7 @@ class <%= controller_class_name %>Controller < ApplicationController
     if @<%= orm_instance.update("#{singular_table_name}_params") %>
       render :show, status: :ok, location: <%= "@#{singular_table_name}" %>
     else
-      render json: <%= "@#{orm_instance.errors}" %>, status: :unprocessable_entity
+      render json: <%= "@#{orm_instance.errors}" %>, status: :<%= status_unprocessable_content.to_s %>
     end
   end
 

@@ -33,15 +33,25 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
         assert_match %r{@post\.save}, m
         assert_match %r{format\.html \{ redirect_to @post, notice: "Post was successfully created\." \}}, m
         assert_match %r{format\.json \{ render :show, status: :created, location: @post \}}, m
-        assert_match %r{format\.html \{ render :new, status: :unprocessable_entity \}}, m
-        assert_match %r{format\.json \{ render json: @post\.errors, status: :unprocessable_entity \}}, m
+        if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3.1")
+          assert_match %r{format\.html \{ render :new, status: :unprocessable_entity \}}, m
+          assert_match %r{format\.json \{ render json: @post\.errors, status: :unprocessable_entity \}}, m
+        else
+          assert_match %r{format\.html \{ render :new, status: :unprocessable_content \}}, m
+          assert_match %r{format\.json \{ render json: @post\.errors, status: :unprocessable_content \}}, m
+        end
       end
 
       assert_instance_method :update, content do |m|
         assert_match %r{format\.html \{ redirect_to @post, notice: "Post was successfully updated\.", status: :see_other \}}, m
         assert_match %r{format\.json \{ render :show, status: :ok, location: @post \}}, m
-        assert_match %r{format\.html \{ render :edit, status: :unprocessable_entity \}}, m
-        assert_match %r{format\.json \{ render json: @post.errors, status: :unprocessable_entity \}}, m
+        if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3.1")
+          assert_match %r{format\.html \{ render :edit, status: :unprocessable_entity \}}, m
+          assert_match %r{format\.json \{ render json: @post.errors, status: :unprocessable_entity \}}, m
+        else
+          assert_match %r{format\.html \{ render :edit, status: :unprocessable_content \}}, m
+          assert_match %r{format\.json \{ render json: @post.errors, status: :unprocessable_content \}}, m
+        end
       end
 
       assert_instance_method :destroy, content do |m|

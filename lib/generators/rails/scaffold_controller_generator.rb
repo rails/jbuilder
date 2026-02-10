@@ -15,6 +15,10 @@ module Rails
         def permitted_params
           attributes_names.map { |name| ":#{name}" }.join(', ')
         end unless private_method_defined? :permitted_params
+
+        def status_unprocessable_content
+          ::Rack::Utils::SYMBOL_TO_STATUS_CODE.key(422) rescue :unprocessable_content
+        end
     end
   end
 end
