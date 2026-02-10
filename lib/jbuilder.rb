@@ -7,6 +7,7 @@ require 'jbuilder/key_formatter'
 require 'jbuilder/errors'
 require 'json'
 require 'active_support/core_ext/hash/deep_merge'
+require 'active_support/core_ext/object/blank'
 
 class Jbuilder
   @@key_formatter = nil
@@ -32,41 +33,12 @@ class Jbuilder
     new(...).target!
   end
 
-  BLANK = Blank.new
+  BLANK = Blank.new.freeze
+  EMPTY_ARRAY = [].freeze
+  private_constant :BLANK, :EMPTY_ARRAY
 
   def set!(key, value = BLANK, *args, &block)
-    result = if ::Kernel.block_given?
-      if !_blank?(value)
-        # json.comments @post.comments { |comment| ... }
-        # { "comments": [ { ... }, { ... } ] }
-        _scope{ array! value, &block }
-      else
-        # json.comments { ... }
-        # { "comments": ... }
-        _merge_block(key){ yield self }
-      end
-    elsif args.empty?
-      if ::Jbuilder === value
-        # json.age 32
-        # json.person another_jbuilder
-        # { "age": 32, "person": { ...  }
-        _format_keys(value.attributes!)
-      else
-        # json.age 32
-        # { "age": 32 }
-        _format_keys(value)
-      end
-    elsif _is_collection?(value)
-      # json.comments @post.comments, :content, :created_at
-      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
-      _scope{ array! value, *args }
-    else
-      # json.author @post.creator, :name, :email_address
-      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
-      _merge_block(key){ _extract value, args }
-    end
-
-    _set_value key, result
+    _set(key, value, args, &block)
   end
 
   # Specifies formatting to be applied to the key. Passing in a name of a function
@@ -206,18 +178,8 @@ class Jbuilder
   #   json.array! [1, 2, 3]
   #
   #   [1,2,3]
-  def array!(collection = [], *attributes, &block)
-    array = if collection.nil?
-      []
-    elsif ::Kernel.block_given?
-      _map_collection(collection, &block)
-    elsif attributes.any?
-      _map_collection(collection) { |element| _extract element, attributes }
-    else
-      _format_keys(collection.to_a)
-    end
-
-    @attributes = _merge_values(@attributes, array)
+  def array!(collection = EMPTY_ARRAY, *attributes, &block)
+    _array collection, attributes, &block
   end
 
   # Extracts the mentioned attributes or hash elements from the passed object and turns them into attributes of the JSON.
@@ -242,8 +204,8 @@ class Jbuilder
   end
 
   def call(object, *attributes, &block)
-    if ::Kernel.block_given?
-      array! object, &block
+    if block
+      _array object, &block
     else
       _extract object, attributes
     end
@@ -275,6 +237,55 @@ class Jbuilder
   private
 
   alias_method :method_missing, :set!
+
+  def _set(key, value = BLANK, attributes = nil, &block)
+    result = if block
+      if _blank?(value)
+        # json.comments { ... }
+        # { "comments": ... }
+        _merge_block key, &block
+      else
+        # json.comments @post.comments { |comment| ... }
+        # { "comments": [ { ... }, { ... } ] }
+        _scope { _array value, &block }
+      end
+    elsif attributes.empty?
+      if ::Jbuilder === value
+        # json.age 32
+        # json.person another_jbuilder
+        # { "age": 32, "person": { ...  }
+        _format_keys(value.attributes!)
+      else
+        # json.age 32
+        # { "age": 32 }
+        _format_keys(value)
+      end
+    elsif _is_collection?(value)
+      # json.comments @post.comments, :content, :created_at
+      # { "comments": [ { "content": "hello", "created_at": "..." }, { "content": "world", "created_at": "..." } ] }
+      _scope { _array value, attributes }
+    else
+      # json.author @post.creator, :name, :email_address
+      # { "author": { "name": "David", "email_address": "david@loudthinking.com" } }
+      _merge_block(key) { _extract value, attributes }
+    end
+
+    _set_value key, result
+  end
+
+  def _array(collection = EMPTY_ARRAY, attributes = nil, &block)
+    array = if collection.nil?
+      EMPTY_ARRAY
+    elsif block
+      _map_collection(collection, &block)
+    elsif attributes.present?
+      _map_collection(collection) { |element| _extract element, attributes }
+    else
+      _format_keys(collection.to_a)
+    end
+
+    @attributes = _merge_values(@attributes, array)
+  end
 
   def _extract(object, attributes)
     if ::Hash === object
