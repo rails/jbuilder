@@ -100,7 +100,7 @@ json.array! @comments do |comment|
   end
 end
 
-# => [ { "body": "great post...", "author": { "first_name": "Joe", "last_name": "Bloe" }} ]
+# => [ { "body": "great post...", "author": { "first_name": "Joe", "last_name": "Blow" }} ]
 ```
 
 ## Array Attributes
@@ -209,6 +209,13 @@ the partial.
 json.partial! 'comments/comments', comments: @message.comments
 ```
 
+You can also render an object to a partial inline under a key.
+
+```ruby
+json.post @post, partial: 'posts/post', as: :post
+# => { "post": { "title": "Hello World!", "author": { "name": "David" } } }
+```
+
 It's also possible to render collections of partials:
 
 ```ruby
@@ -219,9 +226,24 @@ json.partial! 'posts/post', collection: @posts, as: :post
 
 # or
 json.partial! partial: 'posts/post', collection: @posts, as: :post
+```
 
-# or
+You can also render to a collection of partials inline under a key.
+
+```ruby
 json.comments @post.comments, partial: 'comments/comment', as: :comment
+# => { "comments": [{ "content": "Hello everyone!" }, { "content": "To you my good sir!" }] }
+```
+
+You can also provide other locals to the partial you're rendering to.
+
+```ruby
+# Provide the `include_body` local to the partial when rendering a single object
+json.post @post, partial: 'posts/post', as: :post, include_body: true
+
+# Provide a local to the partial when rendering a collection.
+# Each item in the collection will render with `include_author: true`.
+json.comments @post.comments, partial: 'comments/comment', as: :comment, include_author: true
 ```
 
 The `as: :some_symbol` is used with partials. It will take care of mapping the passed in object to a variable for the
@@ -321,7 +343,7 @@ This will include both records as part of the cache key and updating either of t
 ## Formatting Keys
 
 Keys can be auto formatted using `key_format!`, this can be used to convert
-keynames from the standard ruby_format to camelCase:
+key names from the standard ruby_format to camelCase:
 
 ```ruby
 json.key_format! camelize: :lower
