@@ -3,7 +3,10 @@ require "action_view/testing/resolvers"
 
 class JbuilderTemplateTest < ActiveSupport::TestCase
   POST_PARTIAL = <<-JBUILDER
+    # locals: (json:, post:, include_title: false)
+
     json.extract! post, :id, :body
+    json.title post.title if include_title
     json.author do
       first_name, last_name = post.author_name.split(nil, 2)
       json.first_name first_name
@@ -30,7 +33,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   }
 
   AUTHORS = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
-  POSTS   = (1..10).collect { |i| Post.new(i, "Post ##{i}", AUTHORS.next) }
+  POSTS   = (1..10).collect { |i| Post.new(i, "Title #{i}", "Post ##{i}", AUTHORS.next) }
 
   setup { Rails.cache.clear }
 
@@ -136,6 +139,18 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal [], render('json.array! @posts, partial: "post", as: :post', posts: nil)
   end
 
+  test "single partial under key" do
+    result = render('json.post @post, partial: "post", as: :post', post: POSTS.first)
+    assert_equal "Post #1", result["post"]["body"]
+    assert_equal "Heinemeier Hansson", result["post"]["author"]["last_name"]
+    assert_equal "David", result["post"]["author"]["first_name"]
+  end
+
+  test 'single partial under key with local' do
+    result = render('json.post @post, partial: "post", as: :post, include_title: true', post: POSTS.first)
+    assert_equal "Title 1", result["post"]["title"]
+  end
+
   test "array of partials under key" do
     result = render('json.posts @posts, partial: "post", as: :post', posts: POSTS)
     assert_equal 10, result["posts"].count
@@ -144,13 +159,19 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "Pavel", result["posts"][5]["author"]["first_name"]
   end
 
+  test "array of partials under key with local" do
+    result = render('json.posts @posts, partial: "post", as: :post, include_title: true', posts: POSTS)
+    assert_equal "Title 1", result["posts"][0]["title"]
+    assert_equal "Title 2", result["posts"][1]["title"]
+  end
+
   test "empty array of partials under key from nil collection" do
     Jbuilder::CollectionRenderer.expects(:new).never
     result = render('json.posts @posts, partial: "post", as: :post', posts: nil)
     assert_equal [], result["posts"]
   end
 
-  test "empty array of partials under key from an empy collection" do
+  test "empty array of partials under key from an empty collection" do
     Jbuilder::CollectionRenderer.expects(:new).never
     result = render('json.posts @posts, partial: "post", as: :post', posts: [])
     assert_equal [], result["posts"]
