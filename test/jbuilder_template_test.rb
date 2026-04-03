@@ -3,10 +3,8 @@ require "action_view/testing/resolvers"
 
 class JbuilderTemplateTest < ActiveSupport::TestCase
   POST_PARTIAL = <<-JBUILDER
-    # locals: (json:, post:, include_title: false)
-
     json.extract! post, :id, :body
-    json.title post.title if include_title
+    json.title post.title if local_assigns.fetch(:include_title, false)
     json.author do
       first_name, last_name = post.author_name.split(nil, 2)
       json.first_name first_name
