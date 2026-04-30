@@ -141,9 +141,10 @@ class JbuilderTemplate < Jbuilder
     end
   end
 
-  private
-
   alias_method :method_missing, :set!
+  private :method_missing
+
+  private
 
   def _render_partial_with_options(options)
     options[:locals] ||= options.except(:partial, :as, :collection, :cached)

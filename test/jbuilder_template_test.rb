@@ -39,6 +39,11 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "hello", result["content"]
   end
 
+  test "method_missing can be used as a key" do
+    result = render('json.method_missing "hello"')
+    assert_equal({ "method_missing" => "hello" }, result)
+  end
+
   test "partial by name with top-level locals" do
     result = render('json.partial! "partial", content: "hello"')
     assert_equal "hello", result["content"]
