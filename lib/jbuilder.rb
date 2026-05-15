@@ -272,9 +272,10 @@ class Jbuilder
     @attributes.to_json
   end
 
-  private
-
   alias_method :method_missing, :set!
+  private :method_missing
+
+  private
 
   def _extract(object, attributes)
     if ::Hash === object

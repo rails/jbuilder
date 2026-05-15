@@ -61,6 +61,14 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'hello', result['content']
   end
 
+  test 'method_missing key' do
+    result = jbuild do |json|
+      json.method_missing 'hello'
+    end
+
+    assert_equal 'hello', result['method_missing']
+  end
+
   test 'single key with false value' do
     result = jbuild do |json|
       json.content false
