@@ -26,7 +26,7 @@ end
 
 Jbuilder::CollectionRenderer.collection_cache = Rails.cache
 
-class Post < Struct.new(:id, :body, :author_name)
+class Post < Struct.new(:id, :title, :body, :author_name)
   def cache_key
     "post-#{id}"
   end

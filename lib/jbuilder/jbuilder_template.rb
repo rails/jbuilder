@@ -175,13 +175,9 @@ class JbuilderTemplate < Jbuilder
         _array
       end
     else
-      _render_partial options
+      options[:locals][:json] = self
+      @context.render options
     end
-  end
-
-  def _render_partial(options)
-    options[:locals][:json] = self
-    @context.render options
   end
 
   def _cache_fragment_for(key, options, &block)
@@ -242,7 +238,7 @@ class JbuilderTemplate < Jbuilder
       end
     else
       _scope do
-        options[:locals] = { options[:as] => object }
+        options[options[:as]] = object
         _render_partial_with_options options
       end
     end
