@@ -24,12 +24,20 @@ class ScaffoldApiControllerGeneratorTest < Rails::Generators::TestCase
         assert_match %r{@post = Post\.new\(post_params\)}, m
         assert_match %r{@post\.save}, m
         assert_match %r{render :show, status: :created, location: @post}, m
-        assert_match %r{render json: @post\.errors, status: :unprocessable_entity}, m
+        if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3.1")
+          assert_match %r{render json: @post\.errors, status: :unprocessable_entity}, m
+        else
+          assert_match %r{render json: @post\.errors, status: :unprocessable_content}, m
+        end
       end
 
       assert_instance_method :update, content do |m|
         assert_match %r{render :show, status: :ok, location: @post}, m
-        assert_match %r{render json: @post.errors, status: :unprocessable_entity}, m
+        if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3.1")
+          assert_match %r{render json: @post.errors, status: :unprocessable_entity}, m
+        else
+          assert_match %r{render json: @post.errors, status: :unprocessable_content}, m
+        end
       end
 
       assert_instance_method :destroy, content do |m|
