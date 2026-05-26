@@ -18,6 +18,7 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
 
   RACER_PARTIAL = <<-JBUILDER
     json.extract! racer, :id, :name
+    json.highlighted local_assigns.fetch(:highlighted, false)
   JBUILDER
 
   PARTIALS = {
@@ -80,6 +81,13 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     result = render('json.partial! @racer', racer: Racer.new(123, "Chris Harris"))
     assert_equal 123, result["id"]
     assert_equal "Chris Harris", result["name"]
+  end
+
+  test "partial for Active Model preserves extra locals" do
+    result = render('json.partial! @racer, highlighted: true', racer: Racer.new(123, "Chris Harris"))
+    assert_equal 123, result["id"]
+    assert_equal "Chris Harris", result["name"]
+    assert_equal true, result["highlighted"]
   end
 
   test "partial collection by name with symbol local" do
