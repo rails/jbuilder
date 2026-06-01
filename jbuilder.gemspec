@@ -22,8 +22,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency('rubysl')
   end
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- test/*`.split("\n")
+  s.files = Dir['lib/**/*'] + ['MIT-LICENSE', 'README.md']
 
   s.metadata = {
     "bug_tracker_uri"       => "https://github.com/rails/jbuilder/issues",
