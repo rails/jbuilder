@@ -888,6 +888,15 @@ class JbuilderTest < ActiveSupport::TestCase
     end
   end
 
+  test 'throws ArrayError when trying to add a key to an array using block syntax' do
+    assert_raise Jbuilder::ArrayError do
+      jbuild do |json|
+        json.array! %w[foo bar]
+        json.fizz { json.buzz "value" }
+      end
+    end
+  end
+
   test 'throws NullError when trying to add properties to null' do
     assert_raise Jbuilder::NullError do
       jbuild do |json|
@@ -898,6 +907,15 @@ class JbuilderTest < ActiveSupport::TestCase
   end
 
   test 'throws NullError when trying to add properties to null using block syntax' do
+    assert_raise Jbuilder::NullError do
+      jbuild do |json|
+        json.null!
+        json.foo { json.bar 'value' }
+      end
+    end
+  end
+
+  test 'throws NullError when trying to add properties to a previously nulled key using block syntax' do
     assert_raise Jbuilder::NullError do
       jbuild do |json|
         json.author do

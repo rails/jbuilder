@@ -305,6 +305,8 @@ class Jbuilder
   end
 
   def _merge_block(key)
+    ::Kernel.raise NullError.build(key) if @attributes.nil?
+    ::Kernel.raise ArrayError.build(key) if ::Array === @attributes
     current_value = _blank? ? BLANK : @attributes.fetch(_key(key), BLANK)
     ::Kernel.raise NullError.build(key) if current_value.nil?
     new_value = _scope{ yield self }
