@@ -8,6 +8,22 @@ class FakeTemplate
     end
 end
 
+FakeResolvedPath = Struct.new(:prefix, :virtual_path) do
+    def to_s
+      virtual_path
+    end
+end
+
+class FakeViewPath
+    def initialize(*template_paths)
+      @template_paths = template_paths
+    end
+
+    def all_template_paths
+      @template_paths
+    end
+end
+
 
 class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
     def make_tracker(name, source)
@@ -67,5 +83,24 @@ class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
       RUBY
 
       assert_equal %w[path/to/partial], dependencies
+    end
+
+    test 'is registered as the dependency tracker for the :jbuilder handler' do
+      handler = ActionView::Template.handler_for_extension(:jbuilder)
+      template = FakeTemplate.new("json.partial! 'path/to/partial'", handler)
+
+      dependencies = ActionView::DependencyTracker.find_dependencies('jbuilder_template', template, [])
+
+      assert_equal %w[path/to/partial], dependencies
+    end
+
+    test 'receives the view paths so wildcard dependencies resolve' do
+      handler = ActionView::Template.handler_for_extension(:jbuilder)
+      template = FakeTemplate.new('# Template Dependency: comments/*', handler)
+      view_paths = [ FakeViewPath.new(FakeResolvedPath.new('comments', 'comments/_comment')) ]
+
+      dependencies = ActionView::DependencyTracker.find_dependencies('jbuilder_template', template, view_paths)
+
+      assert_equal %w[comments/_comment], dependencies
     end
 end

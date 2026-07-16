@@ -25,6 +25,10 @@ class Jbuilder::DependencyTracker
         (['"])([^'"]+)\1            # quoted value
       /x
 
+  def self.supports_view_paths?
+    true
+  end
+
   def self.call(name, template, view_paths = nil)
     new(name, template, view_paths).dependencies
   end
