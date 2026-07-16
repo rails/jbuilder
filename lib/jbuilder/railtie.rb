@@ -8,7 +8,10 @@ class Jbuilder
     initializer :jbuilder do
       ActiveSupport.on_load :action_view do
         ActionView::Template.register_template_handler :jbuilder, JbuilderHandler
+
+        require 'action_view/dependency_tracker'
         require 'jbuilder/jbuilder_dependency_tracker'
+        ActionView::DependencyTracker.register_tracker :jbuilder, Jbuilder::DependencyTracker
       end
 
       module ::ActionController
