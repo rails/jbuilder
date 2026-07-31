@@ -68,4 +68,13 @@ class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
 
       assert_equal %w[path/to/partial], dependencies
     end
+
+    test 'is registered as the tracker for jbuilder templates' do
+      handler = ActionView::Template.handler_for_extension(:jbuilder)
+      template = FakeTemplate.new("json.partial! 'path/to/partial'", handler)
+
+      dependencies = ActionView::DependencyTracker.find_dependencies('name', template, [])
+
+      assert_equal %w[path/to/partial], dependencies
+    end
 end
