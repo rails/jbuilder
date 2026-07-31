@@ -77,4 +77,26 @@ class JbuilderDependencyTrackerTest < ActiveSupport::TestCase
 
       assert_equal %w[path/to/partial], dependencies
     end
+
+    test 'supports view paths' do
+      assert_predicate Jbuilder::DependencyTracker, :supports_view_paths?
+    end
+
+    test 'resolves wildcard dependencies through the view paths passed by Action View' do
+      handler = ActionView::Template.handler_for_extension(:jbuilder)
+      template = FakeTemplate.new("# Template Dependency: path/to/*", handler)
+      view_paths = [FakeViewPath.new([FakeTemplatePath.new('path/to', 'partial')])]
+
+      dependencies = ActionView::DependencyTracker.find_dependencies('name', template, view_paths)
+
+      assert_equal %w[path/to/partial], dependencies
+    end
 end
+
+FakeTemplatePath = Struct.new(:prefix, :name) do
+  def to_s
+    "#{prefix}/#{name}"
+  end
+end
+
+FakeViewPath = Struct.new(:all_template_paths)
