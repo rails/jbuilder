@@ -2,6 +2,11 @@ require "test_helper"
 require "action_view/testing/resolvers"
 
 class JbuilderTemplateTest < ActiveSupport::TestCase
+  LAYOUT = <<-JBUILDER
+    json.layout true
+    json.merge! yield
+  JBUILDER
+
   POST_PARTIAL = <<-JBUILDER
     json.extract! post, :id, :body
     json.title post.title if local_assigns.fetch(:include_title, false)
@@ -20,6 +25,10 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     json.extract! racer, :id, :name
     json.highlighted local_assigns.fetch(:highlighted, false)
   JBUILDER
+
+  LAYOUTS = {
+    "layouts/test.json.jbuilder"  => LAYOUT
+  }
 
   PARTIALS = {
     "_partial.json.jbuilder"      => "json.content content",
@@ -44,6 +53,12 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
   test "method_missing can be used as a key" do
     result = render('json.method_missing "hello"')
     assert_equal({ "method_missing" => "hello" }, result)
+  end
+
+  test "renders into layout" do
+    result = render('json.template true', layout: "layouts/test")
+    assert_equal true, result["layout"]
+    assert_equal true, result["template"]
   end
 
   test "partial by name with top-level locals" do
@@ -448,8 +463,9 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     end
 
     def render_without_parsing(source, assigns = {})
-      view = build_view(fixtures: PARTIALS.merge("source.json.jbuilder" => source), assigns: assigns)
-      view.render(template: "source")
+      layout = assigns.delete(:layout)
+      view = build_view(fixtures: PARTIALS.merge(LAYOUTS, "source.json.jbuilder" => source), assigns: assigns)
+      view.render(template: "source", layout: layout)
     end
 
     def build_view(options = {})
