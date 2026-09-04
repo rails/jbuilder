@@ -2,6 +2,7 @@
 
 require 'jbuilder/jbuilder'
 require 'jbuilder/collection_renderer'
+require 'jbuilder/rendering_helper'
 require 'action_dispatch/http/mime_type'
 require 'active_support/cache'
 
@@ -14,6 +15,7 @@ class JbuilderTemplate < Jbuilder
 
   def initialize(context, options = nil)
     @context = context
+    @context.extend(RenderingHelper) unless @context.is_a?(RenderingHelper)
     @cached_root = nil
 
     options.nil? ? super() : super(**options)
@@ -116,7 +118,7 @@ class JbuilderTemplate < Jbuilder
   end
 
   def target!
-    @cached_root || super
+    (@cached_root || super).tap { @context._jbuilder = self }
   end
 
   def array!(collection = EMPTY_ARRAY, *args, &block)

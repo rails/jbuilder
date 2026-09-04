@@ -278,6 +278,25 @@ json.partial! 'sub_template', locals: { user: user }
 json.partial! 'sub_template', user: user
 ```
 
+## Layouts
+
+You can rely on Rails' built-in support for layout templates defined in
+`app/views/layouts/`. Layouts can be used to extract properties or structures
+that are shared across responses.
+
+For example, a `PostsController` that inherits from `ApplicationController` will
+render its templates declared in `app/views/posts/` *into* the layout declared
+in `app/views/layouts/application.json.jbuilder`:
+
+```ruby
+# app/views/layouts/application.json.jbuilder
+json.merge! yield
+json.servedAt Time.current
+
+# app/views/posts/index.json.jbuilder
+json.partial! 'posts/post', collection: @posts, as: :post
+```
+
 ## Null Values
 
 You can explicitly make Jbuilder object return null if you want:
