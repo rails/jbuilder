@@ -377,7 +377,7 @@ class Jbuilder
   end
 
   def _blank?(value=@attributes)
-    BLANK == value
+    Blank === value
   end
 end
 
