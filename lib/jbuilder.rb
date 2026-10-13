@@ -226,7 +226,7 @@ class Jbuilder
   # Merges hash, array, or Jbuilder instance into current builder.
   def merge!(object)
     hash_or_array = ::Jbuilder === object ? object.attributes! : object
-    @attributes = _merge_values(@attributes, _format_keys(hash_or_array))
+    _merge_external_values _format_keys(hash_or_array)
   end
 
   # Encodes the current builder as JSON.
@@ -275,17 +275,15 @@ class Jbuilder
   end
 
   def _array(collection = EMPTY_ARRAY, attributes = nil, &block)
-    array = if collection.nil?
-      EMPTY_ARRAY
+    if collection.nil?
+      _merge_external_values EMPTY_ARRAY
     elsif block
-      _map_collection(collection, &block)
+      @attributes = _merge_values(@attributes, _map_collection(collection, &block))
     elsif attributes.present?
-      _map_collection(collection) { |element| _extract element, attributes }
+      @attributes = _merge_values(@attributes, _map_collection(collection) { |element| _extract element, attributes })
     else
-      _format_keys(collection.to_a)
+      _merge_external_values _format_keys(collection.to_a)
     end
-
-    @attributes = _merge_values(@attributes, array)
   end
 
   def _extract(object, attributes)
@@ -309,6 +307,16 @@ class Jbuilder
     ::Kernel.raise NullError.build(key) if current_value.nil?
     new_value = _scope{ yield self }
     _merge_values(current_value, new_value)
+  end
+
+  # Merges a value we don't own (passed to merge! or array!, or the frozen
+  # EMPTY_ARRAY) into the current attributes. When the value would be adopted
+  # as is, a shallow copy is stored instead, so later in-place writes such as
+  # set! or child! don't mutate the caller's hash/array or fail when it's frozen.
+  def _merge_external_values(updates)
+    merged = _merge_values(@attributes, updates)
+    merged = merged.dup if merged.equal?(updates) && (::Hash === merged || ::Array === merged)
+    @attributes = merged
   end
 
   def _merge_values(current_value, updates)

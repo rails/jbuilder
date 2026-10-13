@@ -216,6 +216,47 @@ class JbuilderTest < ActiveSupport::TestCase
     assert_equal 'bar', result['foo']
   end
 
+  test 'merge! in a block does not mutate the merged hash' do
+    defaults = { 'name' => 'Pavel' }
+
+    result = jbuild do |json|
+      json.author do
+        json.merge! defaults
+        json.age 27
+      end
+    end
+
+    assert_equal({ 'name' => 'Pavel', 'age' => 27 }, result['author'])
+    assert_equal({ 'name' => 'Pavel' }, defaults)
+  end
+
+  test 'merge! in a block accepts a frozen hash' do
+    defaults = { 'name' => 'Pavel' }.freeze
+
+    result = jbuild do |json|
+      json.author do
+        json.merge! defaults
+        json.age 27
+      end
+    end
+
+    assert_equal({ 'name' => 'Pavel', 'age' => 27 }, result['author'])
+  end
+
+  test 'merge! in a block does not mutate the merged Jbuilder instance' do
+    obj = Jbuilder.new { |json| json.name 'Pavel' }
+
+    result = jbuild do |json|
+      json.author do
+        json.merge! obj
+        json.age 27
+      end
+    end
+
+    assert_equal({ 'name' => 'Pavel', 'age' => 27 }, result['author'])
+    assert_equal({ 'name' => 'Pavel' }, obj.attributes!)
+  end
+
   test 'blocks are additive via extract syntax' do
     person = Person.new('Pavel', 27)
 
@@ -235,6 +276,38 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal %w[foo bar], result
+  end
+
+  test 'array! followed by child! does not mutate the given array' do
+    comments = [{ 'content' => 'hello' }]
+
+    result = jbuild do |json|
+      json.array! comments
+      json.child! { json.content 'world' }
+    end
+
+    assert_equal [{ 'content' => 'hello' }, { 'content' => 'world' }], result
+    assert_equal [{ 'content' => 'hello' }], comments
+  end
+
+  test 'array! accepts a frozen array followed by child!' do
+    result = jbuild do |json|
+      json.array! %w[foo].freeze
+      json.child! { json.content 'bar' }
+    end
+
+    assert_equal ['foo', { 'content' => 'bar' }], result
+  end
+
+  test 'empty or nil array! followed by child!' do
+    [[], [nil]].each do |args|
+      result = jbuild do |json|
+        json.array!(*args)
+        json.child! { json.content 'hello' }
+      end
+
+      assert_equal [{ 'content' => 'hello' }], result
+    end
   end
 
   test 'nesting multiple children with block' do
