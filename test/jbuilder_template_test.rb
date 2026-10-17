@@ -41,6 +41,14 @@ class JbuilderTemplateTest < ActiveSupport::TestCase
     assert_equal "hello", result["content"]
   end
 
+  test "default key format set on Jbuilder applies to templates" do
+    Jbuilder.key_format :upcase
+    result = render('json.content "hello"')
+    assert_equal({ "CONTENT" => "hello" }, result)
+  ensure
+    Jbuilder.default_key_formatter = nil
+  end
+
   test "method_missing can be used as a key" do
     result = render('json.method_missing "hello"')
     assert_equal({ "method_missing" => "hello" }, result)

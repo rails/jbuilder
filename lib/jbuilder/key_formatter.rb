@@ -12,21 +12,36 @@ class Jbuilder
     end
 
     def format(key)
-      @cache[key] || @mutex.synchronize do
-        @cache[key] ||= begin
-          value = key.is_a?(Symbol) ? key.name : key.to_s
+      cached = @cache[key]
+      return cached if cached
+      return format_key(key) if frozen?
 
-          @formats.each do |func|
-            value = func.is_a?(Proc) ? func.call(value) : value.send(func)
-          end
-
-          @formats_with_options.each do |func, params|
-            value = func.is_a?(Proc) ? func.call(value, *params) : value.send(func, *params)
-          end
-
-          value
-        end
+      @mutex.synchronize do
+        @cache[key] ||= format_key(key)
       end
+    end
+
+    # Once frozen (Ractor.make_shareable freezes it) the cache is read-only, so
+    # the Mutex, which cannot be shared between Ractors, is no longer needed.
+    def freeze
+      @mutex = nil unless frozen?
+      super
+    end
+
+    private
+
+    def format_key(key)
+      value = key.is_a?(Symbol) ? key.name : key.to_s
+
+      @formats.each do |func|
+        value = func.is_a?(Proc) ? func.call(value) : value.send(func)
+      end
+
+      @formats_with_options.each do |func, params|
+        value = func.is_a?(Proc) ? func.call(value, *params) : value.send(func, *params)
+      end
+
+      value
     end
   end
 end

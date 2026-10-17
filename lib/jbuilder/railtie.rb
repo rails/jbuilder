@@ -25,6 +25,13 @@ class Jbuilder
       end
     end
 
+    initializer 'jbuilder.ractorize' do
+      ActiveSupport.on_load :before_ractorize do
+        Ractor.make_shareable(::Jbuilder.default_key_formatter)
+        Ractor.make_shareable(::JbuilderTemplate.template_lookup_options)
+      end
+    end
+
     generators do |app|
       Rails::Generators.configure! app.config.generators
       Rails::Generators.hidden_namespaces.uniq!

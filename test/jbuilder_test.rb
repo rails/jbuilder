@@ -50,7 +50,7 @@ end
 
 class JbuilderTest < ActiveSupport::TestCase
   teardown do
-    Jbuilder.send :class_variable_set, '@@key_formatter', nil
+    Jbuilder.default_key_formatter = nil
   end
 
   test 'single key' do
@@ -682,7 +682,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal %w[firstName lastName], result['allNames'].keys
-    Jbuilder.send(:class_variable_set, '@@deep_format_keys', false)
+    Jbuilder.deep_format_keys false
   end
 
   test 'deep key_format! with merge!' do
@@ -795,9 +795,62 @@ class JbuilderTest < ActiveSupport::TestCase
   test 'use default key formatter when configured' do
     Jbuilder.key_format
     jbuild{ |json| json.key 'value' }
-    formatter = Jbuilder.send(:class_variable_get, '@@key_formatter')
+    formatter = Jbuilder.default_key_formatter
     cache = formatter.instance_variable_get('@cache')
     assert_includes cache, :key
+  end
+
+  test 'defaults set on Jbuilder apply to subclasses and the other way around' do
+    subclass = Class.new(Jbuilder)
+
+    Jbuilder.key_format :upcase
+    subclass.ignore_nil
+
+    [Jbuilder, subclass].each do |builder|
+      result = builder.new { |json| json.name 'David'; json.age nil }.attributes!
+      assert_equal({ 'NAME' => 'David' }, result)
+    end
+  ensure
+    Jbuilder.ignore_nil false
+  end
+
+  test 'frozen key formatter keeps formatting keys' do
+    formatter = Jbuilder::KeyFormatter.new(:upcase)
+    formatter.format(:cached)
+    formatter.freeze
+
+    assert_equal 'CACHED', formatter.format(:cached)
+    assert_equal 'MISS', formatter.format(:miss)
+    assert_not_includes formatter.instance_variable_get('@cache'), :miss
+  end
+
+  test 'before_ractorize makes the class-level state shareable' do
+    skip 'needs Ractor' unless defined?(::Ractor)
+
+    Jbuilder.key_format :upcase
+    # Run only this hook: running all before_ractorize hooks would freeze Rails' own state.
+    ActiveSupport.stubs(:on_load).with(:before_ractorize).yields
+    Jbuilder::Railtie.initializers.find { |initializer| initializer.name == 'jbuilder.ractorize' }.run
+
+    assert Ractor.shareable?(Jbuilder.default_key_formatter)
+    assert Ractor.shareable?(JbuilderTemplate.template_lookup_options)
+    assert_equal 'KEY', Jbuilder.default_key_formatter.format(:key)
+  end
+
+  test 'defaults can be read from a non-main Ractor once shareable' do
+    skip 'needs Ractor#value (Ruby 4.0+)' unless defined?(::Ractor) && ::Ractor.method_defined?(:value)
+
+    Jbuilder.key_format :upcase
+    Jbuilder.ignore_nil
+    Ractor.make_shareable(Jbuilder.default_key_formatter)
+
+    result = Ractor.new do
+      Jbuilder.new { |json| json.name 'David'; json.age nil }.attributes!
+    end.value
+
+    assert_equal({ 'NAME' => 'David' }, result)
+  ensure
+    Jbuilder.ignore_nil false
   end
 
   test 'ignore_nil! without a parameter' do
@@ -836,7 +889,7 @@ class JbuilderTest < ActiveSupport::TestCase
     end
 
     assert_equal ['name'], result.keys
-    Jbuilder.send(:class_variable_set, '@@ignore_nil', false)
+    Jbuilder.ignore_nil false
   end
 
   test 'nil!' do

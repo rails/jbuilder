@@ -10,14 +10,21 @@ require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/object/blank'
 
 class Jbuilder
-  @@key_formatter = nil
-  @@ignore_nil    = false
-  @@deep_format_keys = false
+  # Class instance variables rather than class variables, so the defaults can be
+  # read from non-main Ractors. Always accessed through ::Jbuilder, so that they
+  # are shared with subclasses like class variables were.
+  @default_key_formatter = nil
+  @default_ignore_nil = false
+  @default_deep_format_keys = false
+
+  class << self
+    attr_accessor :default_key_formatter, :default_ignore_nil, :default_deep_format_keys # :nodoc:
+  end
 
   def initialize(
-    key_formatter: @@key_formatter,
-    ignore_nil: @@ignore_nil,
-    deep_format_keys: @@deep_format_keys,
+    key_formatter: ::Jbuilder.default_key_formatter,
+    ignore_nil: ::Jbuilder.default_ignore_nil,
+    deep_format_keys: ::Jbuilder.default_deep_format_keys,
     &block
   )
     @attributes = {}
@@ -75,7 +82,7 @@ class Jbuilder
 
   # Same as the instance method key_format! except sets the default.
   def self.key_format(...)
-    @@key_formatter = KeyFormatter.new(...)
+    ::Jbuilder.default_key_formatter = KeyFormatter.new(...)
   end
 
   # If you want to skip adding nil values to your JSON hash. This is useful
@@ -99,7 +106,7 @@ class Jbuilder
 
   # Same as instance method ignore_nil! except sets the default.
   def self.ignore_nil(value = true)
-    @@ignore_nil = value
+    ::Jbuilder.default_ignore_nil = value
   end
 
   # Deeply apply key format to nested hashes and arrays passed to
@@ -124,7 +131,7 @@ class Jbuilder
 
   # Same as instance method deep_format_keys! except sets the default.
   def self.deep_format_keys(value = true)
-    @@deep_format_keys = value
+    ::Jbuilder.default_deep_format_keys = value
   end
 
   # Turns the current element into an array and yields a builder to add a hash.
